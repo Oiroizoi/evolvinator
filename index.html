@@ -2,7 +2,7 @@
 <html lang="en" dir="ltr">
 
 <head>
-    <meta segmentset="utf-8">
+    <meta charset="utf-8">
     <title>Old to Modern English</title>
     <style>
         body {
@@ -25,7 +25,7 @@
 </head>
 
 <body>
-    <form>
+    <form autocomplete="off">
         <label id="wordLabel" for="word">Word:</label>
         <input type="text" name="word" id="word" placeholder="Enter Old English word">
         <span id="buttons"></span>
@@ -216,15 +216,6 @@
     document.getElementById("stress").value = stressArg;
     if (word.partOfSpeech == "verb")
         document.getElementById("pos").value = "verb";
-    //Override autofill
-    window.onload = () => setTimeout(() => {
-        document.getElementById("word").value = wordArg;
-        document.getElementById("stress").value = stressArg;
-        if (word.partOfSpeech == "verb")
-            document.getElementById("pos").value = "verb";
-        else
-            document.getElementById("pos").value = "other";
-    }, 0);
 
     if (wordArg) {
         try {
