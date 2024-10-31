@@ -216,6 +216,15 @@
     document.getElementById("stress").value = stressArg;
     if (word.partOfSpeech == "verb")
         document.getElementById("pos").value = "verb";
+    //Override autofill
+    window.onload = () => setTimeout(() => {
+        document.getElementById("word").value = wordArg;
+        document.getElementById("stress").value = stressArg;
+        if (word.partOfSpeech == "verb")
+            document.getElementById("pos").value = "verb";
+        else
+            document.getElementById("pos").value = "other";
+    }, 10);
 
     if (wordArg) {
         try {
@@ -518,7 +527,7 @@
                     str += "e";
                     break;
                 case "ə":
-                    if (segment.relIdx(1).value == "ɫ" && !segment.relIdx(-1).match("v", "d͡ʒ") && segment.i > 0) {
+                    if (segment.relIdx(1).value == "ɫ" && !segment.relIdx(-1).match("m", "n", "v", "d͡ʒ") && segment.i > 0) {
                         str += "le";
                         i++;
                     }
