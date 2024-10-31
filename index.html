@@ -216,15 +216,6 @@
     document.getElementById("stress").value = stressArg;
     if (word.partOfSpeech == "verb")
         document.getElementById("pos").value = "verb";
-    //Override autofill
-    window.onload = () => setTimeout(() => {
-        document.getElementById("word").value = wordArg;
-        document.getElementById("stress").value = stressArg;
-        if (word.partOfSpeech == "verb")
-            document.getElementById("pos").value = "verb";
-        else
-            document.getElementById("pos").value = "other";
-    }, 10);
 
     if (wordArg) {
         try {
