@@ -518,7 +518,7 @@
                     str += "e";
                     break;
                 case "ə":
-                    if (segment.relIdx(1).value == "ɫ" && !segment.relIdx(-1).match("m", "n", "v", "d͡ʒ") && segment.i > 0) {
+                    if (segment.relIdx(1).value == "ɫ" && !segment.relIdx(-1).match("m", "n", "v", "t͡ʃ", "d͡ʒ") && segment.i > 0) {
                         str += "le";
                         i++;
                     }
@@ -1224,8 +1224,10 @@
         if (word.stressedVowel.relIdx(-1).type == "consonant")
             word.stressedVowel.relIdx(-1).stressed = true;
 
-        if (word.at(-2)?.match("i", "iː") && word.at(-1).value == "t͡ʃ" && !word.at(-2).stressed)
+        if (word.at(-2)?.match("i", "iː") && word.at(-1).value == "t͡ʃ" && !word.at(-2).stressed) {
+            word.at(-2).value = "iː";
             word.at(-1).remove();
+        }
 
         word.forEach(segment => {
             if (segment.match("b", "n") && segment.relIdx(-1).value == "m" && segment.relIdx(1).type != "vowel" && !segment.relIdx(1).match("l", "r")) {
