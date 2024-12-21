@@ -1227,6 +1227,7 @@
         if (word.at(-2)?.match("i", "iː") && word.at(-1).value == "t͡ʃ" && !word.at(-2).stressed) {
             word.at(-2).value = "iː";
             word.at(-1).remove();
+            word.droppedE = false;
         }
 
         word.forEach(segment => {
