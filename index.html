@@ -237,7 +237,7 @@
         str = str.replaceAll("ȳ", "y");
         str = str.replaceAll("ǣ", "æ");
         str = str.replaceAll("ċ", "c");
-        str = str.replaceAll(/(?<![eiyæ])ġa/g, "gea");
+        str = str.replaceAll(/(?<![eiyæn])ġa/g, "gea");
         str = str.replaceAll("ġo", "geo");
         str = str.replaceAll("ġu", "geo");
         str = str.replaceAll("ġ", "g");
@@ -508,6 +508,8 @@
                 addE = true;
             if (segment.value == "iː" && segment.relIdx(1).value == "rˠ" && !segment.stressed && segment == word.at(-2))
                 addE = true;
+            if (finalE && i == word.length - 1)
+                addE = true;
 
             switch (segment.value) {
                 case "a":
@@ -518,7 +520,8 @@
                     str += "e";
                     break;
                 case "ə":
-                    if (segment.relIdx(1).value == "ɫ" && !segment.relIdx(-1).match("m", "n", "v", "t͡ʃ", "d͡ʒ") && segment.i > 0) {
+                    if (segment.relIdx(1).value == "ɫ" && segment.relIdx(-1).type == "consonant"
+                        && !segment.relIdx(-1).match("m", "n", "v", "θ", "t͡ʃ", "ʃ", "d͡ʒ") && segment.i > 0) {
                         str += "le";
                         i++;
                     }
@@ -760,8 +763,6 @@
             if (addE)
                 str += "e";
         }
-        if (finalE)
-            str += "e";
         return str;
     }
 
@@ -1303,8 +1304,6 @@
 
         word.replace("e", "i", "_n,d͡ʒ");
 
-        word.replace("e", "a", "_rˠ");
-
         word.replace("ð", "d", "_ə,ɫ");
 
         word.forEach(segment => {
@@ -1403,6 +1402,8 @@
         word.replace("r", "rˠ", "_C/#");
         word.replace("ɫ", "l", "_V");
         word.replace("rˠ", "r", "_V");
+
+        word.replace("e", "a", "_rˠ");
 
         let EModEWord = word.duplicate();
 
@@ -1642,6 +1643,8 @@
         word.replace("uː", "ʉː");
         word.replace("ʌ", "ɐ");
         word.replace("ʊ", "ɵ");
+
+        word.replace("iː", "ɪi̯");
 
         word.replace("əʊ̯", "ɒʊ̯", "_ɫ");
 
