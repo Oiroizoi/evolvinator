@@ -1010,7 +1010,7 @@
 
         word.forEach(segment => {
             if (segment.value == "d" && segment.relIdx(1).value == "ə" && segment.relIdx(2).match("r", "rˠ")
-                && !segment.relIdx(-1).match("d", "n", "l"))
+                && !segment.relIdx(-1).match("d", "n", "ɫ"))
                 segment.value = "ð";
         });
 
@@ -1601,6 +1601,9 @@
 
         word.replace("ʍ", "w");
 
+        word.replace("tʰ", "t̠ʰ", "_ɹ̠");
+        word.replace("t", "t̠", "_ɹ̠");
+        word.replace("d", "d̠", "_ɹ̠");
 
         for (let i = 0; i < word.length; i++) {
             let segment = word[i];
