@@ -917,6 +917,10 @@
 
         word.replace("ɣ", "x", "_p/t/k/t͡ʃ/f/s/#");
 
+        word.replace("d", "t", "_s");
+        word.replace("b", "p", "_s");
+        word.replace("g", "k", "_s");
+
         word.forEach(segment => {
             if (segment.value == "n" && segment.relIdx(1).value == "r" && !segment.relIdx(1).stressed)
                 word.insert("d", segment.i + 1);
