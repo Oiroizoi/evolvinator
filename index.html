@@ -1608,6 +1608,9 @@
                 && (segment == word.at(-1) || segment.relIdx(1).type == "vowel"
                     || ((word.sSuffix || word.pastTense) && segment == word.at(-2))))
                 segment.value = "i";
+
+            if (segment.value == "iː" && !segment.stressed)
+                segment.value = "i";
         });
 
         word.forEach(segment => {
