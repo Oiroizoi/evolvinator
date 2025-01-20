@@ -1194,6 +1194,12 @@
         });
 
         word.forEach(segment => {
+            if (segment.value == "v" && segment.relIdx(1).type == "consonant" && !segment.relIdx(1).match("l", "r")) {
+                segment.remove();
+            }
+        });
+
+        word.forEach(segment => {
             if (segment.type == "consonant" && segment.i < word.length - 1 && segment.value[0] == segment.relIdx(1).value[0]) {
                 segment.relIdx(1).degeminated = true;
                 segment.remove();
