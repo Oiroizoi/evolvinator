@@ -171,7 +171,7 @@
     if (wordArg) {
         wordArg = wordArg.trim().toLowerCase();
         wordArg = wordArg.replaceAll("ð", "þ").replaceAll("ƿ", "w").replaceAll("k", "c"); //Alternate spellings
-        wordArg = wordArg.replaceAll("io", "eo").replaceAll("īo", "ēo").replaceAll("oe", "e").replaceAll("ōe", "ē").replaceAll("œ", "e").replaceAll("œ̄", "ē"); //Dialectal vowels
+        wordArg = wordArg.replaceAll("io", "eo").replaceAll("īo", "ēo").replaceAll("oe", "e").replaceAll("ōe", "ē").replaceAll("œ̄", "ē").replaceAll("œ", "e"); //Dialectal vowels
     }
     let stressArg = +params.get("stress") || 1;
     let word = new Word();
@@ -719,7 +719,7 @@
                         str += "r";
                     break;
                 case "s":
-                    if (segment.relIdx(-1).match("a", "e", "i", "ɔ", "u") && (segment.relIdx(1).type != "consonant" || (segment.relIdx(1).value == "z") || addE))
+                    if (segment.relIdx(-1).match("a", "e", "i", "ɔ", "u", "ə") && (segment.relIdx(1).type != "consonant" || (segment.relIdx(1).value == "z") || addE))
                         str += "ss";
                     else if (segment.relIdx(-1).value == "iː" && (segment.relIdx(1).type == "vowel" || addE))
                         str += "c";
@@ -1303,6 +1303,9 @@
                     case "f":
                         segment.value = "v";
                         break;
+                    case "θ":
+                        segment.value = "ð";
+                        break;
                     case "s":
                         segment.value = "z";
                         break;
@@ -1441,6 +1444,13 @@
         }
 
         word.replace("e", "a", "_rˠ");
+
+        if (word.at(-2)?.value == "ə") {
+            if (word.at(-1).value == "ð")
+                word.at(-1).value = "θ";
+            else if (word.at(-1).value == "z")
+                word.at(-1).value = "s";
+        }
 
         let EModEWord = word.duplicate();
 
