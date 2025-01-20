@@ -1019,6 +1019,8 @@
                 && segment.i < word.stressedVowel.i) {
                 segment.value = "i";
                 segment.relIdx(-1).remove();
+                if (segment.relIdx(-1).type == "vowel")
+                    segment.remove();
             }
         });
 
