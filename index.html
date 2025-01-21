@@ -893,7 +893,8 @@
                 segment.value = "ɒ";
         });
         word.forEach(segment => {
-            if (segment.type == "consonant" && segment.relIdx(1).value && segment.value == segment.relIdx(1).value[0]
+            if (segment.type == "consonant" && segment.relIdx(1).value
+                && (segment.value == segment.relIdx(1).value[0] || (segment.match("r", "rˠ") && segment.relIdx(1).match("r", "rˠ")))
                 && (segment.relIdx(-1).type != "vowel" || segment.relIdx(2).type != "vowel")
                 && !onsetClusters.includes(segment.relIdx(1).value + segment.relIdx(2).value))
                 segment.remove();
@@ -1205,7 +1206,8 @@
         });
 
         word.forEach(segment => {
-            if (segment.type == "consonant" && segment.i < word.length - 1 && segment.value == segment.relIdx(1).value[0]) {
+            if (segment.type == "consonant" && segment.i < word.length - 1
+                && (segment.value == segment.relIdx(1).value[0]) || segment.value == segment.relIdx(1).value) {
                 segment.relIdx(1).degeminated = true;
                 segment.remove();
             }
@@ -1308,9 +1310,6 @@
                     case "f":
                         segment.value = "v";
                         break;
-                    case "θ":
-                        segment.value = "ð";
-                        break;
                     case "s":
                         segment.value = "z";
                         break;
@@ -1398,7 +1397,7 @@
 
         word.forEach(segment => {
             if (segment.value == "ə" && segment.relIdx(1).value == "z" && !segment.relIdx(-1).match("s", "z", "t͡ʃ", "d͡ʒ")) {
-                if (segment == word.at(-2) && wordArg.endsWith("s")) {
+                if (segment == word.at(-2) && (wordArg.endsWith("as") || wordArg.endsWith("es"))) {
                     word.sSuffix = true;
                     segment.remove();
                 }
@@ -1452,12 +1451,8 @@
 
         word.replace("e", "a", "_rˠ");
 
-        if (word.at(-2)?.type == "vowel") {
-            if (word.at(-1).value == "ð")
-                word.at(-1).value = "θ";
-            if (word.at(-1).value == "z" && !word.sSuffix)
-                word.at(-1).value = "s";
-        }
+        if (word.at(-1).value == "z" && word.at(-2)?.type == "vowel" && !word.sSuffix)
+            word.at(-1).value = "s";
 
         let EModEWord = word.duplicate();
 
