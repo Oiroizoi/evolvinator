@@ -945,7 +945,11 @@
 
             word.replace("ɑ", "ɑː", "_ŋ,g");
 
+            word.replace("e", "eː", "_rˠ,d");
+            word.replace("eo̯", "eːo̯", "_rˠ,d");
             word.replace("o", "oː", "_rˠ,d");
+            word.replace("e", "eː", "_rˠ,n");
+            word.replace("eo̯", "eːo̯", "_rˠ,n");
         });
         word.replace("ɒː", "ɑː");
 
@@ -1310,6 +1314,9 @@
                     case "f":
                         segment.value = "v";
                         break;
+                    case "θ":
+                        segment.value = "ð";
+                        break;
                     case "s":
                         segment.value = "z";
                         break;
@@ -1439,10 +1446,17 @@
             word.at(-2).value = "iː";
             word.at(-2).type = "vowel";
         }
-        if (word.at(-2)?.value == "w" && word.at(-1).type == "consonant") {
+        if (word.at(-2)?.match("w", "ʍ") && word.at(-1).type == "consonant") {
             word.at(-2).value = "ɔu̯";
             word.at(-2).type = "vowel";
         }
+
+        word.forEach(segment => {
+            if (segment.value == "ə" && segment.relIdx(-2).type == "vowel" && segment.relIdx(2).type == "vowel"
+                && segment.relIdx(-1).type == "consonant" && segment.relIdx(1).type == "consonant"
+                && segment.relIdx(-1).value != segment.relIdx(1).value)
+                segment.remove();
+        });
 
         word.forEach(segment => {
             if (segment.value == "n" && segment.relIdx(-1).value == "ɫ" && segment.relIdx(1).type != "vowel")
@@ -1451,10 +1465,17 @@
 
         word.replace("e", "a", "_rˠ");
 
-        if (word.at(-1).value == "z" && word.at(-2)?.type == "vowel" && !word.sSuffix)
+        if (word.at(-1).value == "z" && word.at(-2)?.type == "vowel" && !word.sSuffix && !word.at(-2)?.stressed)
             word.at(-1).value = "s";
+        if (word.at(-1).value == "ð" && word.at(-2)?.type == "vowel" && !word.at(-2)?.stressed)
+            word.at(-1).value = "θ";
 
         let EModEWord = word.duplicate();
+
+        word.forEach(segment => {
+            if (segment.value == "ə" && segment.relIdx(1).match("t", "d", "s", "z") && segment.relIdx(2).type != "vowel")
+                segment.value = "ɪ";
+        });
 
         word.forEach(segment => {
             if (segment.value == "ɫ" && segment.relIdx(-1).match("a", "ɔ")) {
@@ -1752,6 +1773,15 @@
         word.forEach(segment => {
             if (segment.value == "j" && segment.relIdx(-1).match("n", "tʰ", "t", "d", "θ", "s", "l") && segment.stressed)
                 segment.remove();
+        });
+
+        //Weak vowel merger
+        word.forEach(segment => {
+            if (segment.match("ə", "ɪ") && !segment.stressed)
+                if (segment.relIdx(1).type == "consonant" && segment.relIdx(2).type != "vowel")
+                    segment.value = "ɨ";
+                else
+                    segment.value = "ə";
         });
 
         word.replace("ɛə̯", "ɛ");
