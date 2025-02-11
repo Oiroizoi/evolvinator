@@ -241,8 +241,8 @@
         str = str.replaceAll("ǣ", "æ");
         str = str.replaceAll("ċ", "c");
         str = str.replaceAll(/(?<![eiyæn])ġa/g, "gea");
-        str = str.replaceAll("ġo", "geo");
-        str = str.replaceAll("ġu", "geo");
+        str = str.replaceAll(/(?<![eiyæn])ġo/g, "geo");
+        str = str.replaceAll(/(?<![eiyæn])ġu/g, "geo");
         str = str.replaceAll("ġ", "g");
         str = str.replaceAll("w", "ƿ");
         return str;
@@ -925,10 +925,10 @@
         word.replace("g", "k", "_θ/s");
 
         word.forEach(segment => {
-            if (segment.value == "n" && segment.relIdx(1).value == "r" && !segment.relIdx(1).stressed)
+            if (segment.value == "n" && segment.relIdx(1).match("r", "rˠ") && !segment.relIdx(1).stressed)
                 word.insert("d", segment.i + 1);
 
-            if (segment.value == "m" && segment.relIdx(1).match("l", "r") && !segment.relIdx(1).stressed)
+            if (segment.value == "m" && segment.relIdx(1).match("l", "ɫ", "r", "rˠ") && !segment.relIdx(1).stressed)
                 word.insert("b", segment.i + 1);
         });
 
@@ -1307,6 +1307,17 @@
         word.replace("ɫ", "l", "_V");
         word.replace("rˠ", "r", "_V");
 
+        word.forEach(segment => {
+            if (segment.value == "ə" && segment.relIdx(-2).type == "vowel" && segment.relIdx(2).type == "vowel"
+                && segment.relIdx(-1).type == "consonant" && segment.relIdx(1).type == "consonant"
+                && segment.relIdx(-1).value != segment.relIdx(1).value)
+                segment.remove();
+        });
+        word.replaceSeq("m,t", "m,p,t");
+        word.replaceSeq("m,l", "m,b,l");
+        word.replaceSeq("m,r", "m,b,r");
+        word.replaceSeq("n,r", "n,d,r");
+
         //Fricative voicing after unstressed vowels
         word.forEach(segment => {
             if (segment.relIdx(-1).type == "vowel" && !segment.relIdx(-1).stressed && segment.relIdx(1).type != "consonant" && !segment.relIdx(1).stressed) {
@@ -1435,7 +1446,7 @@
         word.replace("ɫ", "l", "_V");
         word.replace("rˠ", "r", "_V");
         word.forEach(segment => {
-            if (segment.match("m", "n", "l", "r") && segment.relIdx(-1).type != "vowel" && segment.relIdx(1).type != "vowel"
+            if (segment.match("m", "n", "ɫ", "rˠ") && segment.relIdx(-1).type != "vowel" && segment.relIdx(1).type != "vowel"
                 && !(segment.relIdx(-1).match("ɫ", "rˠ") && segment.value != "r")
                 && !(word.at(-2).value == "m" && word.at(-1).value == "n")) {
                 word.insert("ə", segment.i);
@@ -1450,13 +1461,6 @@
             word.at(-2).value = "ɔu̯";
             word.at(-2).type = "vowel";
         }
-
-        word.forEach(segment => {
-            if (segment.value == "ə" && segment.relIdx(-2).type == "vowel" && segment.relIdx(2).type == "vowel"
-                && segment.relIdx(-1).type == "consonant" && segment.relIdx(1).type == "consonant"
-                && segment.relIdx(-1).value != segment.relIdx(1).value)
-                segment.remove();
-        });
 
         word.forEach(segment => {
             if (segment.value == "n" && segment.relIdx(-1).value == "ɫ" && segment.relIdx(1).type != "vowel")
@@ -1775,15 +1779,6 @@
                 segment.remove();
         });
 
-        //Weak vowel merger
-        word.forEach(segment => {
-            if (segment.match("ə", "ɪ") && !segment.stressed)
-                if (segment.relIdx(1).type == "consonant" && segment.relIdx(2).type != "vowel")
-                    segment.value = "ɨ";
-                else
-                    segment.value = "ə";
-        });
-
         word.replace("ɛə̯", "ɛ");
         word.replace("æ", "ɛ", "_ɹ̠");
         word.replace("ɜ", "ə", "_ɹ̠");
@@ -1803,6 +1798,15 @@
                 segment.value += "ɚ̯";
                 segment.relIdx(1).remove();
             }
+        });
+
+        //Weak vowel merger
+        word.forEach(segment => {
+            if (segment.match("ə", "ɪ") && !segment.stressed)
+                if (segment.relIdx(1).type == "consonant" && segment.relIdx(2).type != "vowel")
+                    segment.value = "ɨ";
+                else
+                    segment.value = "ə";
         });
 
         word.replace("l", "ɫ");
