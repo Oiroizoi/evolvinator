@@ -154,7 +154,7 @@
                 return str;
             };
 
-            if (this.value && ["ɑ", "e", "i", "o", "u", "y", "æ"].includes(this.value[0]))
+            if (this.value && ["ɑ", "e", "i", "o", "u", "y", "æ", "ə"].includes(this.value[0]))
                 this.type = "vowel";
             else if (this.value)
                 this.type = "consonant";
@@ -1049,10 +1049,8 @@
         word.forEach(segment => {
             if (segment.match("m", "n", "l", "r") && segment.relIdx(-1).type != "vowel" && segment.relIdx(1).type != "vowel"
                 && !(segment.relIdx(-1).match("ɫ", "rˠ", "j", "w") && segment.value != "r")
-                && !(word.at(-2).value == "m" && word.at(-1).value == "n")) {
+                && !(word.at(-2).value == "m" && word.at(-1).value == "n"))
                 word.insert("ə", segment.i);
-                segment.relIdx(-1).type = "vowel";
-            }
         });
 
         //Not sure if these changes are regular, but they seem to be very widespread
@@ -1065,6 +1063,11 @@
                 segment.relIdx(-1).value = "rˠ";
                 segment.remove();
             }
+        });
+
+        word.forEach(segment => {
+            if (segment.value == "r" && segment.relIdx(-1).value == "w")
+                word.insert("ə", segment.i);
         });
 
         word.forEach(segment => {
@@ -1275,10 +1278,8 @@
 
         word.forEach(segment => {
             if (segment.match("m", "n", "l", "r") && segment.relIdx(-1).type != "vowel" && segment.relIdx(1).type != "vowel"
-                && !(segment.relIdx(-1).match("ɫ", "rˠ") && segment.value != "r")) {
+                && !(segment.relIdx(-1).match("ɫ", "rˠ") && segment.value != "r"))
                 word.insert("ə", segment.i);
-                segment.relIdx(-1).type = "vowel";
-            }
 
             if (segment.value == "j" && segment.relIdx(1).type != "vowel") {
                 if (segment.relIdx(1).type == "consonant" && segment.relIdx(2).type != "vowel")
@@ -1395,18 +1396,19 @@
             word.at(-1).remove();
             if (word.at(-1).match("m", "n", "l", "r") && word.at(-2)?.type != "vowel"
                 && !(word.at(-2).match("ɫ", "rˠ") && word.at(-1).value != "r")
-                && !(word.at(-2).value == "m" && word.at(-1).value == "n")) {
+                && !(word.at(-2).value == "m" && word.at(-1).value == "n"))
                 word.insert("ə", word.length - 1);
-                word.at(-2).type = "vowel";
-            }
+
             if (word.at(-1).value == "j") {
                 word.at(-1).value = "iː";
                 word.at(-1).type = "vowel";
             }
+
             if (word.at(-1).value == "w") {
                 word.at(-1).value = "ɔu̯";
                 word.at(-1).type = "vowel";
             }
+
             word.droppedE = true;
         } else if (word.partOfSpeech == "verb" && word.at(-1).value == "n") {
             word.at(-1).remove();
@@ -1448,10 +1450,8 @@
         word.forEach(segment => {
             if (segment.match("m", "n", "ɫ", "rˠ") && segment.relIdx(-1).type != "vowel" && segment.relIdx(1).type != "vowel"
                 && !(segment.relIdx(-1).match("ɫ", "rˠ") && segment.value != "r")
-                && !(word.at(-2).value == "m" && word.at(-1).value == "n")) {
+                && !(word.at(-2).value == "m" && word.at(-1).value == "n"))
                 word.insert("ə", segment.i);
-                segment.relIdx(-1).type = "vowel";
-            }
         });
         if (word.at(-2)?.value == "j" && word.at(-1).type == "consonant") {
             word.at(-2).value = "iː";
@@ -1643,10 +1643,8 @@
         word.replace("oː", "ɔə̯", "_ɹ̠");
         word.replace("uː", "ʊə̯", "_ɹ̠");
         word.forEach(segment => {
-            if (segment.value == "ɹ̠" && segment.relIdx(-1).match("əi̯", "əu̯", "oi̯") && segment.relIdx(1).type != "vowel") {
+            if (segment.value == "ɹ̠" && segment.relIdx(-1).match("əi̯", "əu̯", "oi̯") && segment.relIdx(1).type != "vowel")
                 word.insert("ə", segment.i);
-                segment.relIdx(-1).type = "vowel";
-            }
         });
 
         //"Happy" shortening & tensing
