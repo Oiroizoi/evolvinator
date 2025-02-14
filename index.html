@@ -1066,7 +1066,7 @@
         });
 
         word.forEach(segment => {
-            if (segment.value == "r" && segment.relIdx(-1).value == "w")
+            if (segment.value.match("r", "rˠ") && segment.relIdx(-1).value == "w")
                 word.insert("ə", segment.i);
         });
 
