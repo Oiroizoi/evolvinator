@@ -622,37 +622,38 @@
                         str += "oy";
                     break;
                 case "b":
-                    if (segment.relIdx(-1).match("a", "e", "i", "ɔ", "u") && (segment.relIdx(1).type == "vowel" || addE))
+                    if (segment.relIdx(-1).match("a", "e", "i", "ɔ", "u") && segment.relIdx(-1).stressed && (segment.relIdx(1).type == "vowel" || addE))
                         str += "bb";
                     else
                         str += "b";
                     break;
                 case "t͡ʃ":
-                    if (segment.relIdx(-1).match("a", "e", "i", "ɔ", "u"))
+                    if (segment.relIdx(-1).match("a", "e", "i", "ɔ", "u") && segment.relIdx(-1).stressed)
                         str += "tch";
                     else
                         str += "ch";
                     break;
                 case "d":
-                    if (segment.relIdx(-1).match("a", "e", "i", "ɔ", "u") && (segment.relIdx(1).type == "vowel" || addE))
+                    if (segment.relIdx(-1).match("a", "e", "i", "ɔ", "u") && segment.relIdx(-1).stressed && (segment.relIdx(1).type == "vowel" || addE))
                         str += "dd";
                     else
                         str += "d";
                     break;
                 case "f":
-                    if (segment.relIdx(-1).match("a", "e", "i", "ɔ", "u") && (segment.relIdx(1).type != "consonant" || (segment.relIdx(1).value == "z") || addE))
+                    if (segment.relIdx(-1).match("a", "e", "i", "ɔ", "u") && segment.relIdx(-1).stressed &&
+                        (segment.relIdx(1).type != "consonant" || (segment.relIdx(1).value == "z") || addE))
                         str += "ff";
                     else
                         str += "f";
                     break;
                 case "g":
-                    if (segment.relIdx(-1).match("a", "e", "i", "ɔ", "u") && (segment.relIdx(1).type == "vowel" || addE))
+                    if (segment.relIdx(-1).match("a", "e", "i", "ɔ", "u") && segment.relIdx(-1).stressed && (segment.relIdx(1).type == "vowel" || addE))
                         str += "gg";
                     else
                         str += "g";
                     break;
                 case "d͡ʒ":
-                    if (segment.relIdx(-1).match("a", "e", "i", "ɔ", "u"))
+                    if (segment.relIdx(-1).match("a", "e", "i", "ɔ", "u") && segment.relIdx(-1).stressed)
                         str += "dg";
                     else
                         str += "g";
@@ -683,7 +684,8 @@
                     break;
                 case "l":
                 case "ɫ":
-                    if (segment.relIdx(-1).match("a", "e", "i", "ɔ", "u") && (segment.relIdx(1).type != "consonant" || (segment.relIdx(1).value == "z") || addE))
+                    if (segment.relIdx(-1).match("a", "e", "i", "ɔ", "u") && segment.relIdx(-1).stressed &&
+                        (segment.relIdx(1).type != "consonant" || (segment.relIdx(1).value == "z") || addE))
                         str += "ll";
                     else
                         str += "l";
@@ -693,27 +695,27 @@
                         str += "mb";
                     else if (segment.droppedN)
                         str += "mn";
-                    else if (segment.relIdx(-1).match("a", "e", "i", "ɔ", "u") && (segment.relIdx(1).type == "vowel" || addE))
+                    else if (segment.relIdx(-1).match("a", "e", "i", "ɔ", "u") && segment.relIdx(-1).stressed && (segment.relIdx(1).type == "vowel" || addE))
                         str += "mm";
                     else
                         str += "m";
                     break;
                 case "n":
                 case "ŋ":
-                    if (segment.relIdx(-1).match("a", "e", "i", "ɔ", "u") && (segment.relIdx(1).type == "vowel" || addE))
+                    if (segment.relIdx(-1).match("a", "e", "i", "ɔ", "u") && segment.relIdx(-1).stressed && (segment.relIdx(1).type == "vowel" || addE))
                         str += "nn";
                     else
                         str += "n";
                     break;
                 case "p":
-                    if (segment.relIdx(-1).match("a", "e", "i", "ɔ", "u") && (segment.relIdx(1).type == "vowel" || addE))
+                    if (segment.relIdx(-1).match("a", "e", "i", "ɔ", "u") && segment.relIdx(-1).stressed && (segment.relIdx(1).type == "vowel" || addE))
                         str += "pp";
                     else
                         str += "p";
                     break;
                 case "r":
                 case "rˠ":
-                    if (segment.relIdx(-1).match("a", "e", "i", "ɔ", "u") && (segment.relIdx(1).type == "vowel" || addE))
+                    if (segment.relIdx(-1).match("a", "e", "i", "ɔ", "u") && segment.relIdx(-1).stressed && (segment.relIdx(1).type == "vowel" || addE))
                         str += "rr";
                     else
                         str += "r";
@@ -736,7 +738,7 @@
                         break;
                     else if (segment == word.at(-1) && word.pastTense)
                         str += "d";
-                    else if (segment.relIdx(-1).match("a", "e", "i", "ɔ", "u") && (segment.relIdx(1).type == "vowel" || addE))
+                    else if (segment.relIdx(-1).match("a", "e", "i", "ɔ", "u") && segment.relIdx(-1).stressed && (segment.relIdx(1).type == "vowel" || addE))
                         str += "tt";
                     else
                         str += "t";
@@ -758,7 +760,8 @@
                     str += "y";
                     break;
                 case "z":
-                    if (segment.relIdx(-1).match("a", "e", "i", "ɔ", "u") && (segment.relIdx(1).type != "consonant" || (segment.relIdx(1).value == "z") || addE))
+                    if (segment.relIdx(-1).match("a", "e", "i", "ɔ", "u") && segment.relIdx(-1).stressed &&
+                        (segment.relIdx(1).type != "consonant" || (segment.relIdx(1).value == "z") || addE))
                         str += "zz";
                     else
                         str += "s";
@@ -1059,14 +1062,14 @@
                 && segment.relIdx(1).type == "consonant" && !(segment.relIdx(1).match("n", "s", "θ", "d") && segment == word.vowels.at(-1)) && !segment.relIdx(1).stressed)
                 segment.remove();
 
-            if (segment.value == "ə" && segment.relIdx(-1).value == "r" && segment.relIdx(1).value == "l" && segment.relIdx(-2).type == "vowel") {
+            if (segment.value == "ə" && segment.relIdx(-1).value == "r" && segment.relIdx(1).match("l", "ɫ") && segment.relIdx(-2).type == "vowel") {
                 segment.relIdx(-1).value = "rˠ";
                 segment.remove();
             }
         });
 
         word.forEach(segment => {
-            if (segment.value.match("r", "rˠ") && segment.relIdx(-1).value == "w")
+            if (segment.value.match("r", "rˠ") && segment.relIdx(-1).value == "w" && !segment.stressed)
                 word.insert("ə", segment.i);
         });
 
@@ -1163,8 +1166,8 @@
 
         //Trisyllabic laxing and open syllable lengthening
         word.vowels.forEach((vowel, i) => {
-            if (i < word.vowels.length - 2) {
-                if (vowel.value.endsWith("ː") && vowel.relIdx(1).type != "vowel")
+            if (i < word.vowels.length - 2 && vowel.relIdx(1).type != "vowel") {
+                if (vowel.value.endsWith("ː"))
                     vowel.value = vowel.value[0];
                 word.replace("ɛ", "e");
                 word.replace("ɔ", "o");
@@ -1203,12 +1206,6 @@
                         segment.value = "u";
                         break;
                 }
-            }
-        });
-
-        word.forEach(segment => {
-            if (segment.value == "v" && segment.relIdx(1).type == "consonant" && !segment.relIdx(1).match("l", "r")) {
-                segment.remove();
             }
         });
 
@@ -1303,21 +1300,25 @@
                 segment.remove();
         });
 
-        word.replace("l", "ɫ", "_C/#");
-        word.replace("r", "rˠ", "_C/#");
-        word.replace("ɫ", "l", "_V");
-        word.replace("rˠ", "r", "_V");
-
         word.forEach(segment => {
-            if (segment.value == "ə" && segment.relIdx(-2).type == "vowel" && segment.relIdx(2).type == "vowel"
+            if (segment.type == "vowel" && segment.relIdx(-2).type == "vowel" && segment.relIdx(2).type == "vowel"
                 && segment.relIdx(-1).type == "consonant" && segment.relIdx(1).type == "consonant"
-                && segment.relIdx(-1).value != segment.relIdx(1).value)
-                segment.remove();
+                && segment.relIdx(-1).value != segment.relIdx(1).value) {
+                if (segment.value == "ə")
+                    segment.remove();
+                else if (segment.value == "iː")
+                    segment.value = "i";
+            }
         });
         word.replaceSeq("m,t", "m,p,t");
         word.replaceSeq("m,l", "m,b,l");
         word.replaceSeq("m,r", "m,b,r");
         word.replaceSeq("n,r", "n,d,r");
+
+        word.replace("l", "ɫ", "_C/#");
+        word.replace("r", "rˠ", "_C/#");
+        word.replace("ɫ", "l", "_V");
+        word.replace("rˠ", "r", "_V");
 
         //Fricative voicing after unstressed vowels
         word.forEach(segment => {
@@ -1477,7 +1478,7 @@
         let EModEWord = word.duplicate();
 
         word.forEach(segment => {
-            if (segment.value == "ə" && segment.relIdx(1).match("t", "d", "s", "z") && segment.relIdx(2).type != "vowel")
+            if (segment.value == "ə" && segment.relIdx(1).match("t", "d", "s", "z") && segment.relIdx(2).type != "vowel" && !segment.relIdx(1).stressed)
                 segment.value = "ɪ";
         });
 
@@ -1801,7 +1802,7 @@
         //Weak vowel merger
         word.forEach(segment => {
             if (segment.match("ə", "ɪ") && !segment.stressed)
-                if (segment.relIdx(1).type == "consonant" && segment.relIdx(2).type != "vowel")
+                if (segment.relIdx(1).type == "consonant" && segment.relIdx(2).type != "vowel" && !segment.relIdx(1).stressed)
                     segment.value = "ɨ";
                 else
                     segment.value = "ə";
