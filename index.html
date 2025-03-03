@@ -528,7 +528,8 @@
                     }
                     else if (segment.i == 0 && segment.relIdx(1).stressed)
                         str += "a";
-                    else if (segment.MEValue == "oː" || segment.MEValue == "ɔ" || segment.relIdx(1).match("m", "p", "b", "k"))
+                    else if (segment.MEValue == "oː" || segment.MEValue == "ɔ"
+                        || (segment.relIdx(1).match("m", "p", "b", "k") && !segment.relIdx(1).stressed))
                         str += "o";
                     else
                         str += "e";
@@ -1165,7 +1166,7 @@
         word.replace("ou̯", "uː");
         word.replace("eu̯", "iu̯");
 
-        word.replace("θ", "t", "f/s/ʃ/x_");
+        word.replace("θ", "t", "f/s/ʃ/ç/x_");
 
         //Trisyllabic laxing and open syllable lengthening
         word.vowels.forEach((vowel, i) => {
@@ -1231,10 +1232,10 @@
             }
         });
 
-        word.forEach(segment => {
-            if (segment.value == "t" && segment.relIdx(1).value == "s")
-                segment.remove();
-        });
+        word.replace("θ", "s", "_s");
+        word.replace("t", "s", "_s");
+        if (word.at(-1).value == word.at(-2)?.value)
+            word.at(-1).remove();
 
         word.replace("f", "s", "#_n");
 
@@ -1551,7 +1552,7 @@
                     segment.stressed = false;
                     if (segment.value == "kʰ")
                         segment.value = "k";
-                } else {
+                } else if (!segment.relIdx(-1).match("ŋ", "ɫ", "ɹ̠", "s") || segment.relIdx(1).stressed) {
                     if (segment.relIdx(-1).value == "ŋ")
                         segment.relIdx(-1).value = "n";
                     segment.remove();
