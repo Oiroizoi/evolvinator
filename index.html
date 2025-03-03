@@ -522,7 +522,7 @@
                     break;
                 case "ə":
                     if (segment.relIdx(1).value == "ɫ" && segment.relIdx(-1).type == "consonant"
-                        && !segment.relIdx(-1).match("m", "n", "v", "r", "θ", "t͡ʃ", "ʃ", "d͡ʒ", "j", "w") && segment.i > 0) {
+                        && !segment.relIdx(-1).match("m", "n", "v", "l", "r", "θ", "t͡ʃ", "ʃ", "d͡ʒ", "j", "w") && segment.i > 0) {
                         str += "le";
                         i++;
                     }
