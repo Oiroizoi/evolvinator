@@ -1057,12 +1057,18 @@
                 && !(segment.relIdx(-1).match("ɫ", "rˠ", "j", "w") && segment.value != "r")
                 && !(word.at(-2).value == "m" && word.at(-1).value == "n"))
                 word.insert("ə", segment.i);
+
+            if (segment.value == "j" && segment.relIdx(-1).type != "vowel" && segment.relIdx(1).type != "vowel") {
+                segment.value = "iː";
+                segment.type = "vowel";
+            }
         });
 
         //Not sure if these changes are regular, but they seem to be very widespread
         word.forEach(segment => {
             if (segment.value == "ə" && (segment.relIdx(-1).type == "vowel" || (segment.relIdx(-1).match("j", "w") && segment.relIdx(-2).type == "vowel"))
-                && segment.relIdx(1).type == "consonant" && !(segment.relIdx(1).match("n", "s", "θ", "d") && segment == word.vowels.at(-1)) && !segment.relIdx(1).stressed)
+                && segment.relIdx(1).type == "consonant" && !(segment.relIdx(1).match("n", "s", "d") && segment == word.vowels.at(-1))
+                && !(segment.relIdx(1).value == "d" && segment == word.vowels.at(-2)) && !segment.relIdx(1).stressed)
                 segment.remove();
 
             if (segment.value == "ə" && segment.relIdx(-1).value == "r" && segment.relIdx(1).match("l", "ɫ") && segment.relIdx(-2).type == "vowel") {
@@ -1215,6 +1221,12 @@
         });
 
         word.forEach(segment => {
+            if (segment.value == "v" && segment.relIdx(1).type == "consonant" && !segment.relIdx(1).match("l", "r", "n")) {
+                segment.remove();
+            }
+        });
+
+        word.forEach(segment => {
             if (segment.type == "consonant" && segment.i < word.length - 1
                 && (segment.value == segment.relIdx(1).value[0]) || segment.value == segment.relIdx(1).value) {
                 segment.relIdx(1).degeminated = true;
@@ -1284,6 +1296,11 @@
         word.replaceSeq("w,l", "l");
 
         word.forEach(segment => {
+            if (segment.value == "iː" && !segment.stressed && segment.relIdx(1).type == "consonant" && segment.relIdx(1).value != "r")
+                segment.value = "i";
+        });
+
+        word.forEach(segment => {
             if (segment.match("m", "n", "l", "r") && segment.relIdx(-1).type != "vowel" && segment.relIdx(1).type != "vowel"
                 && !(segment.relIdx(-1).match("ɫ", "rˠ") && segment.value != "r"))
                 word.insert("ə", segment.i);
@@ -1316,8 +1333,6 @@
                 && segment.relIdx(-1).value != segment.relIdx(1).value && !segment.stressed) {
                 if (segment.value == "ə")
                     segment.remove();
-                else if (segment.value == "iː")
-                    segment.value = "i";
             }
         });
         word.replaceSeq("m,t", "m,p,t");
@@ -1486,7 +1501,7 @@
         let EModEWord = word.duplicate();
 
         word.forEach(segment => {
-            if (segment.value == "ə" && segment.relIdx(1).match("t", "d", "s", "z") && segment.relIdx(2).type != "vowel" && !segment.relIdx(1).stressed)
+            if (segment.value == "ə" && segment.relIdx(1).match("t", "d", "θ", "ð", "s", "z") && segment.relIdx(2).type != "vowel" && !segment.relIdx(1).stressed)
                 segment.value = "ɪ";
         });
 
