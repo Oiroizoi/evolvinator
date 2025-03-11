@@ -562,7 +562,8 @@
                         || addE || (finalE && segment == word.at(-2))
                         || (segment == word.at(-3) && (word.sSuffix || word.pastTense))
                         || (segment.relIdx(1).value == "ɫ" && segment.relIdx(2).value == "d")
-                        || (segment.relIdx(1).value == "m" && segment.relIdx(1).droppedB))
+                        || (segment.relIdx(1).value == "m" && segment.relIdx(1).droppedB)
+                        || (segment.relIdx(1).value == "rˠ" && segment.relIdx(2).value == "n"))
                         str += "o";
                     else
                         str += "oa";
@@ -1053,7 +1054,7 @@
         });
 
         word.forEach(segment => {
-            if (segment.match("m", "n", "l", "r") && segment.relIdx(-1).type != "vowel" && segment.relIdx(1).type != "vowel"
+            if (segment.match("m", "n", "l", "ɫ", "r", "rˠ") && segment.relIdx(-1).type != "vowel" && segment.relIdx(1).type != "vowel"
                 && !(segment.relIdx(-1).match("ɫ", "rˠ", "j", "w") && segment.value != "r")
                 && !(word.at(-2).value == "m" && word.at(-1).value == "n"))
                 word.insert("ə", segment.i);
