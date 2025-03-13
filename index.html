@@ -941,22 +941,19 @@
 
         //Homorganic lengthening
         word.forEach(segment => {
-            if (segment.match("ɑ", "e", "eo̯", "i", "y") && segment.relIdx(1).value == "ɫ" && segment.relIdx(2).value == "d")
-                segment.value = segment.value.slice(0, 1) + "ː" + segment.value.slice(1);
+            if (segment.stressed) {
+                if (segment.match("ɑ", "e", "eo̯", "i", "y") && segment.relIdx(1).value == "ɫ" && segment.relIdx(2).value == "d")
+                    segment.value = segment.value.slice(0, 1) + "ː" + segment.value.slice(1);
 
-            if (segment.match("ɒ", "i", "y") && segment.relIdx(1).value == "m" && segment.relIdx(2).value == "b")
-                segment.value = segment.value.slice(0, 1) + "ː" + segment.value.slice(1);
+                if (segment.match("ɒ", "i", "y") && segment.relIdx(1).value == "m" && segment.relIdx(2).value == "b")
+                    segment.value = segment.value.slice(0, 1) + "ː" + segment.value.slice(1);
 
-            if (segment.match("i", "y", "u") && segment.relIdx(1).value == "n" && segment.relIdx(2).value == "d")
-                segment.value = segment.value.slice(0, 1) + "ː" + segment.value.slice(1);
+                if (segment.match("i", "y", "u") && segment.relIdx(1).value == "n" && segment.relIdx(2).value == "d")
+                    segment.value = segment.value.slice(0, 1) + "ː" + segment.value.slice(1);
 
-            word.replace("ɑ", "ɑː", "_ŋ,g");
-
-            word.replace("e", "eː", "_rˠ,d");
-            word.replace("eo̯", "eːo̯", "_rˠ,d");
-            word.replace("o", "oː", "_rˠ,d");
-            word.replace("e", "eː", "_rˠ,n");
-            word.replace("eo̯", "eːo̯", "_rˠ,n");
+                if (segment.value == "ɑ" && segment.relIdx(1).value == "ŋ" && segment.relIdx(2).value == "g")
+                    segment.value = "ɑː";
+            }
         });
         word.replace("ɒː", "ɑː");
 
@@ -1227,14 +1224,6 @@
             }
         });
 
-        word.forEach(segment => {
-            if (segment.type == "consonant" && segment.i < word.length - 1
-                && (segment.value == segment.relIdx(1).value[0]) || segment.value == segment.relIdx(1).value) {
-                segment.relIdx(1).degeminated = true;
-                segment.remove();
-            }
-        });
-
         word.replace("l̥", "l");
         word.replace("n̥", "n");
         word.replace("r̥", "r");
@@ -1248,9 +1237,51 @@
 
         word.replace("θ", "s", "_s");
         word.replace("t", "s", "_s");
+
+        //Fricative voicing after unstressed vowels
         word.forEach(segment => {
-            if (segment.value == segment.relIdx(1).value && !(segment.relIdx(-1).type == "vowel" && segment.relIdx(2).type == "vowel"))
+            if (segment.relIdx(-1).type == "vowel" && !segment.relIdx(-1).stressed && segment.relIdx(1).type != "consonant" && !segment.relIdx(1).stressed) {
+                switch (segment.value) {
+                    case "f":
+                        segment.value = "v";
+                        break;
+                    case "θ":
+                        segment.value = "ð";
+                        break;
+                    case "s":
+                        segment.value = "z";
+                        break;
+                }
+            }
+        });
+
+        if (word.at(-2)?.value == "ə" && word.at(-1).value == "z")
+            word.sSuffix = true;
+
+        word.forEach(segment => {
+            if (segment.value == "ə" && segment.relIdx(-2).type == "vowel" && segment.relIdx(2).type == "vowel"
+                && segment.relIdx(-1).type == "consonant" && segment.relIdx(1).type == "consonant"
+                && segment.relIdx(-1).value != segment.relIdx(1).value && !(segment.relIdx(2) == word.at(-1) && segment.relIdx(2).value == "ə")
+                && !(segment.relIdx(2) == word.vowels.at(-1) && (word.sSuffix || word.pastTense || (word.partOfSpeech == "verb" && word.at(-1).value == "n"))))
                 segment.remove();
+        });
+        word.forEach(segment => {
+            if (segment.value == "m" && segment.relIdx(1).value == "t")
+                word.insert("p", segment.i + 1);
+
+            if (segment.value == "m" && segment.relIdx(1).match("l", "r"))
+                word.insert("b", segment.i + 1);
+
+            if (segment.value == "n" && segment.relIdx(1).value == "r")
+                word.insert("d", segment.i + 1);
+        });
+
+        word.forEach(segment => {
+            if (segment.type == "consonant" && segment.i < word.length - 1
+                && (segment.value == segment.relIdx(1).value[0]) || segment.value == segment.relIdx(1).value) {
+                segment.relIdx(1).degeminated = true;
+                segment.remove();
+            }
         });
 
         word.replace("f", "s", "#_n");
@@ -1263,9 +1294,6 @@
             if (segment.type == "consonant" && segment.stressed && !segment.relIdx(1).stressed)
                 segment.stressed = false;
         });
-
-        if (word.at(-2).value == "ə" && word.at(-1).value == "s")
-            word.sSuffix = true;
 
         if (word.at(-1).value == "ə") {
             word.at(-1).remove();
@@ -1328,48 +1356,16 @@
                 segment.remove();
         });
 
-        word.forEach(segment => {
-            if (segment.type == "vowel" && segment.relIdx(-2).type == "vowel" && segment.relIdx(2).type == "vowel"
-                && segment.relIdx(-1).type == "consonant" && segment.relIdx(1).type == "consonant"
-                && segment.relIdx(-1).value != segment.relIdx(1).value && !segment.stressed) {
-                if (segment.value == "ə")
-                    segment.remove();
-            }
-        });
-        word.replaceSeq("m,t", "m,p,t");
-        word.replaceSeq("m,l", "m,b,l");
-        word.replaceSeq("m,r", "m,b,r");
-        word.replaceSeq("n,r", "n,d,r");
-
         word.replace("l", "ɫ", "_C/#");
         word.replace("r", "rˠ", "_C/#");
         word.replace("ɫ", "l", "_V");
         word.replace("rˠ", "r", "_V");
 
-        //Fricative voicing after unstressed vowels
-        word.forEach(segment => {
-            if (segment.relIdx(-1).type == "vowel" && !segment.relIdx(-1).stressed && segment.relIdx(1).type != "consonant" && !segment.relIdx(1).stressed) {
-                switch (segment.value) {
-                    case "f":
-                        segment.value = "v";
-                        break;
-                    case "θ":
-                        segment.value = "ð";
-                        break;
-                    case "s":
-                        segment.value = "z";
-                        break;
-                }
-            }
-        });
-
-        if (word.at(-1).value == "z" && word.at(-2)?.type == "vowel" && !word.sSuffix && !word.at(-2)?.stressed)
-            word.at(-1).value = "s";
-
         word.forEach(segment => segment.MEValue = segment.value);
         document.getElementById("outcomes").innerHTML += `<br> Middle English (c. 1400): <i>${getMESpelling()}</i> [${word}]`;
 
 
+        //Loss of y- prefix
         if (word[0].value == "i" && !word[0].stressed && word[1]?.stressed)
             word[0].remove();
 
