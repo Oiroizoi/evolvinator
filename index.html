@@ -38,7 +38,9 @@
 
         <label for="pos" style="margin-left: 8px;">Part of speech:</label>
         <select name="pos" id="pos">
-            <option value="verb">Verb (infinitive)</option>
+            <option value="inf">Infinitive verb</option>
+            <option value="conjVerb">Conjugated verb</option>
+            <option value="pastPtcp">Past participle</option>
             <option value="other" selected>Other</option>
         </select>
         <br>
@@ -218,8 +220,8 @@
     document.getElementById("word").value = wordArg;
     document.getElementById("word").oninput();
     document.getElementById("stress").value = stressArg;
-    if (word.partOfSpeech == "verb")
-        document.getElementById("pos").value = "verb";
+    if (word.partOfSpeech == "inf" || word.partOfSpeech == "conjVerb" || word.partOfSpeech == "pastPtcp")
+        document.getElementById("pos").value = word.partOfSpeech;
 
     if (wordArg) {
         try {
@@ -1067,10 +1069,27 @@
 
         //Not sure if these changes are regular, but they seem to be very widespread
         word.forEach(segment => {
+            //Drop schwa between vowel and consonant, except in inflectional endings
             if (segment.value == "ə" && (segment.relIdx(-1).type == "vowel" || (segment.relIdx(-1).match("j", "w") && segment.relIdx(-2).type == "vowel"))
-                && segment.relIdx(1).type == "consonant" && !(segment.relIdx(1).match("n", "s", "d") && segment == word.vowels.at(-1))
-                && !(segment.relIdx(1).value == "d" && segment == word.vowels.at(-2)) && !segment.relIdx(1).stressed)
-                segment.remove();
+                && segment.relIdx(1).type == "consonant" && !segment.relIdx(1).stressed) {
+                let inInflection = false;
+                switch (word.partOfSpeech) {
+                    case "conjVerb":
+                        if (segment.relIdx(1).value == "θ")
+                            inInflection = true;
+                    case "pastPtcp":
+                        if (segment.relIdx(1).value == "d")
+                            inInflection = true;
+                    case "inf":
+                        if (segment.relIdx(1).value == "n")
+                            inInflection = true;
+                    default:
+                        if (segment.relIdx(1).value == "s")
+                            inInflection = true;
+                }
+                if (!inInflection)
+                    segment.remove();
+            }
 
             if (segment.value == "ə" && segment.relIdx(-1).value == "r" && segment.relIdx(1).match("l", "ɫ") && segment.relIdx(-2).type == "vowel") {
                 segment.relIdx(-1).value = "rˠ";
@@ -1270,7 +1289,8 @@
             if (segment.value == "ə" && segment.relIdx(-2).type == "vowel" && segment.relIdx(2).type == "vowel"
                 && segment.relIdx(-1).type == "consonant" && segment.relIdx(1).type == "consonant"
                 && !(segment.relIdx(2) == word.at(-1) && segment.relIdx(2).value == "ə")
-                && !(segment.relIdx(2) == word.vowels.at(-1) && (word.sSuffix || word.pastTense || (word.partOfSpeech == "verb" && word.at(-1).value == "n")))
+                && !(segment.relIdx(2) == word.vowels.at(-1) && (word.sSuffix || word.pastTense
+                    || ((word.partOfSpeech == "inf" || word.partOfSpeech == "conjVerb") && word.at(-1).value == "n")))
                 && !word.toString().endsWith("ədəst") && !word.toString().endsWith("ədən"))
                 segment.remove();
         });
@@ -1396,7 +1416,13 @@
         word.replace("r", "rˠ", "_#");
 
         word.replace("i", "iː", "_V");
-        word.replace("j", "iː", "_V");
+
+        word.forEach(segment => {
+            if (segment.value == "j" && segment.relIdx(-1).type == "consonant" && !segment.stressed) {
+                segment.value = "iː";
+                segment.type = "vowel";
+            }
+        });
 
         word.forEach(segment => {
             if (segment.value == "e" && !segment.stressed)
@@ -1428,8 +1454,9 @@
             }
         });
 
-        //Loss of infinitive ending
-        if (word.partOfSpeech == "verb" && word.at(-2)?.value == "ə" && word.at(-1).value == "n") {
+        //Loss of -en suffix
+        if ((word.partOfSpeech == "inf" || word.partOfSpeech == "conjVerb")
+            && word.at(-2)?.value == "ə" && word.at(-1).value == "n") {
             word.at(-2).remove();
             word.at(-1).remove();
             if (word.at(-1).match("m", "n", "l", "r") && word.at(-2)?.type != "vowel"
@@ -1443,28 +1470,38 @@
             }
 
             word.droppedE = true;
-        } else if (word.partOfSpeech == "verb" && word.at(-1).value == "n" && word.at(-2).value.length > 1) {
+        } else if ((word.partOfSpeech == "inf" || word.partOfSpeech == "conjVerb")
+            && word.at(-1).value == "n" && word.at(-2).value.length > 1) {
             word.at(-1).remove();
             word.droppedE = true;
         }
 
+        if (word.partOfSpeech == "conjVerb" && word.at(-1).value == "ð" && word.at(-2).type == "vowel" && !word.at(-2).stressed) {
+            word.at(-1).value = "z";
+            word.sSuffix = true;
+        }
+        if (word.partOfSpeech == "conjVerb" && word.at(-1).value == "θ" && word.at(-2).type == "consonant") {
+            word.at(-1).value = "s";
+            word.sSuffix = true;
+        }
+
         //Loss of vowel in -es and -ed suffixes
         word.forEach(segment => {
-            if (segment.value == "ə" && segment.relIdx(1).value == "z" && !segment.relIdx(-1).match("s", "z", "ʃ", "t͡ʃ", "d͡ʒ")
-                && segment == word.at(-2) && word.sSuffix)
+            if (word.sSuffix && segment.value == "ə" && segment == word.at(-2) && segment.relIdx(1).value == "z"
+                && !segment.relIdx(-1).match("s", "z", "ʃ", "t͡ʃ", "d͡ʒ"))
                 segment.remove();
         });
-        if (word.at(-1).value == "d" && word.at(-2).type == "vowel" && !word.at(-2).stressed) {
+        if ((word.partOfSpeech == "conjVerb" || word.partOfSpeech == "pastPtcp") && word.at(-1).value == "d" && word.at(-2).type == "vowel" && !word.at(-2).stressed) {
             word.pastTense = true;
             if (word.at(-2)?.value == "ə" && !word.at(-3).match("t", "d"))
                 word.at(-2).remove();
         }
-        if (word.toString().endsWith("dəst") && word.at(-5).type == "vowel" && !word.at(-5).stressed) {
+        if (word.partOfSpeech == "conjVerb" && word.toString().endsWith("dəst") && word.at(-5).type == "vowel" && !word.at(-5).stressed) {
             word.conjPastTense = true;
             if (word.at(-5)?.value == "ə" && !word.at(-6).match("t", "d"))
                 word.at(-5).remove();
         }
-        if (word.toString().endsWith("dən") && word.at(-4).type == "vowel" && !word.at(-4).stressed) {
+        if (word.partOfSpeech == "conjVerb" && word.toString().endsWith("dən") && word.at(-4).type == "vowel" && !word.at(-4).stressed) {
             word.conjPastTense = true;
             if (word.at(-4)?.value == "ə" && !word.at(-5).match("t", "d"))
                 word.at(-4).remove();
