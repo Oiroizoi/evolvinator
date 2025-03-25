@@ -1506,7 +1506,10 @@
 
         word.replace("ð", "d", "_ə,ɫ");
 
-        word.replace("i", "iː", "_V");
+        word.forEach(segment => {
+            if (segment.value == "i" && segment.relIdx(1).type == "vowel" && !segment.relIdx(1).inSuffix)
+                segment.value = "iː";
+        });
 
         word.forEach(segment => {
             if (segment.value == "e" && !segment.stressed)
@@ -1572,12 +1575,16 @@
         }
 
         word.forEach(segment => {
-            if (segment.value == "ə" && segment.relIdx(1).value == "n" && segment.relIdx(-1).type == "vowel" && segment.relIdx(2).type != "consonant")
+            if (
+                segment.value == "ə" && segment.relIdx(1).value == "n" && segment.relIdx(-1).type == "vowel" && segment.relIdx(-1).value.length > 1
+                && segment.relIdx(2).type != "consonant"
+            )
                 segment.remove();
         });
         if (word.at(-4)?.type == "vowel" && word.at(-3)?.value == "r" && word.at(-2)?.value == "ə" && word.at(-1).value == "n")
             word.at(-2).remove();
         word.replace("r", "rˠ", "_#");
+        word.replace("i", "iː", "_V");
 
         //Loss of vowel in -es and -ed suffixes
         word.forEach(segment => {
