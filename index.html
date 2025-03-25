@@ -710,7 +710,7 @@
                         str += "qu";
                         i++;
                     }
-                    else if (segment.relIdx(-1).match("a", "e", "i", "ɔ", "u", "ə") && !segment.stressed &&
+                    else if (segment.relIdx(-1).match("a", "e", "i", "ɔ", "u", "ə") && (!segment.stressed || segment.relIdx(1).value == "n") &&
                         (segment.relIdx(1).type != "consonant" || segment.relIdx(1).match("s", "n", "l", "h") || addE))
                         str += "ck";
                     else if (
@@ -1085,7 +1085,7 @@
             if (
                 segment.type == "vowel" && !segment.stressed && !segment.value.endsWith("ː")
                 && ((segment.i > word.stressedVowel.i && !segment.relIdx(1).match("j", "w", "ɣ", "x", "ç"))
-                    || (segment.value == "e" && (segment.relIdx(1).stressed || segment.relIdx(1).value == "rˠ")))
+                    || (segment.value == "e" && (segment.relIdx(1).stressed || segment.relIdx(1).value == "rˠ" || segment.relIdx(1).type == "vowel")))
             )
                 segment.value = "ə";
         });
@@ -1100,10 +1100,7 @@
         });
         word.replaceSeq("ə,ə", "ə");
         word.forEach(segment => {
-            if (
-                segment.value == "ə" && segment.relIdx(-1).value == "j"
-                && segment.i < word.stressedVowel.i
-            ) {
+            if (segment.value == "ə" && segment.relIdx(-1).value == "j" && segment.i < word.stressedVowel.i) {
                 segment.value = "i";
                 segment.relIdx(-1).remove();
                 if (segment.relIdx(-1).type == "vowel")
@@ -1489,7 +1486,7 @@
 
 
         //Loss of y- prefix
-        if (word[0].value == "i" && !word[0].stressed && word[1]?.stressed)
+        if (word[0].value == "i" && !word[0].stressed && (word[1]?.stressed || word[1]?.type == "vowel"))
             word[0].remove();
 
         if (word.partOfSpeech == "conjVerb" && word.toString().endsWith("ənd")) {
