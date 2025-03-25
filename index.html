@@ -1100,7 +1100,7 @@
         });
         word.replaceSeq("ə,ə", "ə");
         word.forEach(segment => {
-            if (segment.value == "ə" && segment.relIdx(-1).value == "j" && segment.i < word.stressedVowel.i) {
+            if (segment.value == "ə" && segment.relIdx(-1).value == "j" && (segment.i < word.stressedVowel.i || segment.relIdx(-2).value != "rˠ")) {
                 segment.value = "i";
                 segment.relIdx(-1).remove();
                 if (segment.relIdx(-1).type == "vowel")
@@ -1485,8 +1485,11 @@
         document.getElementById("outcomes").innerHTML += `<br> Middle English (c. 1400): <i>${getMESpelling()}</i> [${word}]`;
 
 
-        //Loss of y- prefix
-        if (word[0].value == "i" && !word[0].stressed && (word[1]?.stressed || word[1]?.type == "vowel"))
+        //Drop y- prefix from verbs (was also lost from many nouns and adjectives, but remained in some)
+        if (
+            word[0].value == "i" && !word[0].stressed && (word[1]?.stressed || word[1]?.type == "vowel")
+            && ["inf", "conjVerb", "pastPtcp"].includes(word.partOfSpeech)
+        )
             word[0].remove();
 
         if (word.partOfSpeech == "conjVerb" && word.toString().endsWith("ənd")) {
