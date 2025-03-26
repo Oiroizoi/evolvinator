@@ -485,7 +485,7 @@
 
         let finalE = false;
         if (
-            word.at(-2)?.match("aː", "iː") && !word.at(-2).droppedH && word.at(-1).type == "consonant" && !word.sSuffix && !word.pastTense
+            word.at(-2)?.match("aː", "iː") && !word.at(-2).droppedH && word.at(-1).type == "consonant" && !word.sSuffix && !word.pastTense && !word.at(-1).droppedB
             && !(word.at(-2).value == "iː" && !word.at(-2).stressed && word.at(-1).value == "rˠ")
         )
             finalE = true;
