@@ -1002,7 +1002,7 @@
         word.forEach(segment => {
             if (
                 segment.type == "vowel" && !segment.stressed && !segment.value.includes("ː") && segment.relIdx(-1).match("l", "r")
-                && segment.relIdx(-2).type == "vowel" && !segment.relIdx(-2).value.includes("ː") && !segment.inSuffix
+                && segment.relIdx(-2).type == "vowel" && !segment.relIdx(-2).value.includes("ː") && !segment.inSuffix && segment.relIdx(1).type == "consonant"
                 && !(segment.relIdx(1).match("m", "n", "ŋ") && segment.relIdx(2).match("p", "b", "t", "d", "t͡ʃ", "d͡ʒ", "k", "g"))
                 && !(segment.relIdx(-1).value == "l" && segment.relIdx(1).match("l", "ɫ"))
                 && !(segment.relIdx(-1).value == "r" && segment.relIdx(1).match("r", "rˠ"))
