@@ -1100,7 +1100,10 @@
         });
         word.replaceSeq("ə,ə", "ə");
         word.forEach(segment => {
-            if (segment.value == "ə" && segment.relIdx(-1).value == "j" && (segment.i < word.stressedVowel.i || segment.relIdx(-2).value != "rˠ")) {
+            if (
+                segment.value == "ə" && segment.relIdx(-1).value == "j" && (segment.i < word.stressedVowel.i || segment.relIdx(-2).value != "rˠ")
+                && segment != word.vowels.at(-1)
+            ) {
                 segment.value = "i";
                 segment.relIdx(-1).remove();
                 if (segment.relIdx(-1).type == "vowel")
