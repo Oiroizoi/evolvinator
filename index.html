@@ -1587,7 +1587,7 @@
         if (word.at(-4)?.type == "vowel" && word.at(-3)?.value == "r" && word.at(-2)?.value == "ə" && word.at(-1).value == "n")
             word.at(-2).remove();
         word.replace("r", "rˠ", "_#");
-        word.replace("i", "iː", "_V");
+        word.replace("i", "iː", "_V/#");
 
         //Loss of vowel in -es and -ed suffixes
         word.forEach(segment => {
