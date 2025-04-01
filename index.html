@@ -936,7 +936,7 @@
             }
         });
         word.forEach(segment => {
-            if (segment.value == "ɑ" && segment.stressed && segment.relIdx(1).match("m", "n"))
+            if (segment.value == "ɑ" && segment.stressed && segment.relIdx(1).match("m", "n", "ŋ"))
                 segment.value = "ɒ";
         });
         word.forEach(segment => {
@@ -960,6 +960,12 @@
         word.forEach(segment => segment.OEValue = segment.value);
         document.getElementById("outcomes").innerHTML += "<br><b>Expected outcomes:</b>";
         document.getElementById("outcomes").innerHTML += `<br> Old English (c. 900): <i>${getOESpelling()}</i> [${word}]`;
+
+        word.replace("θ", "s", "_s");
+        word.forEach(segment => {
+            if (segment.value == segment.relIdx(1).value && (segment.relIdx(-1).type != "vowel" || segment.relIdx(2).type != "vowel"))
+                segment.remove();
+        });
 
         word.replace("ɣ", "x", "_p/t/k/t͡ʃ/f/θ/s/ʃ/#");
 
@@ -1111,13 +1117,9 @@
             }
         });
 
-        word.forEach(segment => {
-            if (
-                segment.value == "d" && segment.relIdx(1).value == "ə" && segment.relIdx(2).match("r", "rˠ")
-                && !segment.relIdx(-1).match("d", "n", "ɫ")
-            )
-                segment.value = "ð";
-        });
+        word.replace("l̥", "l");
+        word.replace("n̥", "n");
+        word.replace("r̥", "r");
 
         word.replace("ɣ", "j", "ɛː/e/eː/i/iː_");
         word.replace("ɣ", "w");
@@ -1155,6 +1157,15 @@
             }
         });
 
+        word.forEach(segment => {
+            if (segment.match("i", "iː") && segment.relIdx(1).value == "j" && !segment.relIdx(2).stressed) {
+                segment.value = "iː";
+                segment.relIdx(1).remove();
+            }
+        });
+
+        word.replace("θ", "t", "f/s/ʃ/ç/x_");
+
         //Drop schwa between vowel and consonant, except in inflectional suffixes
         word.forEach(segment => {
             if (
@@ -1163,26 +1174,6 @@
             )
                 segment.remove();
         });
-
-        word.forEach(segment => {
-            if (segment.match("i", "iː") && segment.relIdx(1).value == "j" && !segment.relIdx(2).stressed) {
-                segment.value = "iː";
-                segment.relIdx(1).remove();
-            }
-        });
-
-        word.replace("θ", "s", "_s");
-        word.replace("t", "s", "_s");
-        word.forEach(segment => {
-            if (segment.value == "v" && segment.relIdx(1).type == "consonant" && !segment.relIdx(1).match("l", "r", "n", "j")) {
-                segment.value = segment.relIdx(1).value[0];
-            }
-        });
-        word.forEach(segment => {
-            if (segment.value == segment.relIdx(1).value && (segment.relIdx(-1).type != "vowel" || segment.relIdx(2).type != "vowel"))
-                segment.remove();
-        });
-        word.replaceSeq("w,w", "w");
 
         word.forEach(segment => {
             if (segment.value.match("r", "rˠ") && segment.relIdx(-1).value == "w" && !segment.stressed)
@@ -1280,11 +1271,21 @@
         word.replace("ou̯", "uː");
         word.replace("eu̯", "iu̯");
 
-        word.replace("θ", "t", "f/s/ʃ/ç/x_");
+        //Circa 1200
 
-        word.replace("l̥", "l");
-        word.replace("n̥", "n");
-        word.replace("r̥", "r");
+        word.replace("t", "s", "_s");
+
+        //Loss of [v] before most consonants
+        word.forEach(segment => {
+            if (segment.value == "v" && segment.relIdx(1).type == "consonant" && !segment.relIdx(1).match("l", "r", "n", "j")) {
+                segment.value = segment.relIdx(1).value[0];
+            }
+        });
+        word.forEach(segment => {
+            if (segment.value == segment.relIdx(1).value && (segment.relIdx(-1).type != "vowel" || segment.relIdx(2).type != "vowel"))
+                segment.remove();
+        });
+        word.replaceSeq("w,w", "w");
 
         //Trisyllabic laxing and open syllable lengthening
         word.vowels.forEach((vowel, i) => {
@@ -1331,6 +1332,14 @@
                         break;
                 }
             }
+        });
+
+        word.forEach(segment => {
+            if (
+                segment.value == "d" && segment.relIdx(1).value == "ə" && segment.relIdx(2).match("r", "rˠ")
+                && !segment.relIdx(-1).match("d", "n", "ɫ")
+            )
+                segment.value = "ð";
         });
 
         word.forEach(segment => {
@@ -1666,6 +1675,9 @@
 
         let EModEWord = word.duplicate();
 
+        word.replace("rˠ", "ɹ̠");
+
+        //[ə] > [ɪ] frequently before coronal obstruents (unsure of when this occurred) 
         word.forEach(segment => {
             if (segment.value == "ə" && segment.relIdx(1).match("t", "d", "θ", "ð", "s", "z") && segment.relIdx(2).type != "vowel" && !segment.relIdx(1).stressed)
                 segment.value = "ɪ";
@@ -1697,20 +1709,16 @@
         word.replace("i", "ɪ");
         word.replace("u", "ʊ");
 
-        word.replace("uː", "iu̯", "j_");
-
         //Great Vowel Shift
         word.replace("iː", "əi̯");
         word.replace("uː", "əu̯");
+        word.replace("əu̯", "uː", "j_");
         word.replace("əu̯", "uː", "_m/p/b/f/v");
         word.replace("eː", "iː");
         word.replace("oː", "uː");
         word.replace("ɛː", "eː");
         word.replace("ɔː", "oː");
         word.replace("aː", "ɛː");
-        word.replace("aː", "ɛː");
-
-        word.replaceSeq("w,r", "r");
 
         word.replace("ɑu̯", "ɔː");
         word.replace("ɛi̯", "ei̯");
@@ -1720,10 +1728,21 @@
         word.replace("ɔi̯", "oi̯");
         word.replace("ui̯", "oi̯");
 
-        word.replace("e", "ɛ");
+        word.replace("ɔ", "ɒ");
+
+        word.replace("eː", "iː");
+        word.replace("ɛː", "eː");
+
+        //Circa 1600
 
         word.replace("r", "ɹ̠");
-        word.replace("rˠ", "ɹ̠");
+
+        word.replace("e", "ɛ");
+
+        word.replace("ei̯", "eː");
+        word.replace("ou̯", "oː");
+
+        word.replaceSeq("w,ɹ̠", "ɹ̠");
 
         word.forEach(segment => {
             if (segment.match("p", "t", "k") && (segment.stressed || segment == word[0]) && segment.relIdx(-1).value != "s")
@@ -1753,14 +1772,6 @@
             if (segment.value == "ŋ" && segment.relIdx(1).value == "g" && segment.relIdx(2).type != "vowel" && !segment.relIdx(2).match("l", "ɹ̠", "w"))
                 segment.relIdx(1).remove();
         });
-
-        word.replace("ɔ", "ɒ");
-
-        word.replace("eː", "iː");
-        word.replace("ɛː", "eː");
-
-        word.replace("ei̯", "eː");
-        word.replace("ou̯", "oː");
 
         word.forEach(segment => {
             if (segment.value == "a" && segment.relIdx(-1).match("w", "ʍ") && !segment.relIdx(1).match("k", "g", "ŋ"))
