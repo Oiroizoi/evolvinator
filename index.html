@@ -118,6 +118,7 @@
                     newSegment.OEValue = segment.OEValue;
                     newSegment.MEValue = segment.MEValue;
                     newSegment.type = segment.type;
+                    newSegment.lengthened = segment.lengthened;
                     newSegment.droppedW = segment.droppedW;
                     newSegment.droppedB = segment.droppedB;
                     newSegment.droppedN = segment.droppedN;
@@ -1026,18 +1027,14 @@
 
         //Homorganic lengthening
         word.forEach(segment => {
-            if (segment.stressed) {
-                if (segment.match("ɑ", "æ", "æɑ̯", "e", "eo̯", "i", "y") && segment.relIdx(1).value == "ɫ" && segment.relIdx(2).value == "d")
-                    segment.value = segment.value.slice(0, 1) + "ː" + segment.value.slice(1);
+            let lengtheningClusters = ["ɫd", "mb", "nd", "ŋg", "rˠd", "rˠɫ", "rˠl", "rˠn", "rˠz", "rˠð"];
 
-                if (segment.match("ɒ", "i", "y") && segment.relIdx(1).value == "m" && segment.relIdx(2).value == "b")
-                    segment.value = segment.value.slice(0, 1) + "ː" + segment.value.slice(1);
-
-                if (segment.match("i", "y", "u") && segment.relIdx(1).value == "n" && segment.relIdx(2).value == "d")
-                    segment.value = segment.value.slice(0, 1) + "ː" + segment.value.slice(1);
-
-                if (segment.value == "ɑ" && segment.relIdx(1).value == "ŋ" && segment.relIdx(2).value == "g")
-                    segment.value = "ɑː";
+            if (
+                segment.type == "vowel" && segment.stressed && !segment.value.includes("ː")
+                && lengtheningClusters.includes(segment.relIdx(1).value + segment.relIdx(2).value)
+            ) {
+                segment.value = segment.value.slice(0, 1) + "ː" + segment.value.slice(1);
+                segment.lengthened = true;
             }
         });
         word.replace("ɒː", "ɑː");
@@ -1083,8 +1080,6 @@
 
         word.replace("ç", "x", "a/x_");
         word.replace("x", "ç", "ɛː/e/eː/i/iː/ç_");
-
-        word.replace("eː", "ɛː", "_r/rˠ");
 
         //Vowel reduction
         word.forEach(segment => {
@@ -1309,8 +1304,9 @@
             }
         });
 
-        let nonShorteningClusters = ["st", "ɫd", "mb", "nd"];
+        //Vowel shortening before most clusters
         word.forEach(segment => {
+            let nonShorteningClusters = ["st", "ɫd", "mb", "nd"];
             if (
                 segment.relIdx(1).type == "consonant" && segment.relIdx(2).type == "consonant"
                 && !nonShorteningClusters.includes(segment.relIdx(1).value + segment.relIdx(2).value)
@@ -1332,6 +1328,28 @@
                         break;
                 }
             }
+
+            //Homorganic lengthening reversed in some cases
+            if (segment.lengthened) {
+                if (segment.relIdx(1).value == "ɫ" && segment.relIdx(2).value == "d") {
+                    if (segment.value == "oː")
+                        segment.value = "o";
+
+                    if (segment.value == "uː")
+                        segment.value = "u";
+                }
+            }
+
+            if (segment.relIdx(1).value == "m" && segment.relIdx(2).value == "b" && segment.value == "uː")
+                segment.value = "u";
+
+            if (segment.relIdx(1).value == "n" && segment.relIdx(2).value == "d") {
+                if (segment.match("ɛː", "eː"))
+                    segment.value = "e";
+
+                if (segment.match("ɔː", "oː"))
+                    segment.value = "o";
+            }
         });
 
         word.forEach(segment => {
@@ -1341,6 +1359,8 @@
             )
                 segment.value = "ð";
         });
+
+        word.replace("eː", "ɛː", "_r/rˠ");
 
         word.forEach(segment => {
             if (segment.value == "w" && segment.relIdx(-1).value == "s" && segment.relIdx(1).match("o", "ɔː", "oː", "ɔu̯", "u", "uː")) {
@@ -1509,6 +1529,8 @@
             word.at(-2).value = "ŋ";
             word.at(-1).value = "g";
         }
+
+        word.replace("ɔ", "a", "_n,d");
 
         word.replace("u", "ɔ", "_ɫ,t/d/n");
 
