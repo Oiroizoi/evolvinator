@@ -460,6 +460,8 @@
                     break;
                 case "v":
                     str += "u";
+                    if (segment.relIdx(1).type == "consonant")
+                        str += "e";
                     break;
                 case "w":
                     str += "w";
@@ -1159,8 +1161,6 @@
             }
         });
 
-        word.replace("θ", "t", "f/s/ʃ/ç/x_");
-
         //Drop schwa between vowel and consonant, except in inflectional suffixes
         word.forEach(segment => {
             if (
@@ -1268,19 +1268,24 @@
 
         //Circa 1200
 
-        word.replace("t", "s", "_s");
-
-        //Loss of [v] before most consonants
         word.forEach(segment => {
-            if (segment.value == "v" && segment.relIdx(1).type == "consonant" && !segment.relIdx(1).match("l", "r", "n", "j")) {
-                segment.value = segment.relIdx(1).value[0];
-            }
+            if (segment.value == "x" && segment.relIdx(-1).type == "consonant" && segment.relIdx(1).type == "consonant")
+                segment.remove();
         });
+
+        word.replace("θ", "t", "f/s/ʃ/ç/x_");
+
+        word.replace("t", "s", "_s");
         word.forEach(segment => {
             if (segment.value == segment.relIdx(1).value && (segment.relIdx(-1).type != "vowel" || segment.relIdx(2).type != "vowel"))
                 segment.remove();
         });
-        word.replaceSeq("w,w", "w");
+
+        //Loss of [v] before most consonants
+        word.forEach(segment => {
+            if (segment.value == "v" && segment.relIdx(1).type == "consonant" && !segment.relIdx(1).match("l", "r", "n", "j"))
+                segment.remove();
+        });
 
         //Trisyllabic laxing and open syllable lengthening
         word.vowels.forEach((vowel, i) => {
