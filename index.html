@@ -1196,6 +1196,7 @@
 
         word.forEach(segment => {
             if (segment.value == "oː" && segment.relIdx(1).value == "w" && !(segment.stressed || !segment.relIdx(1).stressed))
+            if (segment.value == "oː" && segment.relIdx(1).value == "w" && (segment.stressed || !segment.relIdx(1).stressed))
                 segment.value = "o";
         });
         word.replace("eː", "e", "_j,C/#");
