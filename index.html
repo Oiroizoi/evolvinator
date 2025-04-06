@@ -21,6 +21,40 @@
         input[type=button] {
             margin-left: 4px;
         }
+
+        #outcomes {
+            margin-top: 20px;
+            text-align: center;
+            border-spacing: 0;
+        }
+
+        th {
+            position: relative;
+            padding: 5px 0;
+            background-color: lightgray;
+            border-color: black;
+            cursor: pointer;
+        }
+
+        #headerArrow {
+            position: absolute;
+            top: 0;
+            right: 0;
+            height: 100%;
+            aspect-ratio: 1;
+            padding: 5px 0;
+        }
+
+        td {
+            padding: 15px 12px 0 12px;
+        }
+
+        .hidden td {
+            visibility: hidden;
+            line-height: 0;
+            padding-top: 0;
+            padding-bottom: 0;
+        }
     </style>
 </head>
 
@@ -48,10 +82,33 @@
         <input type="submit">
     </form>
 
-    <div id="outcomes"></div>
+    <table id="outcomes">
+        <tr id="header">
+            <th colspan="4">
+                Expected outcomes:
+                <div id="headerArrow">▼</div>
+            </th>
+        </tr>
+        <tr id="OE"></tr>
+        <tr id="EME" class="hidden"></tr>
+        <tr id="ME"></tr>
+        <tr id="EModE" class="hidden"></tr>
+        <tr id="UK" class="hidden"></tr>
+        <tr id="US"></tr>
+    </table>
 </body>
 
 <script>
+    document.getElementById("header").onclick = () => {
+        document.getElementById("EME").classList.toggle("hidden");
+        document.getElementById("EModE").classList.toggle("hidden");
+        document.getElementById("UK").classList.toggle("hidden");
+        if (document.getElementById("headerArrow").innerHTML == "▲")
+            document.getElementById("headerArrow").innerHTML = "▼";
+        else
+            document.getElementById("headerArrow").innerHTML = "▲";
+    };
+
     class Word extends Array {
         constructor() {
             super();
@@ -256,13 +313,145 @@
         return str;
     }
 
+    function getEMESpelling() {
+        let str = "";
+        for (let i = 0; i < word.length; i++) {
+            let segment = word[i];
+            switch (segment.value) {
+                case "ä":
+                    str += "a";
+                    break;
+                case "e":
+                case "ɛː":
+                case "eː":
+                case "ə":
+                    str += "e";
+                    break;
+                    break;
+                case "i":
+                case "iː":
+                    if (segment.relIdx(1).type == "consonant")
+                        str += "i";
+                    else
+                        str += "iȝ";
+                    break;
+                case "o":
+                case "ɔː":
+                case "oː":
+                    str += "o";
+                    break;
+                case "u":
+                case "uː":
+                    str += "u";
+                    break;
+                case "b":
+                    str += "b";
+                    break;
+                case "t͡ʃ":
+                    str += "ch";
+                    break;
+                case "d":
+                    if (segment.relIdx(1).value == "d͡ʒ")
+                        str += "g";
+                    else
+                        str += "d";
+                    break;
+                case "f":
+                    str += "f";
+                    break;
+                case "g":
+                case "d͡ʒ":
+                    str += "g";
+                    break;
+                case "ɣ":
+                case "ʝ":
+                case "j":
+                case "x":
+                case "ç":
+                    str += "ȝ";
+                    break;
+                case "h":
+                    str += "h";
+                    break;
+                case "k":
+                    if (segment.relIdx(1).value == "s") {
+                        str += "x";
+                        i++;
+                    }
+                    else if (segment.relIdx(1).value == "w") {
+                        str += "qu";
+                        i++;
+                    }
+                    else if (
+                        segment.relIdx(1).match("e", "ə", "ɛː", "eː", "i", "iː", "ɛi̯", "ɛu̯", "iu̯")
+                        || segment.relIdx(1).value == "k" || segment == word.at(-1)
+                    )
+                        str += "k";
+                    else
+                        str += "c";
+                    break;
+                case "l":
+                case "ɫ":
+                    str += "l";
+                    break;
+                case "m":
+                    str += "m";
+                    break;
+                case "n":
+                case "ŋ":
+                    str += "n";
+                    break;
+                case "p":
+                    str += "p";
+                    break;
+                case "r":
+                case "rˠ":
+                    str += "r";
+                    break;
+                case "s":
+                case "z":
+                    if (segment == word.at(-1))
+                        str += "s";
+                    else
+                        str += "ſ";
+                    break;
+                case "ʃ":
+                    str += "ſch";
+                    break;
+                case "t":
+                    if (segment.relIdx(1).value == "t͡ʃ")
+                        str += "c";
+                    else
+                        str += "t";
+                    break;
+                case "θ":
+                case "ð":
+                    str += "þ";
+                    break;
+                case "v":
+                    if (segment.relIdx(1).type == "consonant")
+                        str += "f";
+                    else
+                        str += "u";
+                    break;
+                case "w":
+                    str += "uu";
+                    break;
+                case "ʍ":
+                    str += "huu";
+                    break;
+            }
+        }
+        return str;
+    }
+
     function getMESpelling() {
         let str = "";
         for (let i = 0; i < word.length; i++) {
             let segment = word[i];
             switch (segment.value) {
-                case "a":
-                case "aː":
+                case "ä":
+                case "äː":
                     str += "a";
                     break;
                 case "e":
@@ -478,6 +667,333 @@
         }
         if (word.droppedE)
             str += "e";
+        return str;
+    }
+
+    function getEModESpelling(EModEWord, laterWord) {
+        let word = EModEWord;
+        let str = "";
+
+        let finalE = false;
+        if (word.droppedE && (word.vowels.at(-1).stressed || word.at(-1).type == "vowel"))
+            finalE = true;
+        if (
+            laterWord.vowels.at(-1).value.length > 1 && !word.sSuffix && !word.pastTense && !word.vowels.at(-1).droppedH
+            && word.at(-1).type != "vowel" && word.at(-1).value != "θ"
+        )
+            finalE = true;
+        if (
+            word.at(-1).match("v", "d͡ʒ")
+            || (word.at(-1).match("ð", "z") && word.at(-2).type == "vowel" && word.at(-2).value.length > 1 && word.at(-2).stressed && !word.sSuffix)
+        )
+            finalE = true;
+        if (word.at(-1).value == "ð" && word.vowels.at(-1).stressed)
+            finalE = true;
+        if (word.at(-1).value == "s" && word.at(-2).type == "vowel" && word.vowels.at(-1).value.length == 1)
+            finalE = true;
+        if (word.at(-1).match("s", "z") && word.at(-2).match("rˠ", "ɫ", "n", "m", "p") && !word.sSuffix)
+            finalE = true;
+
+        for (let i = 0; i < word.length; i++) {
+            let segment = word[i];
+
+            let addE = false;
+            if (
+                segment.relIdx(-1).match("aː", "iː") && segment.type == "consonant" && segment.relIdx(1).type == "consonant" && !segment.relIdx(-1).droppedH
+                && segment.relIdx(2).type == "vowel" && !(segment.relIdx(-1).value == "iː" && ["mb", "nd", "ɫd"].includes(segment.value + segment.relIdx(1).value))
+            )
+                addE = true;
+            if (i == word.length - 2 && segment.relIdx(-1).match("aː", "iː", "ɔː") && word.sSuffix && !segment.relIdx(-1).droppedH)
+                addE = true;
+            if (i == word.length - 2 && segment.match("aː", "iː", "ɔː", "eː", "ɛː") && word.sSuffix && !segment.droppedH)
+                addE = true;
+            if (i == word.length - 2 && word.pastTense && !(segment.type == "vowel" && segment.value.length == 1) && !(segment.value == "eː" && segment.stressed))
+                addE = true;
+            if (i == word.length - 4 && word.conjPastTense && !(segment.type == "vowel" && segment.value.length == 1) && segment.value != "eː")
+                addE = true;
+            if (segment.value == "v" && segment.relIdx(1).type == "consonant")
+                addE = true;
+            if (segment.value == "d͡ʒ" && (segment.relIdx(1).type == "consonant" || ["a", "ɑ", "ɔ", "o", "u"].includes(segment.relIdx(1).value[0])))
+                addE = true;
+            if (segment.value == "iː" && segment.relIdx(1).value == "rˠ" && !segment.stressed && segment == word.at(-2))
+                addE = true;
+            if (finalE && i == word.length - 1)
+                addE = true;
+
+            switch (segment.value) {
+                case "a":
+                case "aː":
+                    str += "a";
+                    break;
+                case "e":
+                    str += "e";
+                    break;
+                case "ə":
+                    if (
+                        segment.relIdx(1).value == "ɫ" && segment.relIdx(-1).type == "consonant"
+                        && !segment.relIdx(-1).match("m", "n", "v", "l", "r", "θ", "t͡ʃ", "ʃ", "d͡ʒ", "j", "w") && segment.i > 0
+                    ) {
+                        str += "le";
+                        i++;
+                    }
+                    else if (segment.i == 0 && segment.relIdx(1).stressed)
+                        str += "a";
+                    else if (segment.MEValue == "oː" || segment.MEValue == "ɔ" || (segment.relIdx(1).match("m", "p", "b", "k") && !segment.relIdx(1).stressed))
+                        str += "o";
+                    else
+                        str += "e";
+                    break;
+                case "ɛː":
+                    str += "ea";
+                    break;
+                case "eː":
+                    if (segment.relIdx(1).match("ɫ", "n") && segment.relIdx(2).value == "d")
+                        str += "ie";
+                    else
+                        str += "ee";
+                    break;
+                case "i":
+                case "iː":
+                    if (segment.droppedH)
+                        str += "igh";
+                    else if (!segment.stressed && segment.MEValue == "e")
+                        str += "e";
+                    else if ((segment == word.at(-1) && !finalE) || segment.relIdx(1).value == "i")
+                        str += "y";
+                    else
+                        str += "i";
+                    break;
+                case "ɔ":
+                    str += "o";
+                    break;
+                case "ɔː":
+                    if (
+                        segment.relIdx(2).type == "vowel" || segment.relIdx(1).type != "consonant"
+                        || addE || (word.droppedE && segment == word.at(-2))
+                        || (segment == word.at(-3) && (word.sSuffix || word.pastTense))
+                        || (segment.relIdx(1).value == "ɫ" && segment.relIdx(2).value == "d")
+                        || (segment.relIdx(1).value == "m" && segment.relIdx(1).droppedB)
+                        || (segment.relIdx(1).value == "rˠ" && segment.relIdx(2).value == "n")
+                    )
+                        str += "o";
+                    else
+                        str += "oa";
+                    break;
+                case "oː":
+                    if ((segment.relIdx(1).value == "m" && segment.relIdx(1).droppedB))
+                        str += "o";
+                    else
+                        str += "oo";
+                    break;
+                case "u":
+                    if (segment.relIdx(-1).match("w", "v") || segment.relIdx(1).value == "v")
+                        str += "o";
+                    else if (segment.i == 0)
+                        str += "v";
+                    else
+                        str += "u";
+                    break;
+                case "uː":
+                case "ɔu̯":
+                    if (segment.droppedH)
+                        str += "ough";
+                    else if (segment.value == "uː" && segment.relIdx(1).match("m", "p", "b", "f", "v"))
+                        str += "oo";
+                    else if (
+                        segment.relIdx(1).type == "consonant" && !addE
+                        && !(segment.relIdx(1).match("n", "l", "ɫ") && ((segment.relIdx(2).type != "consonant") || segment.relIdx(2).value == "z"))
+                        && !(word.sSuffix && segment.relIdx(1).value == "z" && segment == word.at(-2))
+                    )
+                        str += "ou";
+                    else
+                        str += "ow";
+                    break;
+                case "ɑu̯":
+                    if (segment.droppedH && segment.MEValue == "ɔu̯")
+                        str += "ough";
+                    else if (segment.droppedH)
+                        str += "augh";
+                    else if (
+                        segment.relIdx(1).type == "consonant" && !addE
+                        && !(segment.relIdx(1).match("n", "l", "ɫ") && ((segment.relIdx(2).type != "consonant") || segment.relIdx(2).value == "z"))
+                        && !(word.sSuffix && segment.relIdx(1).value == "z" && segment == word.at(-2))
+                    )
+                        str += "au";
+                    else
+                        str += "aw";
+                    break;
+                case "æi̯":
+                    if (segment.droppedH)
+                        str += "eigh";
+                    else if (
+                        segment.relIdx(1).type == "consonant" && !addE
+                        && !(word.sSuffix && segment.relIdx(1).value == "z" && segment == word.at(-2))
+                    )
+                        str += "ai";
+                    else
+                        str += "ay";
+                    break;
+                case "ɛu̯":
+                case "iu̯":
+                    str += "ew";
+                    break;
+                case "ɔi̯":
+                case "ui̯":
+                    str += "oy";
+                    break;
+                case "b":
+                    if (segment.relIdx(-1).match("a", "e", "i", "ɔ", "u") && segment.relIdx(-1).stressed && (segment.relIdx(1).type == "vowel" || addE))
+                        str += "bb";
+                    else
+                        str += "b";
+                    break;
+                case "t͡ʃ":
+                    if (segment.relIdx(-1).match("a", "e", "i", "ɔ", "u") && segment.relIdx(-1).stressed)
+                        str += "tch";
+                    else
+                        str += "ch";
+                    break;
+                case "d":
+                    if (segment.relIdx(-1).match("a", "e", "i", "ɔ", "u") && segment.relIdx(-1).stressed && (segment.relIdx(1).type == "vowel" || addE))
+                        str += "dd";
+                    else
+                        str += "d";
+                    break;
+                case "f":
+                    if (segment.relIdx(-1).match("a", "e", "i", "ɔ", "u") && segment.relIdx(-1).stressed &&
+                        (segment.relIdx(1).type != "consonant" || (segment.relIdx(1).value == "z") || addE))
+                        str += "ff";
+                    else
+                        str += "f";
+                    break;
+                case "g":
+                    if (segment.relIdx(-1).match("a", "e", "i", "ɔ", "u") && segment.relIdx(-1).stressed && (segment.relIdx(1).type == "vowel" || addE))
+                        str += "gg";
+                    else
+                        str += "g";
+                    break;
+                case "h":
+                    if (segment.MEValue == "ʍ")
+                        str += "wh";
+                    else
+                        str += "h";
+                    break;
+                case "d͡ʒ":
+                    if (segment.relIdx(-1).match("a", "e", "i", "ɔ", "u"))
+                        str += "dg";
+                    else
+                        str += "g";
+                    break;
+                case "k":
+                    if (segment.relIdx(1).value == "s" && !(segment == word.at(-2) && word.sSuffix))
+                        str += "x";
+                    else if (segment.relIdx(1).value == "w") {
+                        str += "qu";
+                        i++;
+                    }
+                    else if (segment.relIdx(-1).match("a", "e", "i", "ɔ", "u", "ə") && (!segment.stressed || segment.relIdx(1).value == "n") &&
+                        (segment.relIdx(1).type != "consonant" || segment.relIdx(1).match("s", "n", "l", "h") || addE))
+                        str += "ck";
+                    else if (
+                        segment.relIdx(1).match("e", "ɛː", "eː", "i", "iː", "ɛu̯", "iu̯", "j", "n", "h")
+                        || (segment.relIdx(1).value == "ə" && !segment.relIdx(2).match("m", "p", "b", "k")) || addE
+                        || segment == word.at(-1) || (segment == word.at(-2) && word.sSuffix)
+                    )
+                        str += "k";
+                    else
+                        str += "c";
+                    break;
+                case "l":
+                case "ɫ":
+                    if (segment.relIdx(-1).match("a", "e", "i", "ɔ", "u") && segment.relIdx(-1).stressed &&
+                        (segment.relIdx(1).type != "consonant" || (segment.relIdx(1).value == "z") || addE))
+                        str += "ll";
+                    else
+                        str += "l";
+                    break;
+                case "m":
+                    if (segment.droppedB)
+                        str += "mb";
+                    else if (segment.droppedN)
+                        str += "mn";
+                    else if (segment.relIdx(-1).match("a", "e", "i", "ɔ", "u") && segment.relIdx(-1).stressed && (segment.relIdx(1).type == "vowel" || addE))
+                        str += "mm";
+                    else
+                        str += "m";
+                    break;
+                case "n":
+                case "ŋ":
+                    if (segment.relIdx(-1).match("a", "e", "i", "ɔ", "u") && segment.relIdx(-1).stressed && (segment.relIdx(1).type == "vowel" || addE))
+                        str += "nn";
+                    else
+                        str += "n";
+                    break;
+                case "p":
+                    if (segment.relIdx(-1).match("a", "e", "i", "ɔ", "u") && segment.relIdx(-1).stressed && (segment.relIdx(1).type == "vowel" || addE))
+                        str += "pp";
+                    else
+                        str += "p";
+                    break;
+                case "r":
+                case "rˠ":
+                    if (segment.relIdx(-1).match("a", "e", "i", "ɔ", "u") && segment.relIdx(-1).stressed && (segment.relIdx(1).type == "vowel" || addE))
+                        str += "rr";
+                    else
+                        str += "r";
+                    break;
+                case "s":
+                    if (str.at(-1) == "x") {}
+                    else if (
+                        segment.relIdx(-1).match("a", "e", "i", "ɔ", "u", "ə") && !segment.stressed
+                        && (segment.relIdx(1).type != "consonant" || (segment.relIdx(1).value == "z") || addE)
+                    )
+                        str += "ſſ";
+                    else if (segment.relIdx(-1).value == "iː" && (segment.relIdx(1).type == "vowel" || addE))
+                        str += "c";
+                    else if (segment == word.at(-1) && !addE)
+                        str += "s";
+                    else
+                        str += "ſ";
+                    break;
+                case "ʃ":
+                    str += "ſh";
+                    break;
+                case "t":
+                    if (segment.relIdx(1).value == "θ")
+                        break;
+                    else if ((segment == word.at(-1) && word.pastTense) || (segment == word.at(-3) && word.conjPastTense))
+                        str += "d";
+                    else if (segment.relIdx(-1).match("a", "e", "i", "ɔ", "u") && segment.relIdx(-1).stressed && (segment.relIdx(1).type == "vowel" || addE))
+                        str += "tt";
+                    else
+                        str += "t";
+                    break;
+                case "θ":
+                case "ð":
+                    str += "th";
+                    break;
+                case "v":
+                    if (segment.i == 0)
+                        str += "v";
+                    else
+                        str += "u";
+                    break;
+                case "w":
+                    str += "w";
+                    break;
+                case "ʍ":
+                    str += "wh";
+                    break;
+                case "j":
+                    str += "y";
+                    break;
+                case "z":
+                    str += "s";
+                    break;
+            }
+            if (addE)
+                str += "e";
+        }
         return str;
     }
 
@@ -962,8 +1478,8 @@
 
     function getOutcomes() {
         word.forEach(segment => segment.OEValue = segment.value);
-        document.getElementById("outcomes").innerHTML += "<br><b>Expected outcomes:</b>";
-        document.getElementById("outcomes").innerHTML += `<br> Old English (c. 900): <i>${getOESpelling()}</i> [${word}]`;
+        document.getElementById("OE").innerHTML =
+            `<td>Late Old English</td> <td>c. 900</td> <td><i>${getOESpelling()}</i></td> <td>[${word}]</td>`;
 
         word.replace("θ", "s", "_s");
         word.forEach(segment => {
@@ -976,10 +1492,6 @@
         word.replace("x", "k", "_s");
         word.replace("ç", "k", "_s");
 
-        word.replace("d", "t", "_θ/s");
-        word.replace("b", "p", "_θ/s");
-        word.replace("g", "k", "_θ/s");
-
         word.forEach(segment => {
             if (segment.value == "n" && segment.relIdx(1).value == "d" && !segment.relIdx(1).stressed && segment.relIdx(2).stressed) {
                 segment.relIdx(1).remove();
@@ -987,6 +1499,21 @@
                     segment.relIdx(-1).value = "o";
             }
         });
+
+        //Anglian smoothing (occurred in Old English, but became standard later)
+        word.replace("æɑ̯", "æ", "_k/x/ɣ");
+        word.replace("æɑ̯", "e", "_ɫ/rˠ,k/x/ɣ");
+        word.replace("æːɑ̯", "eː", "_k/x/ɣ");
+        word.replace("æːɑ̯", "eː", "_ɫ/rˠ,k/x/ɣ");
+        word.replace("eo̯", "e", "_k/x/ɣ");
+        word.replace("eo̯", "e", "_ɫ/rˠ,k/x/ɣ");
+        word.replace("eːo̯", "eː", "_k/x/ɣ");
+        word.replace("eːo̯", "eː", "_ɫ/rˠ,k/x/ɣ");
+        word.replace("x", "ç", "æ/e/eː/i/iː_");
+
+        word.replace("d", "t", "_θ/s");
+        word.replace("b", "p", "_θ/s");
+        word.replace("g", "k", "_θ/s");
 
         word.forEach(segment => {
             if (segment.value == "n" && segment.relIdx(1).match("r", "rˠ") && !segment.relIdx(1).stressed)
@@ -1033,9 +1560,6 @@
             }
         });
 
-        word.replace("iy̯", "y");
-        word.replace("iːy̯", "yː");
-
         //Homorganic lengthening
         word.forEach(segment => {
             let lengtheningClusters = ["ɫd", "mb", "nd", "ŋg", "rˠd", "rˠn", "rˠz", "rˠð"];
@@ -1080,6 +1604,10 @@
         if (word[0].value == "ɑː" && !word[0].stressed)
             word[0].value = "ɑ";
 
+        //Use Anglian forms
+        word.replace("iy̯", "e");
+        word.replace("iːy̯", "eː");
+
         word.replace("æɑ̯", "æ");
         word.replace("æːɑ̯", "æː");
         word.replace("eo̯", "ø");
@@ -1088,23 +1616,28 @@
         word.replace("æː", "ɛː");
         word.replace("ɑː", "ɔː");
 
-        word.replace("æ", "a");
-        word.replace("ɑ", "a");
-        word.replace("ɒ", "a");
+        word.replace("æ", "ä");
+        word.replace("ɑ", "ä");
+        word.replace("ɒ", "ä");
 
         word.replace("ø", "e");
         word.replace("øː", "eː");
         word.replace("y", "i");
         word.replace("yː", "iː");
 
-        word.replace("ç", "x", "a/x_");
+        word.replace("ç", "x", "ä/x_");
         word.replace("x", "ç", "ɛː/e/eː/i/iː/ç_");
+
+        word.forEach(segment => {
+            if (segment.value == "ɣ" && segment.relIdx(-1).match("ɛː", "e", "eː", "i", "iː") && !segment.stressed)
+                segment.value = "ʝ";
+        });
 
         //Vowel reduction
         word.forEach(segment => {
             if (
                 segment.type == "vowel" && !segment.stressed && !segment.value.endsWith("ː")
-                && ((segment.i > word.stressedVowel.i && !segment.relIdx(1).match("j", "w", "ɣ", "x", "ç"))
+                && ((segment.i > word.stressedVowel.i && !segment.relIdx(1).match("j", "w", "ɣ", "ʝ", "x", "ç"))
                     || (segment.value == "e" && (segment.relIdx(1).stressed || segment.relIdx(1).value == "rˠ" || segment.relIdx(1).type == "vowel")))
             )
                 segment.value = "ə";
@@ -1149,9 +1682,41 @@
             }
         });
 
-        //Circa 1200
+        word.vowels.forEach(segment => {
+            if (segment.relIdx(1).match("j", "w") && segment.relIdx(2).type != "vowel") {
+                switch (segment.value) {
+                    case "ɛː":
+                    case "eː":
+                        segment.value = "e";
+                        break;
+                    case "i":
+                    case "iː":
+                        if (segment.relIdx(1).value == "j") {
+                            segment.value = "iː";
+                            segment.relIdx(1).remove();
+                        } else
+                            segment.value = "i";
+                        break;
+                    case "ɔː":
+                    case "oː":
+                        segment.value = "o";
+                        break;
+                    case "uː":
+                        if (segment.relIdx(1).value == "w") {
+                            segment.value = "uː";
+                            segment.relIdx(1).remove();
+                        } else
+                            segment.value = "u";
+                        break;
+                }
+            }
+        });
 
-        word.replace("ɣ", "j", "ɛː/e/eː/i/iː_");
+        document.getElementById("EME").innerHTML =
+            `<td>Early Middle English</td> <td>c. 1200</td> <td><i>${getEMESpelling()}</i></td> <td>[${word}]</td>`;
+
+
+        word.replace("ʝ", "j");
         word.replace("ɣ", "w");
 
         word.forEach(segment => {
@@ -1195,11 +1760,9 @@
         });
 
         word.forEach(segment => {
-            if (segment.value == "oː" && segment.relIdx(1).value == "w" && !(segment.stressed || !segment.relIdx(1).stressed))
             if (segment.value == "oː" && segment.relIdx(1).value == "w" && (segment.stressed || !segment.relIdx(1).stressed))
                 segment.value = "o";
         });
-        word.replace("eː", "e", "_j,C/#");
         word.replace("oː", "o", "_x,C");
 
         for (let i = 0; i < word.length; i++) {
@@ -1221,8 +1784,8 @@
             if (segment.type == "vowel" && segment.value != "ə" && (segment.stressed || !segment.relIdx(1).stressed)) {
                 if (segment.relIdx(1).value == "j") {
                     switch (segment.value) {
-                        case "a":
-                            segment.value = "ai̯";
+                        case "ä":
+                            segment.value = "äi̯";
                             break;
                         case "ɛː":
                         case "e":
@@ -1248,8 +1811,8 @@
                     segment.relIdx(1).remove();
                 } else if (segment.relIdx(1).value == "w") {
                     switch (segment.value) {
-                        case "a":
-                            segment.value = "au̯";
+                        case "ä":
+                            segment.value = "äu̯";
                             break;
                         case "ɛː":
                         case "e":
@@ -1311,8 +1874,8 @@
                 word.replace("ɔ", "o");
             } else if (vowel.stressed && (vowel.relIdx(2).type == "vowel" || vowel.relIdx(1).type == "vowel" || vowel == word.at(-1))) {
                 switch (vowel.value) {
-                    case "a":
-                        vowel.value = "aː";
+                    case "ä":
+                        vowel.value = "äː";
                         break;
                     case "e":
                         vowel.value = "ɛː";
@@ -1447,9 +2010,9 @@
                 segment.value = "s";
         });
 
-        word.replace("ai̯", "æi̯");
+        word.replace("äi̯", "æi̯");
         word.replace("ɛi̯", "æi̯");
-        word.replace("au̯", "ɑu̯");
+        word.replace("äu̯", "ɑu̯");
         word.replace("o", "ɔ");
 
         word.forEach(segment => {
@@ -1540,7 +2103,8 @@
         word.replace("rˠ", "r", "_V");
 
         word.forEach(segment => segment.MEValue = segment.value);
-        document.getElementById("outcomes").innerHTML += `<br> Middle English (c. 1400): <i>${getMESpelling()}</i> [${word}]`;
+        document.getElementById("ME").innerHTML =
+            `<td>Late Middle English</td> <td>c. 1400</td> <td><i>${getMESpelling()}</i></td> <td>[${word}]</td>`;
 
 
         //Drop y- prefix from verbs (was also lost from many nouns and adjectives, but remained in some)
@@ -1556,7 +2120,7 @@
             word.at(-1).value = "g";
         }
 
-        word.replace("ɔ", "a", "_n,d");
+        word.replace("ɔ", "ä", "_n,d");
 
         word.replace("u", "ɔ", "_ɫ,t/d/n");
 
@@ -1662,7 +2226,7 @@
             if (word.at(-2)?.value == "ə" && !word.at(-3).match("t", "d"))
                 word.at(-2).remove();
         }
-        if (word.partOfSpeech == "pastPtcp" && word.at(-1).value == "d")
+        if (word.partOfSpeech == "pastPtcp" && word.at(-1).value == "d" && word.at(-2).type == "vowel")
             word.pastTense = true;
         if (word.partOfSpeech == "conjVerb" && word.toString().endsWith("dəst") && word.at(-5).type == "vowel" && !word.at(-5).stressed) {
             word.conjPastTense = true;
@@ -1716,7 +2280,10 @@
                 segment.remove();
         });
 
-        word.replace("e", "a", "_rˠ");
+        word.replace("e", "ä", "_rˠ");
+
+        word.replace("ä", "a");
+        word.replace("äː", "aː");
 
         let EModEWord = word.duplicate();
 
@@ -1776,7 +2343,9 @@
 
         word.replace("ɔ", "ɒ");
 
-        //Circa 1600
+        document.getElementById("EModE").innerHTML =
+            `<td>Early Modern English</td> <td>c. 1600</td> <td><i>${getEModESpelling(EModEWord, word)}</i></td> <td>[${word}]</td>`;
+
 
         word.replace("r", "ɹ̠");
 
@@ -1979,7 +2548,8 @@
                 segment.remove();
         });
 
-        document.getElementById("outcomes").innerHTML += `<br> Modern English (UK): <i>${getModESpelling(EModEWord)}</i> [${word}]`;
+        document.getElementById("UK").innerHTML
+            += `<tr> <td>Modern English (UK)</td> <td>c. 2000</td> <td><i>${getModESpelling(EModEWord)}</i></td> <td>[${word}]</td> </tr>`;
 
 
         word = beforeSplit;
@@ -2056,7 +2626,8 @@
         word.replace("i", "iə̯", "_ɫ,C/#");
         word.replace("u", "uə̯", "_ɫ,C/#");
 
-        document.getElementById("outcomes").innerHTML += `<br> Modern English (US): <i>${getModESpelling(EModEWord)}</i> [${word}]`;
+        document.getElementById("US").innerHTML =
+            `<td>Modern English (US)</td> <td>c. 2000</td> <td><i>${getModESpelling(EModEWord)}</i></td> <td>[${word}]</td>`;
     }
 </script>
 

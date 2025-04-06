@@ -6,7 +6,7 @@ You can try it [here](https://oiroizoi.github.io/old-to-modern-english/).
 - Enter an Old English word, using standard diacritics (i.e., dots for palatalization and macrons for long vowels).
 - Select the syllable on which the primary stress falls.
 - Choose the appropriate part of speech. For present participles, select "Conjugated verb".
-- The program will output the word's likely pronunciation and spelling in late Old English (circa 900), late Middle English (circa 1400), and present-day English. Two Modern English pronunciations are provided, one for contemporary Received Pronunciation (UK) and one for General American (US).
+- The program will output the word's likely pronunciation and spelling in late Old English (circa 900), late Middle English (circa 1400), and present-day General American. You can click on "Expected outcomes" to see additional steps in the word's development, as well as the expected modern RP (British) pronunciation.
 
 ## Tips
 - Predicted outcomes are more accurate for single-stem words than for compounds. For better results, enter each component of a compound word separately.
