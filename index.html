@@ -1557,6 +1557,11 @@
             }
         });
 
+        word.forEach(segment => {
+            if (segment.match("e", "eo̯", "o", "y") && segment.relIdx(-1).value == "w" && segment.relIdx(1).match("r", "rˠ"))
+                segment.value = "u";
+        });
+
         //Homorganic lengthening
         word.forEach(segment => {
             let lengtheningClusters = ["ɫd", "mb", "nd", "ŋg", "rˠd", "rˠn", "rˠz", "rˠð"];
@@ -1577,11 +1582,6 @@
                 && (segment.relIdx(3).type == "consonant" || word.vowels.indexOf(segment) < word.vowels.length - 2)
             )
                 segment.value = segment.value.slice(0, 1) + segment.value.slice(2);
-        });
-
-        word.forEach(segment => {
-            if (segment.match("e", "eo̯", "o", "y") && segment.relIdx(-1).value == "w" && segment.relIdx(1).match("r", "rˠ"))
-                segment.value = "u";
         });
 
         word.forEach(segment => {
