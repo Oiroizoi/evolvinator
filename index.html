@@ -83,12 +83,7 @@
     </form>
 
     <table id="outcomes">
-        <tr id="header">
-            <th colspan="4">
-                Expected outcomes:
-                <div id="headerArrow">▼</div>
-            </th>
-        </tr>
+        <tr id="header"></tr>
         <tr id="OE"></tr>
         <tr id="EME" class="hidden"></tr>
         <tr id="ME"></tr>
@@ -1477,6 +1472,8 @@
     }
 
     function getOutcomes() {
+        document.getElementById("header").innerHTML = `<th colspan="4"> Expected outcomes: <div id="headerArrow">▼</div> </th>`;
+
         word.forEach(segment => segment.OEValue = segment.value);
         document.getElementById("OE").innerHTML =
             `<td>Late Old English</td> <td>c. 900</td> <td><i>${getOESpelling()}</i></td> <td>[${word}]</td>`;
@@ -2476,8 +2473,8 @@
 
         word.replace("eː", "eɪ̯");
         word.replace("oː", "oʊ̯");
-        word.replace("əi̯", "aɪ̯");
-        word.replace("əu̯", "aʊ̯");
+        word.replace("əi̯", "äɪ̯");
+        word.replace("əu̯", "äʊ̯");
         word.replace("oi̯", "ɔɪ̯");
 
         word.replace("ʍ", "w");
@@ -2625,6 +2622,8 @@
 
         word.replace("i", "iə̯", "_ɫ,C/#");
         word.replace("u", "uə̯", "_ɫ,C/#");
+
+        word.replace("äʊ̯", "aʊ̯");
 
         document.getElementById("US").innerHTML =
             `<td>Modern English (US)</td> <td>c. 2000</td> <td><i>${getModESpelling(EModEWord)}</i></td> <td>[${word}]</td>`;
