@@ -489,7 +489,7 @@
                 case "oː":
                     if (
                         segment.relIdx(2).type == "vowel" || segment.relIdx(1).type != "consonant" || (word.droppedE && segment == word.at(-2))
-                        || (segment.relIdx(1).value == "ɫ" && segment.relIdx(2).value == "d")
+                        || (segment.relIdx(1).match("ɫ", "rˠ") && segment.relIdx(2).value == "d")
                         || (segment.relIdx(1).value == "m" && (segment.relIdx(1).droppedB || segment.relIdx(2).value == "b"))
                     )
                         str += "o";
@@ -794,7 +794,7 @@
                         str += "oa";
                     break;
                 case "oː":
-                    if (segment.relIdx(1).value == "m" && (segment.relIdx(1).droppedB || segment.relIdx(2).value == "b"))
+                    if (segment.relIdx(1).droppedB || (segment.relIdx(1).value == "m" && segment.relIdx(2).value == "b"))
                         str += "o";
                     else
                         str += "oo";
@@ -1129,7 +1129,10 @@
                         str += "oa";
                     break;
                 case "oː":
-                    if (segment.relIdx(1).value == "m" && (segment.relIdx(1).droppedB || segment.relIdx(2).value == "b"))
+                    if (
+                        segment.relIdx(1).droppedB || (segment.relIdx(1).value == "m" && segment.relIdx(2).value == "b")
+                        || (segment.relIdx(1).value == "rˠ" && segment.relIdx(2).value == "d")
+                    )
                         str += "o";
                     else
                         str += "oo";
@@ -1889,6 +1892,7 @@
             if (
                 segment.relIdx(1).type == "consonant" && segment.relIdx(2).type == "consonant"
                 && !nonShorteningClusters.includes(segment.relIdx(1).value + segment.relIdx(2).value)
+                && !(segment.value == "oː" && segment.relIdx(1).value == "rˠ" && segment.relIdx(2).value == "d")
             ) {
                 switch (segment.value) {
                     case "ɛː":
@@ -2589,6 +2593,7 @@
         word.replace("ʊə̯", "ə", "t͡ʃ/d͡ʒ/ʃ/j/n/l/ɹ̠_");
         word.replace("ʊə̯", "ɔ");
         word.replace("ɛ", "e", "_ɹ̠");
+        word.replace("ɔ", "o", "_ɹ̠");
 
         word.forEach(segment => {
             if (segment.value == "ə" && segment.relIdx(1).value == "ɹ̠" && (segment.relIdx(2).type != "vowel" || segment.stressed)) {
@@ -2597,7 +2602,7 @@
             }
         });
         word.forEach(segment => {
-            if (segment.match("ɑ", "e", "ɪ", "ɔ") && segment.relIdx(1).value == "ɹ̠" && segment.relIdx(2).type != "vowel") {
+            if (segment.match("ɑ", "e", "ɪ", "o") && segment.relIdx(1).value == "ɹ̠" && segment.relIdx(2).type != "vowel") {
                 segment.value += "ɚ̯";
                 segment.relIdx(1).remove();
             }
