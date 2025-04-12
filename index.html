@@ -686,7 +686,10 @@
         let str = "";
 
         let finalE = false;
-        if (word.droppedE && (word.vowels.at(-1).stressed || (word.at(-1).type == "vowel" && !word.at(-1).stressed)) && !word.at(-1).match("eː", "ɛː"))
+        if (
+            word.droppedE && (word.vowels.at(-1).stressed || (word.at(-1).type == "vowel" && !word.at(-1).stressed))
+            && !word.at(-1).match("eː", "ɛː") && word.at(-1).value != "θ"
+        )
             finalE = true;
         if (
             laterWord.vowels.at(-1).value.length > 1 && !word.sSuffix && !word.pastTense && !word.vowels.at(-1).droppedH
@@ -1883,7 +1886,10 @@
             if (segment.match("ɫ", "n") && segment.relIdx(1).value == "r")
                 word.insert("d", segment.i + 1);
 
-            if (segment.value == "m" && segment.relIdx(1).value == "ə" && segment.relIdx(2).match("l", "ɫ")) {
+            if (
+                segment.value == "m" && segment.relIdx(1).value == "ə" && segment.relIdx(2).match("l", "ɫ")
+                && (segment.relIdx(-1).type == "vowel" || segment.relIdx(-1).match("rˠ", "m"))
+            ) {
                 word.insert("b", segment.i + 1);
                 if (segment.relIdx(-1).value == "m")
                     segment.relIdx(-1).remove();
