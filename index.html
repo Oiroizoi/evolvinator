@@ -1654,6 +1654,7 @@
                 segment.type == "vowel" && !segment.stressed && !segment.value.endsWith("ː")
                 && ((segment.i > word.stressedVowel.i && !segment.relIdx(1).match("j", "w", "ɣ", "ʝ", "x", "ç"))
                     || (segment.value == "e" && (segment.relIdx(1).stressed || segment.relIdx(1).value == "rˠ" || segment.relIdx(1).type == "vowel")))
+                && !(segment.value == "i" && segment.relIdx(1).value == "p")
             )
                 segment.value = "ə";
         });
