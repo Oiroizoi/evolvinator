@@ -1703,7 +1703,7 @@
         let modernSpelling = getModESpelling(EModEWord);
 
         document.getElementById("UK").innerHTML =
-            `<tr> <td>Modern English (UK)</td> <td>c. 2000</td> <td><i>${modernSpelling}</i></td> <td>[${word}]</td> </tr>`;
+            `<td>Modern English (UK)</td> <td></td> <td><i>${modernSpelling}</i></td> <td>[${word}]</td>`;
 
 
         word.forEach(segment => {
@@ -1759,7 +1759,7 @@
         });
 
         document.getElementById("AU").innerHTML =
-            `<tr> <td>Modern English (AU)</td> <td>c. 2000</td> <td><i>${modernSpelling}</i></td> <td>[${word}]</td> </tr>`;
+            `<td>Modern English (AU)</td> <td></td> <td><i>${modernSpelling}</i></td> <td>[${word}]</td>`;
 
 
         word = beforeSplit;
@@ -1840,7 +1840,7 @@
         word.replace("u", "uə̯", "_ɫ,C/#");
 
         document.getElementById("US").innerHTML =
-            `<td>Modern English (US)</td> <td>c. 2000</td> <td><i>${modernSpelling}</i></td> <td>[${word}]</td>`;
+            `<td>Modern English (US)</td> <td></td> <td><i>${modernSpelling}</i></td> <td>[${word}]</td>`;
 
 
         word = getOutcomes("scots");
@@ -2037,7 +2037,7 @@
         word.replace("øː", "eː", "_#");
 
         document.getElementById("scots").innerHTML =
-            `<td>Modern Scots</td> <td>c. 2000</td> <td><i>${getScotsSpelling(word)}</i></td> <td>[${word}]</td>`;
+            `<td>Modern Scots</td> <td></td> <td><i>${getScotsSpelling(word)}</i></td> <td>[${word}]</td>`;
     }
 
     function getOESpelling() {
