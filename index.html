@@ -1662,8 +1662,10 @@
         });
 
         word.forEach(segment => {
-            if (segment.value == "æ" && (segment.relIdx(1).match("f", "θ", "s") || (segment.relIdx(1).value == "n") && segment.relIdx(2).match("t͡ʃ", "s")))
+            if (segment.value == "æ" && (segment.relIdx(1).match("f", "θ", "s") || (segment.relIdx(1).value == "n") && segment.relIdx(2).match("t͡ʃ", "s"))) {
                 segment.value = "ɑː";
+                segment.trapBath = true;
+            }
         });
 
         word.replace("ɒː", "ɒ");
@@ -1703,6 +1705,11 @@
         document.getElementById("UK").innerHTML =
             `<tr> <td>Modern English (UK)</td> <td>c. 2000</td> <td><i>${modernSpelling}</i></td> <td>[${word}]</td> </tr>`;
 
+
+        word.forEach(segment => {
+            if (segment.trapBath && segment.relIdx(1).value == "n")
+                segment.value = "a";
+        });
 
         //Flapping
         word.forEach(segment => {
@@ -3163,7 +3170,10 @@
             switch (segment.value) {
                 case "əi̯":
                 case "aɪ̯":
-                    if (segment.MEValue == "iː" && segment == word.at(-1) || segment.relIdx(1).MEValue == "i")
+                    if (
+                        segment.MEValue == "iː"
+                        && (segment == word.at(-1) || segment.relIdx(1).MEValue == "i" || (segment.relIdx(1).inSuffix && word.partOfSpeech != "pastPtcp"))
+                    )
                         str += "y";
                     else if (segment.MEValue == "iː")
                         str += "i";
