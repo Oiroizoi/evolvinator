@@ -1346,7 +1346,7 @@
         });
         word.forEach(segment => {
             if (segment.match("m", "n", "l", "r") && segment.relIdx(-1).type != "vowel" && segment.relIdx(1).type != "vowel"
-                && !(segment.relIdx(-1).match("ɫ", "rˠ") && segment.value != "r") && !(word.at(-2).value == "m" && word.at(-1).value == "n"))
+                && !(segment.relIdx(-1).match("l", "ɫ", "r", "rˠ") && segment.value != "r") && !(word.at(-2).value == "m" && word.at(-1).value == "n"))
                 word.insert("ə", segment.i);
         });
         if (word.at(-2)?.value == "j" && word.at(-1).type == "consonant") {
@@ -3332,7 +3332,7 @@
                     break;
                 case "d͡ʒ":
                 case "ʒ":
-                    if (segment.relIdx(-1).match(...shortVowels) && segment.relIdx(-1).stressed)
+                    if (segment.relIdx(-1).match(...shortVowels))
                         str += "dg";
                     else
                         str += "g";
