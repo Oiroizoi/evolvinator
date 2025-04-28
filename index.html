@@ -537,7 +537,7 @@
         });
 
         word.forEach(segment => {
-            if (segment.type == "vowel" && !segment.stressed) {
+            if (segment.type == "vowel" && segment.i > word.stressedVowel.i) {
                 switch (word.partOfSpeech) {
                     case "conjVerb":
                         if (segment.relIdx(1).value == "θ")
@@ -699,7 +699,7 @@
                     segment.remove();
             }
 
-            if (segment.value == "ə" && segment.relIdx(1).value == "n" && ["conjVerb", "pastPtcp", "inf"].includes(word.partOfSpeech))
+            if (segment.value == "ə" && segment.relIdx(1).value == "n" && ["conjVerb", "pastPtcp", "inf"].includes(word.partOfSpeech) && segment.i > word.stressedVowel.i)
                 segment.inSuffix = true;
         });
 
@@ -765,7 +765,7 @@
         });
 
         word.forEach(segment => {
-            if (segment.type == "vowel" && !segment.stressed) {
+            if (segment.type == "vowel" && segment.i > word.stressedVowel.i) {
                 switch (word.partOfSpeech) {
                     case "conjVerb":
                         if (segment.relIdx(1).value == "θ")
@@ -1285,16 +1285,6 @@
             word.droppedE = true;
         }
 
-        if (word.partOfSpeech == "conjVerb" && word.at(-1).value == "ð" && word.at(-2).type == "vowel" && !word.at(-2).stressed) {
-            word.at(-1).value = "z";
-            word.sSuffix = true;
-        }
-        if (word.partOfSpeech == "conjVerb" && word.at(-1).value == "θ" && word.at(-2).type == "consonant") {
-            word.insert("ə", -1);
-            word.at(-1).value = "z";
-            word.sSuffix = true;
-        }
-
         word.forEach(segment => {
             if (
                 segment.value == "ə" && segment.relIdx(1).value == "n" && segment.relIdx(-1).type == "vowel" && segment.relIdx(-1).value.length > 1
@@ -1306,6 +1296,19 @@
             word.at(-2).remove();
         word.replace("r", "rˠ", "_#");
         word.replace("i", "iː", "_V/#");
+
+        let thVerb;
+        if (word.partOfSpeech == "conjVerb" && word.at(-1).value == "ð" && word.at(-2).type == "vowel" && !word.at(-2).stressed) {
+            thVerb = true;
+            word.at(-1).value = "z";
+            word.sSuffix = true;
+        }
+        if (word.partOfSpeech == "conjVerb" && word.at(-1).value == "θ" && word.at(-2).type == "consonant") {
+            thVerb = true;
+            word.insert("ə", -1);
+            word.at(-1).value = "z";
+            word.sSuffix = true;
+        }
 
         //Loss of vowel in -es and -ed suffixes
         word.forEach(segment => {
@@ -1358,6 +1361,8 @@
         word.replace("r", "rˠ", "_C/#");
         word.replace("ɫ", "l", "_V");
         word.replace("rˠ", "r", "_V");
+
+        let sForm = word;
 
         if (word.conjPastTense && word.toString().endsWith("əst"))
             word.at(-3).remove();
@@ -1479,6 +1484,33 @@
             document.getElementById("EModE").innerHTML =
                 `<td>Early Modern English</td> <td>c. 1600</td> <td><i>${getEModESpelling(EModEWord, word)}</i></td> <td>[${word}]</td>`;
 
+
+        if (thVerb) {
+            word.sSuffix = true;
+            EModEWord.sSuffix = true;
+            word.at(-1).value = sForm.at(-1).value;
+            EModEWord.at(-1).value = sForm.at(-1).value;
+            if (word.at(-2).value == "ɪ" && sForm.at(-2).value != "ə") {
+                word.at(-2).remove();
+                EModEWord.at(-2).remove();
+            }
+            if (word.at(-3).type == "consonant" && sForm.at(-3).value == "ə") {
+                word.insert("ə", -2);
+                EModEWord.insert("ə", -2);
+            }
+            if (word.at(-2).value == "j" && sForm.at(-2).value == "iː") {
+                word.at(-2).value = "əi̯";
+                word.at(-2).type = "vowel";
+                EModEWord.at(-2).value = "iː";
+                EModEWord.at(-2).type = "vowel";
+            }
+            if (word.at(-2).match("w", "ʍ") && sForm.at(-2).value == "ɔu̯") {
+                word.at(-2).value = "ou̯";
+                word.at(-2).type = "vowel";
+                EModEWord.at(-2).value = "ɔu̯";
+                EModEWord.at(-2).type = "vowel";
+            }
+        }
 
         if (lang == "scots") {
             word.replace("r", "ɾ");
@@ -2512,8 +2544,8 @@
                     break;
                 case "ə":
                     if (
-                        segment.relIdx(1).value == "ɫ" && segment.relIdx(-1).type == "consonant"
-                        && !segment.relIdx(-1).match("m", "n", "v", "l", "r", "θ", "s", "t͡ʃ", "ʃ", "d͡ʒ", "j", "w") && segment.i > 0
+                        segment.relIdx(1).value == "ɫ" && segment.relIdx(-1).type == "consonant" && segment.i > 0
+                        && !segment.relIdx(-1).match("m", "n", "v", "l", "r", "θ", "t͡ʃ", "ʃ", "d͡ʒ", "j", "w") && !(str.at(-1) == "s" && str.at(-2) != "s")
                         && !(segment.relIdx(2).type == "consonant" && !(segment == word.at(-3) && (word.sSuffix || word.pastTense))
                             && segment.relIdx(3).type != "vowel")
                     ) {
@@ -2844,8 +2876,8 @@
                     break;
                 case "ə":
                     if (
-                        segment.relIdx(1).value == "ɫ" && segment.relIdx(-1).type == "consonant"
-                        && !segment.relIdx(-1).match("m", "n", "v", "l", "r", "θ", "s", "t͡ʃ", "ʃ", "d͡ʒ", "j", "w") && segment.i > 0
+                        segment.relIdx(1).value == "ɫ" && segment.relIdx(-1).type == "consonant" && segment.i > 0
+                        && !segment.relIdx(-1).match("m", "n", "v", "l", "r", "θ", "t͡ʃ", "ʃ", "d͡ʒ", "j", "w") && !(str.at(-1) == "s" && str.at(-2) != "s")
                         && !(segment.relIdx(2).type == "consonant" && !(segment == word.at(-3) && (word.sSuffix || word.pastTense))
                             && segment.relIdx(3).type != "vowel")
                     ) {
@@ -3283,8 +3315,8 @@
                     break;
                 case "ə":
                     if (
-                        segment.relIdx(1).value == "ɫ" && segment.relIdx(-1).type == "consonant" && segment.relIdx(2).type != "vowel"
-                        && !segment.relIdx(-1).match("v", "l", "r", "θ", "s", "t͡ʃ", "ʃ", "d͡ʒ", "j", "w") && segment.i > 0
+                        segment.relIdx(1).value == "ɫ" && segment.relIdx(-1).type == "consonant" && segment.relIdx(2).type != "vowel" && segment.i > 0
+                        && !segment.relIdx(-1).match("v", "l", "r", "θ", "t͡ʃ", "ʃ", "d͡ʒ", "j", "w") && !(str.at(-1) == "s" && str.at(-2) != "s")
                         && !(segment.relIdx(2).type == "consonant" && !(segment == word.at(-3) && word.sSuffix) && segment.relIdx(3).type != "vowel")
                     ) {
                         str += "le";
