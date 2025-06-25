@@ -23,10 +23,10 @@ You can try it [here](https://oiroizoi.github.io/evolvinator/).
 - If you find a bug or have other feedback, please create an issue!
 
 ## Main sources
-https://en.wikipedia.org/wiki/Phonological_history_of_English
-https://adoneilson.com/eme/index.html
-https://web.archive.org/web/20140818162929/http://www.dsl.ac.uk/dsl/SCOTSHIST/output4.php?file=NEW-Final6phonology.htm
-https://openlibrary.org/books/OL453735M/The_Edinburgh_history_of_the_Scots_language
-https://www.google.com/books/edition/From_Latin_to_Spanish_Historical_phonolo/_QkNAAAAIAAJ?hl=en
-https://en.wikipedia.org/wiki/Phonological_history_of_French
-https://archive.org/details/fromlatintomoder0000unse
+- https://en.wikipedia.org/wiki/Phonological_history_of_English
+- https://adoneilson.com/eme/index.html
+- https://web.archive.org/web/20140818162929/http://www.dsl.ac.uk/dsl/SCOTSHIST/output4.php?file=NEW-Final6phonology.htm
+- https://openlibrary.org/books/OL453735M/The_Edinburgh_history_of_the_Scots_language
+- https://www.google.com/books/edition/From_Latin_to_Spanish_Historical_phonolo/_QkNAAAAIAAJ?hl=en
+- https://en.wikipedia.org/wiki/Phonological_history_of_French
+- https://archive.org/details/fromlatintomoder0000unse
