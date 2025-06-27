@@ -2624,7 +2624,7 @@
             if (
                 segment.type == "vowel" && !segment.stressed && !segment.match("a", "aː") && segment != word.vowels[0]
                 && segment.relIdx(-1).match("p", "t", "k", "b", "d", "g") && segment.relIdx(1).match("l", "r")
-                && segment.relIdx(2).type == "vowel" && (segment.relIdx(-2).type != "vowel" || segment.relIdx(-2).match("j", "w"))
+                && segment.relIdx(2).type == "vowel" && (segment.relIdx(-2).type == "vowel" || segment.relIdx(-2).match("j", "w"))
                 && !(word.partOfSpeech == "inf" && segment.relIdx(1).value == "r" && segment == word.at(-3))
             )
                 segment.remove();
