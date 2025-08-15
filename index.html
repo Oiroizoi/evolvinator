@@ -3521,10 +3521,6 @@
             }
         });
 
-        ////also port?
-        if (word.stressedVowel.value == "o" && word.stressedVowel.relIdx(1).value == "ɲ") ////also j? (russeum)
-            word.stressedVowel.value = "u";
-
         word.replace("ɛ", "ie̯");
         word.replace("ɔ", "ue̯");
 
@@ -3611,6 +3607,8 @@
         if (word.stressedVowel.value == "i" && word.stressedVowel.prevVowel().value == "i")
             word.stressedVowel.prevVowel().value = "e";
 
+        word.remove("j", "o/u_t͡s/d͡z/t͡ʃ/s̺/z̺/ʃ/ʒ");
+
         word.forEach(segment => {
             if (segment.value == "o" && segment.relIdx(1).value == "j" && segment.relIdx(2).type == "consonant") {
                 if (segment.nextVowel().stressed) {
@@ -3621,8 +3619,6 @@
                 }
             }
         });
-
-        word.remove("j", "u_t͡s/d͡z/t͡ʃ/s̺/z̺/ʃ/ʒ");
 
         word.forEach(segment => {
             if (segment.value == "ie̯") {
@@ -4060,7 +4056,11 @@
         if (word.at(-1).value == "ã")
             word.insert("o", word.length);
 
-        word.replace("e", "ẽ", "ẽ_"); ////other vowels
+        word.replace("a", "ã", "ã_");
+        word.replace("e", "ẽ", "ẽ_");
+        word.replace("i", "ĩ", "ĩ_");
+        word.replace("o", "õ", "õ_");
+        word.replace("u", "ũ", "ũ_");
 
         word.forEach(segment => {
             if (segment.value == "j" && segment.relIdx(-1).value.endsWith("̃") && segment.relIdx(1).match("t", "d", "t͡s", "d͡z"))
@@ -4075,9 +4075,7 @@
                 switch (segment.value) {
                     case "a":
                     case "ã":
-                        if (segment.value == "ã" && segment.relIdx(1).value == "a")
-                            segment.relIdx(1).value = "ã";
-                        else if (segment.value == "a" && segment.relIdx(1).value == "e" && segment.relIdx(1).stressed)
+                        if (segment.value == "a" && segment.relIdx(1).value == "e" && segment.relIdx(1).stressed)
                             segment.relIdx(1).value = "ɛ";
                         else if (segment.value == "a" && segment.relIdx(1).value == "o" && segment.relIdx(1).stressed)
                             segment.relIdx(1).value = "ɔ";
@@ -4123,9 +4121,7 @@
                     case "o":
                     case "õ":
                         if (segment.relIdx(1).match("o", "õ", "u", "ũ")) {
-                            if (segment.value == "õ" && segment.relIdx(1).value == "o")
-                                segment.relIdx(1).value = "õ";
-                            else if (segment.value == "õ" && segment.relIdx(1).value == "u")
+                            if (segment.value == "õ" && segment.relIdx(1).value == "u")
                                 segment.relIdx(1).value = "ũ";
                             else if (segment.relIdx(1).value == "o" && segment.relIdx(1).i < word.stressedVowel.i)
                                 segment.relIdx(1).value = "oː";
@@ -4143,9 +4139,6 @@
                         if (segment.relIdx(1).value == "o" && segment.relIdx(1).stressed) {
                             segment.relIdx(1).value = "ɔ";
                         } else if (segment.relIdx(1).match("u", "ũ")) {
-                            if (segment.value == "ũ")
-                                segment.relIdx(1).value = "ũ";
-                            segment.relIdx(1).value = "ũ";
                             segment.remove();
                             i--;
                         }
