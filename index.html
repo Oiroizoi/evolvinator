@@ -94,7 +94,7 @@
             #LL .spelling {
                 font-family: "Rustic Capitals";
                 font-size: 14px;
-                transform: translateY(3px);
+                transform: translateY(2px);
                 font-style: normal;
             }
 
@@ -107,8 +107,8 @@
 
             #EME .spelling,
             #OSp .spelling,
-            #GR .spelling,
-            #OF .spelling {
+            #EOF .spelling,
+            #LOF .spelling {
                 font-family: "Pfeffer Mediæval";
                 font-feature-settings: "hist";
                 font-size: 18px;
@@ -407,9 +407,9 @@
                 getIPA_lat();
                 lat_to_LL();
                 LL_to_WR("french");
-                WR_to_GR();
-                GR_to_OF();
-                OF_to_MF();
+                WR_to_EOF();
+                EOF_to_LOF();
+                LOF_to_MF();
                 MF_to_ModF();
             } else if (from == "lat" && to == "ModPort") {
                 getIPA_lat();
@@ -3236,6 +3236,11 @@
             word.replace("g", "d", "_d͡zʲ");
         }
 
+        if (variety == "french") {
+            word.replace("d", "ð", "V/j/w_V/w/r/rʲ/#");
+            word.replace("t", "d", "V/j/w_V/j/w/r/rʲ/#");
+        }
+
         //Palatalization of velars before coronals
         word.forEach(segment => {
             if (segment.match("k", "g") && (segment.relIdx(-1).type == "vowel" || segment.relIdx(-1).value == "w") && segment.relIdx(1).match("t", "d", "t͡sʲ", "d͡zʲ", "s", "sʲ", "z", "zʲ"))
@@ -3249,11 +3254,6 @@
             if (segment.value == "ŋ" && !segment.relIdx(1).match("k", "g"))
                 segment.value = "n";
         });
-
-        if (variety == "french") {
-            word.replace("d", "ð", "V/j/w_V/w/r/rʲ/#");
-            word.replace("t", "d", "V/j/w_V/j/w/r/rʲ/#");
-        }
 
         if (variety == "portuguese" && word.vowels.at(-3)?.value == "ɛ" && word.vowels.at(-3).stressed && word.vowels.at(-2).value == "ɪ")
             word.vowels.at(-3).value = "e";
@@ -3827,6 +3827,13 @@
             }
         }
         word.replace("ɾ", "r", "#_");
+        word.forEach(segment => {
+            if (segment.value == "ɾ" && segment.relIdx(-1).match("n", "z")) {
+                word.insert("d", segment.i);
+                if (segment.stressed)
+                    segment.relIdx(-1).stressed = true;
+            }
+        });
 
         word.forEach(segment => {
             if (segment.type == "vowel" && segment.value == segment.relIdx(-1).value && !segment.stressed && !segment.relIdx(-1).stressed)
@@ -4121,7 +4128,7 @@
                     case "o":
                     case "õ":
                         if (segment.relIdx(1).match("o", "õ", "u", "ũ")) {
-                            if (segment.value == "õ" && segment.relIdx(1).value == "u")
+                            if (segment.value == "õ" && segment.relIdx(1).value == "u" && segment != word.at(-2))
                                 segment.relIdx(1).value = "ũ";
                             else if (segment.relIdx(1).value == "o" && segment.relIdx(1).i < word.stressedVowel.i)
                                 segment.relIdx(1).value = "oː";
@@ -4419,7 +4426,7 @@
         addRow("Br", "Modern Portuguese (Brazil)", "2000", getSpelling_ModPort(word.EModPortWord, "br"), word, true);
     }
 
-    function WR_to_GR(variety) {
+    function WR_to_EOF(variety) {
         word = outcomes.WR.duplicate();
 
         word.remove("j", "V/w_V");
@@ -4429,10 +4436,13 @@
         word.replace("ʊ", "o");
         word.replace("ʊː", "oː");
 
+        word.replace("ɛ", "ie̯", "_j");
+        word.replace("ɔ", "uo̯", "_j");
+
+        addRow("GR", "Gallo-Romance", "600", "", word, true);
+
         word.replace("ɛː", "ie̯");
         word.replace("ɔː", "uo̯");
-        word.replace("ɛ", "ie̯", "_j/ʎ");
-        word.replace("ɔ", "uo̯", "_j/ʎ");
 
         word.replace("ɛ", "e", "_ɲ");
         word.replace("ɔ", "o", "_ɲ");
@@ -4978,11 +4988,11 @@
 
         word.remove("s̺", "_t͡s");
 
-        addRow("GR", "Gallo-Romance", "850", getSpelling_GR(), word, true);
+        addRow("EOF", "Early Old French", "900", getSpelling_EOF(), word, true);
     }
 
-    function GR_to_OF(variety) {
-        word = outcomes.GR.duplicate();
+    function EOF_to_LOF(variety) {
+        word = outcomes.EOF.duplicate();
 
         word.replace("β", "v");
 
@@ -5170,11 +5180,11 @@
                 segment.remove();
         });
 
-        addRow("OF", "Old French", "1200", getSpelling_OF(), word);
+        addRow("LOF", "Late Old French", "1200", getSpelling_LOF(), word);
     }
 
-    function OF_to_MF() {
-        word = outcomes.OF.duplicate();
+    function LOF_to_MF() {
+        word = outcomes.LOF.duplicate();
 
         word.replace("ɫ", "l");
 
@@ -5225,13 +5235,14 @@
                     || (segment.relIdx(-1).value == "ɔ" && (segment.value.startsWith("o") || segment.value.startsWith("u")))
                 )
             ) {
-                segment.hiatus = true;
                 if (segment.stressed && segment.value.length == 1)
                     segment.value += "ː";
-                if (segment.value == "ei̯")
+                if (segment.match("eː", "ei̯"))
                     segment.value = "ɛː";
-                if (segment.relIdx(-1).match("a", "ɛ") && segment.value == "iː")
+                if (segment.relIdx(-1).match("a", "ɛ") && segment.match("ɛː", "iː")) {
                     segment.value = "ɛː";
+                    segment.droppedA = true;
+                }
                 if (segment.relIdx(-1).value == "ɔ" && segment.value == "uː")
                     segment.value = "oː";
                 else if (segment.relIdx(-1).match("ə", "a") && segment.value == "uː" && segment.relIdx(1).match("m", "n", "ɲ", "ŋ"))
@@ -5293,7 +5304,7 @@
         });
 
         word.forEach(segment => {
-            if (segment.value == "ɛː" && !segment.stressed && segment.OFValue != "ai̯")
+            if (segment.value == "ɛː" && !segment.stressed && segment.LOFValue != "ai̯")
                 segment.value = "e";
         });
 
@@ -5381,11 +5392,11 @@
 
         word.replace("e", "ɛ", "_r");
 
-        if (word.at(-1).value == "r" && word.at(-2).value == "ɛ" && word.at(-2).OFValue != "ai̯" && word.vowels.length > 1)
+        if (word.at(-1).value == "r" && word.at(-2).value == "ɛ" && word.at(-2).LOFValue != "ai̯" && word.vowels.length > 1)
             word.at(-1).remove();
 
         word.forEach(segment => {
-            if (segment.value == "ɛ" && segment.relIdx(1).type != "consonant" && segment.OFValue != "ai̯")
+            if (segment.value == "ɛ" && segment.relIdx(1).type != "consonant" && segment.LOFValue != "ai̯")
                 segment.value = "e";
         });
 
@@ -5481,18 +5492,18 @@
 
     function getSpelling_OE() {
         let str = wordArg;
-        str = str.replaceAll("ā", "a");
-        str = str.replaceAll("ē", "e");
-        str = str.replaceAll("ī", "i");
-        str = str.replaceAll("ō", "o");
-        str = str.replaceAll("ū", "u");
-        str = str.replaceAll("ȳ", "y");
-        str = str.replaceAll("ǣ", "æ");
-        str = str.replaceAll("ċ", "c");
-        str = str.replaceAll(/(?<![eiyæn])ġa/g, "gea");
-        str = str.replaceAll(/(?<![eiyæn])ġo/g, "geo");
-        str = str.replaceAll(/(?<![eiyæn])ġu/g, "geo");
-        str = str.replaceAll("ġ", "g");
+        str = str.replaceAll("ā", "a")
+            .replaceAll("ē", "e")
+            .replaceAll("ī", "i")
+            .replaceAll("ō", "o")
+            .replaceAll("ū", "u")
+            .replaceAll("ȳ", "y")
+            .replaceAll("ǣ", "æ")
+            .replaceAll("ċ", "c")
+            .replaceAll(/(?<![eiyæn])ġa/g, "gea")
+            .replaceAll(/(?<![eiyæn])ġo/g, "geo")
+            .replaceAll(/(?<![eiyæn])ġu/g, "geo")
+            .replaceAll("ġ", "g");
         return str;
     }
 
@@ -5615,8 +5626,8 @@
                     break;
             }
         }
-        str = str.replace(/s$/, `<span class="nonHist">s</span>`);
-        return str;
+
+        return str.replace(/s$/, `<span class="nonHist">s</span>`);
     }
 
     function getSpelling_LME() {
@@ -5840,8 +5851,10 @@
                     break;
             }
         }
+
         if (word.droppedE)
             str += "e";
+
         return str;
     }
 
@@ -6066,8 +6079,10 @@
                     break;
             }
         }
+
         if (word.droppedE && ((word.at(-2)?.value.endsWith("ː") && word.at(-1).type == "consonant") || (word.at(-1).degeminated && word.at(-1).value != "ʃ")))
             str += "e";
+
         return str;
     }
 
@@ -6394,6 +6409,7 @@
             if (addE)
                 str += "e";
         }
+
         return str;
     }
 
@@ -6684,6 +6700,7 @@
             if (addI)
                 str += "i";
         }
+
         return str;
     }
 
@@ -7010,6 +7027,7 @@
             if (addE)
                 str += "e";
         }
+
         return str;
     }
 
@@ -7327,6 +7345,7 @@
             if (addE)
                 str += "e";
         }
+
         return str;
     }
 
@@ -7479,8 +7498,8 @@
                     break;
             }
         }
-        str = str.replace(/s$/, `<span class="nonHist">s</span>`);
-        return str;
+
+        return str.replace(/s$/, `<span class="nonHist">s</span>`);
     }
 
     function getSpelling_EModSp() {
@@ -7642,7 +7661,7 @@
                     break;
                 case "s":
                 case "z":
-                    if (segment.OSpValue == "d͡z" || (segment.relIdx(1).type != "vowel" && segment.relIdx(1).value != "w"))
+                    if (segment.OSpValue == "d͡z" || (segment.relIdx(1).type != "vowel" && !segment.relIdx(1).match("j", "w")))
                         str += "z";
                     else if (segment.relIdx(1).match("e", "i", "j"))
                         str += "c";
@@ -7651,6 +7670,7 @@
                     break;
             }
         }
+
         return str;
     }
 
@@ -7813,6 +7833,7 @@
                     break;
             }
         }
+
         return str;
     }
 
@@ -8282,10 +8303,11 @@
                     break;
             }
         }
+
         return str;
     }
 
-    function getSpelling_GR() {
+    function getSpelling_EOF() {
         let str = "";
         for (let i = 0; i < word.length; i++) {
             let segment = word[i];
@@ -8445,10 +8467,11 @@
                     break;
             }
         }
+
         return str;
     }
 
-    function getSpelling_OF() {
+    function getSpelling_LOF() {
         let str = "";
 
         let frontVowels = ["ɛ", "e", "æ", "ə", "i", "ei̯", "e̯au̯", "øu̯", "ɛː", "eː", "iː", "j"];
@@ -8520,7 +8543,7 @@
                 case "ɛː":
                 case "eː":
                 case "øː":
-                    if (segment.OFValue == "ai̯")
+                    if (segment.LOFValue == "ai̯")
                         str += "ais";
                     else
                         str += "es";
@@ -8636,8 +8659,8 @@
                     break;
             }
         }
-        str = str.replace(/s$/, `<span class="nonHist">s</span>`);
-        return str;
+
+        return str.replace(/s$/, `<span class="nonHist">s</span>`);
     }
 
     function getSpelling_MF(lateOFWord) {
@@ -8649,13 +8672,13 @@
 
             let frontVowels = ["ɛ", "e", "ə", "æ", "œ", "i", "ei̯", "e̯au̯", "ɛː", "iː", "øː", "j"];
 
-            let doubleCons = segment.relIdx(-1).match("a", "ɛ", "æ", "ɔ", "o") && segment.relIdx(-1).stressed && segment.relIdx(-1).OFValue != "ai̯"
+            let doubleCons = segment.relIdx(-1).match("a", "ɛ", "æ", "ɔ", "o") && segment.relIdx(-1).stressed && segment.relIdx(-1).LOFValue != "ai̯"
                 && segment.relIdx(1).value == "ə";
 
             switch (segment.value) {
                 case "a":
                 case "ɑ":
-                    if (segment.OFValue == "u")
+                    if (segment.LOFValue == "u")
                         str += "ao";
                     else if (segment.relIdx(1).value == "ɲ")
                         str += "ai";
@@ -8664,9 +8687,9 @@
                     break;
                 case "ɛ":
                 case "æ":
-                    if ((segment.OFValue == "ai̯" || segment.hiatus) && (segment == word.at(-1) || segment.relIdx(1).type == "vowel" || segment.relIdx(1).value == "j"))
+                    if ((segment.LOFValue == "ai̯" || segment.droppedA) && (segment == word.at(-1) || segment.relIdx(1).type == "vowel" || segment.relIdx(1).value == "j"))
                         str += "ay";
-                    else if (segment.OFValue == "ai̯" || segment.hiatus)
+                    else if (segment.LOFValue == "ai̯" || segment.droppedA)
                         str += "ai";
                     else
                         str += "e";
@@ -8737,7 +8760,7 @@
                     str += "eau";
                     break;
                 case "ɑː":
-                    if (segment.OFValue == "u")
+                    if (segment.LOFValue == "u")
                         str += "ao";
                     else if (!segment.droppedS)
                         str += "a";
@@ -8747,7 +8770,7 @@
                         str += "aſ";
                     break;
                 case "ɛː":
-                    if (segment.OFValue == "ai̯" || segment.hiatus)
+                    if (segment.LOFValue == "ai̯" || segment.droppedA)
                         str += "ai";
                     else
                         str += "e";
@@ -8839,7 +8862,7 @@
                         str += "f";
                     break;
                 case "g":
-                    if (segment.relIdx(1).match(...frontVowels) && segment.relIdx(1).OFValue != "ai̯")
+                    if (segment.relIdx(1).match(...frontVowels) && segment.relIdx(1).LOFValue != "ai̯")
                         str += "gu";
                     else
                         str += "g";
@@ -8856,7 +8879,7 @@
                     if (segment.relIdx(1).match("œ", "øː") && segment.relIdx(2).value == "ʎ")
                         str += "cu";
                     else if (
-                        (segment.relIdx(1).match(...frontVowels) && segment.relIdx(1).OFValue != "ai̯")
+                        (segment.relIdx(1).match(...frontVowels) && segment.relIdx(1).LOFValue != "ai̯")
                         || (segment.latValue == "kʷ" && (segment.relIdx(1).type == "vowel" || segment.relIdx(1).match("j", "w", "ɥ")))
                     )
                         str += "qu";
@@ -8900,7 +8923,7 @@
                         str += "p";
                     break;
                 case "r":
-                    if (doubleCons || (segment.OFValue == "r" && segment.i != 0))
+                    if (doubleCons || (segment.LOFValue == "r" && segment.i != 0))
                         str += "rr";
                     else
                         str += "r";
@@ -8952,6 +8975,7 @@
                     break;
             }
         }
+
         return str;
     }
 
@@ -8964,21 +8988,21 @@
 
             let frontVowels = ["ɛ", "e", "ə", "æ", "œ", "i", "ei̯", "e̯au̯", "ɛː", "iː", "øː", "j"];
 
-            let doubleCons = segment.relIdx(-1).match("a", "ɛ", "æ", "ɔ", "o") && segment.relIdx(-1).stressed && segment.relIdx(-1).OFValue != "ai̯"
+            let doubleCons = segment.relIdx(-1).match("a", "ɛ", "æ", "ɔ", "o") && segment.relIdx(-1).stressed && segment.relIdx(-1).LOFValue != "ai̯"
                 && segment.relIdx(1).value == "ə";
 
             switch (segment.value) {
                 case "a":
                 case "ɑ":
-                    if (segment.OFValue == "u")
+                    if (segment.LOFValue == "u")
                         str += "ao";
                     else
                         str += "a";
                     break;
                 case "ɛ":
-                    if ((segment.OFValue == "ai̯" || segment.hiatus) && segment.relIdx(1).match("j", "i", "iː"))
+                    if ((segment.LOFValue == "ai̯" || segment.droppedA) && segment.relIdx(1).match("j", "i", "iː"))
                         str += "ay";
-                    else if (segment.OFValue == "ai̯" || segment.hiatus)
+                    else if (segment.LOFValue == "ai̯" || segment.droppedA)
                         str += "ai";
                     else if (segment == word.at(-1) || segment.relIdx(1).value == "ə" || (word.vowels.length > 1 && segment == word.at(-2) && segment.relIdx(1).value == "s̺"))
                         str += "é";
@@ -9027,7 +9051,7 @@
                 case "yː":
                     if (segment.droppedL)
                         str += "ul";
-                    else if (str.endsWith("g") && segment.relIdx(1).match(...frontVowels) && segment.relIdx(1).OFValue != "ai̯")
+                    else if (str.endsWith("g") && segment.relIdx(1).match(...frontVowels) && segment.relIdx(1).LOFValue != "ai̯")
                         str += "ü";
                     else
                         str += "u";
@@ -9057,7 +9081,7 @@
                     str += "eau";
                     break;
                 case "ɑː":
-                    if (segment.OFValue == "u")
+                    if (segment.LOFValue == "u")
                         str += "ao";
                     else if (segment == word.at(-1))
                         str += "as";
@@ -9065,9 +9089,9 @@
                         str += "â";
                     break;
                 case "ɛː":
-                    if (segment.OFValue == "ai̯" || segment.hiatus)
+                    if (segment.LOFValue == "ai̯" || segment.droppedA)
                         str += "ai";
-                    else if (segment.relIdx(1).OFValue == "r")
+                    else if (segment.relIdx(1).LOFValue == "r")
                         str += "e";
                     else
                         str += "ê";
@@ -9115,7 +9139,7 @@
                         str += "f";
                     break;
                 case "g":
-                    if (segment.relIdx(1).match(...frontVowels) && segment.relIdx(1).OFValue != "ai̯")
+                    if (segment.relIdx(1).match(...frontVowels) && segment.relIdx(1).LOFValue != "ai̯")
                         str += "gu";
                     else
                         str += "g";
@@ -9130,7 +9154,7 @@
                     if (segment.relIdx(1).match("œ", "øː") && segment.relIdx(2).value == "ʎ")
                         str += "cu";
                     else if (
-                        (segment.relIdx(1).match(...frontVowels) && segment.relIdx(1).OFValue != "ai̯")
+                        (segment.relIdx(1).match(...frontVowels) && segment.relIdx(1).LOFValue != "ai̯")
                         || (segment.latValue == "kʷ" && (segment.relIdx(1).type == "vowel" || segment.relIdx(1).match("j", "w", "ɥ")))
                     )
                         str += "qu";
@@ -9174,7 +9198,7 @@
                         str += "p";
                     break;
                 case "r":
-                    if (doubleCons || (segment.OFValue == "r" && segment.i != 0))
+                    if (doubleCons || (segment.LOFValue == "r" && segment.i != 0))
                         str += "rr";
                     else
                         str += "r";
@@ -9216,6 +9240,7 @@
                     break;
             }
         }
+
         return str;
     }
 </script>
