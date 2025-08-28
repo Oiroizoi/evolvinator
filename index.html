@@ -2889,7 +2889,7 @@
         });
 
         word.forEach(segment => {
-            if (segment.match("ɪ", "iː") && segment.relIdx(1).match("ɪ", "i", "iː")) {
+            if (segment.match("i", "iː") && segment.relIdx(1).match("ɪ", "i", "iː")) {
                 segment.value = "iː";
                 if (segment.relIdx(1).stressed)
                     segment.stressed = true;
@@ -9729,8 +9729,8 @@
                 case "ɑː":
                     if (segment.LOFValue == "u")
                         str += "ao";
-                    else if (segment == word.at(-1))
-                        str += "as";
+                    else if (segment.relIdx(1).match("z̺"))
+                        str += "a";
                     else
                         str += "â";
                     break;
