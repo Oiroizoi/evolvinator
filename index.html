@@ -6,7 +6,10 @@
     <title>Evolvinator</title>
 
     <link rel="preload" href="fonts/PfefferMediaeval.otf" as="font" type="font/otf" crossorigin>
-    <link rel="preload" href="fonts/PfefferSimpelgotisch normal.otf" as="font" type="font/otf" crossorigin>
+    <link rel="preload" href="fonts/PfefferSimpelgotisch.otf" as="font" type="font/otf" crossorigin>
+    <link rel="preload" href="fonts/RusticCapitals.ttf" as="font" type="font/ttf" crossorigin>
+    <link rel="preload" href="fonts/Stoix.ttf" as="font" type="font/ttf" crossorigin>
+    <link rel="preload" href="fonts/P39.ttf" as="font" type="font/ttf" crossorigin>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -16,28 +19,35 @@
     <style>
         @font-face {
             font-family: "Pfeffer Mediæval";
-            src: local("Pfeffer Mediæval"),
-                url("fonts/PfefferMediaeval.otf") format("opentype");
+            src: url("fonts/PfefferMediaeval.otf") format("opentype");
             unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
         }
 
         @font-face {
             font-family: "Pfeffer Mediæval";
-            src: local("Pfeffer Mediæval"),
-                url("fonts/PfefferMediaeval.otf") format("opentype");
+            src: url("fonts/PfefferMediaeval.otf") format("opentype");
             unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
         }
 
         @font-face {
             font-family: "Pfeffer Simpelgotisch";
-            src: local("Pfeffer Simpelgotisch"),
-                url("fonts/PfefferSimpelgotisch normal.otf") format("opentype");
+            src: url("fonts/PfefferSimpelgotisch.otf") format("opentype");
         }
 
         @font-face {
             font-family: "Rustic Capitals";
-            src: local("Rustic Capitals"),
-                url("fonts/RusticCapitals.ttf") format("truetype");
+            src: url("fonts/RusticCapitals.ttf") format("truetype");
+        }
+
+        @font-face {
+            font-family: "Stoix";
+            src: url("fonts/Stoix.ttf") format("truetype");
+            text-transform: uppercase;
+        }
+
+        @font-face {
+            font-family: "P39";
+            src: url("fonts/P39.ttf") format("truetype");
         }
 
         body {
@@ -55,6 +65,12 @@
 
         input[type=button] {
             margin-left: 4px;
+        }
+
+        #inputNote {
+            font-size: 14px;
+            line-height: 200%;
+            margin-top: -5px;
         }
 
         #table {
@@ -137,6 +153,19 @@
                 font-size: 18px;
                 font-style: normal;
             }
+
+            #AttGr .spelling {
+                font-family: "Stoix";
+                font-size: 18px;
+                text-transform: uppercase;
+                font-style: normal;
+            }
+
+            #KoiGr .spelling {
+                font-family: "P39";
+                font-size: 14px;
+                font-style: normal;
+            }
         }
 
         .nonHist {
@@ -161,8 +190,9 @@
 <body>
     <form autocomplete="off">
         <select name="from" id="from">
-            <option value="OE">Old English</option>
+            <option value="AttGr">Ancient Greek</option>
             <option value="lat">Classical Latin</option>
+            <option value="OE">Old English</option>
         </select>
         →
         <select name="to" id="to">
@@ -174,6 +204,8 @@
         <input type="text" name="word" id="word">
         <span id="buttons"></span>
         <br>
+
+        <div id="inputNote"></div>
 
         <label for="stress" id="stressLabel">Stressed syllable:</label>
         <select name="stress" id="stress" style="margin-right: 8px;">
@@ -209,14 +241,90 @@
 
     function init() {
         if (wordArg) {
-            wordArg = wordArg.trim().toLowerCase();
-            if (from == "OE") {
-                wordArg = wordArg.replaceAll("ð", "þ").replaceAll("ƿ", "w").replaceAll("k", "c"); //Alternative spellings
-                wordArg = wordArg.replaceAll("io", "eo").replaceAll("īo", "ēo")
-                    .replaceAll("oe", "e").replaceAll("ōe", "ē").replaceAll("œ", "e").replaceAll("œ̄", "ē"); //Dialectalal vowels
-            } else if (from == "lat") {
-                wordArg = wordArg.replaceAll("k", "c").replaceAll("j", "i").replace(/^w/, "gu");
-                wordArg = wordArg.replaceAll(/(?<=[eiouyāēīōūȳ])u(?=[aeiouyāēīōūȳ])/g, "v");
+            wordArg = wordArg.trim().toLowerCase().normalize("NFC");
+
+            //Normalize spelling
+            switch (from) {
+                case "AttGr":
+                    wordArg = wordArg.normalize("NFD");
+                    wordArg = wordArg.replaceAll("\u0306", "") //Breve
+                        .replaceAll("\u0313", "") //Smooth breathing
+                        .replaceAll("\u0342", "\u0302") //Replace Greek circumflex with Latin form
+                        .replaceAll("\u0300", "\u0301") //Replace grave accent with accute
+                        .replaceAll(/([\u0301\u0302])\u0345/g, "\u0345$1") //Switch order of accents and iota subscript
+                        .replaceAll(/\u0345/g, "\u0304\u0345") //Lengthen vowels with iota subscript
+                        .replaceAll("\u0345", "i"); //Iota subscript
+                    //Rough breathing
+                    wordArg = wordArg.replaceAll("ῥ", "rh")
+                        .replaceAll("ἁ", "ha")
+                        .replaceAll("ᾱ̔", "hā")
+                        .replaceAll("ἑ", "he")
+                        .replaceAll("ἡ", "hē")
+                        .replaceAll("ὁ", "ho")
+                        .replaceAll("ὡ", "hō");
+                    if (wordArg.includes("\u0314"))
+                        wordArg = "h" + wordArg;
+                    wordArg = wordArg.replaceAll("\u0314", "");
+                    //Convert Greek input to Latin-script
+                    wordArg = wordArg.replaceAll("α", "a")
+                        .replaceAll("β", "b")
+                        .replaceAll("γ", "g")
+                        .replaceAll("δ", "d")
+                        .replaceAll("ε", "e")
+                        .replaceAll("ζ", "z")
+                        .replaceAll("η", "ē")
+                        .replaceAll("θ", "th")
+                        .replaceAll("ι", "i")
+                        .replaceAll("κ", "k")
+                        .replaceAll("λ", "l")
+                        .replaceAll("μ", "m")
+                        .replaceAll("ν", "n")
+                        .replaceAll("ξ", "x")
+                        .replaceAll("ο", "o")
+                        .replaceAll("π", "p")
+                        .replaceAll("ρ", "r")
+                        .replaceAll("σ", "s")
+                        .replaceAll("ς", "s")
+                        .replaceAll("τ", "t")
+                        .replaceAll("υ", "y")
+                        .replaceAll("φ", "ph")
+                        .replaceAll("χ", "ch")
+                        .replaceAll("ψ", "ps")
+                        .replaceAll("ω", "ō");
+                    wordArg = wordArg.replaceAll("c", "k")
+                        //Dieresis comes before accents
+                        .replaceAll(/\u0301\u0308/g, "\u0308\u0301")
+                        .replaceAll(/\u0302\u0308/g, "\u0308\u0302")
+                        //Other spelling changes
+                        .replaceAll("kh", "ch")
+                        .replaceAll("u", "y")
+                        .replaceAll("\u0304\u0304", "\u0304")
+                        .replaceAll(/(?<=(a|ā|e|ē|o))y(?![\u0308\u0304])/g, "u")
+                        .replaceAll(/g(?=[gkcx])/g, "n")
+                        .replaceAll(/rr(?!h)/g, "rrh")
+                        .replaceAll(/chch/g, "kch")
+                        .replaceAll(/phph/g, "pph")
+                        .replaceAll(/thth/g, "tth")
+                        .replaceAll(/rhrh/g, "rrh")
+                        //Remove redundant macron before circumflex
+                        .replaceAll(/\u0304(?=\u0308?\u0302)/g, "")
+                        //Add dieresis over "i" and "y" in certain cases
+                        .replaceAll(/(?<=[\u0301\u0302])i(?![\u0308\u0304])/g, "ï")
+                        .replaceAll(/(?<=[aeoy][\u0304\u0301\u0302\u0308]*)ī(?!\u0308)/g, "ī̈")
+                        .replaceAll(/(?<=[aeo][\u0304\u0301\u0302\u0308]*)y(?![\u0308\u0304])/g, "ÿ")
+                        .replaceAll(/(?<=[aeo][\u0304\u0301\u0302\u0308]*)ȳ(?!\u0308)/g, "ȳ̈")
+                        //Remove dieresis over other vowels
+                        .replaceAll(/(?<=(a|ā|e|ē|o|ō))\u0308/g, "");
+                    wordArg = wordArg.replaceAll(/.\u0304/g, match => match.normalize("NFC"));
+                    break;
+                case "lat":
+                    wordArg = wordArg.replaceAll("k", "c").replaceAll("j", "i").replace(/^w/, "gu");
+                    wordArg = wordArg.replaceAll(/(?<=[eouyāēīōūȳ])u(?=[aeiouyāēīōūȳ])/g, "v");
+                    break;
+                case "OE":
+                    wordArg = wordArg.replaceAll("ð", "þ").replaceAll("ƿ", "w").replaceAll("k", "c"); //Alternative spellings
+                    wordArg = wordArg.replaceAll("io", "eo").replaceAll("īo", "ēo").replaceAll("oe", "e").replaceAll("ōe", "ē").replaceAll("œ", "e").replaceAll("œ̄", "ē"); //Dialectal vowels
+                    break;
             }
 
             params.set("word", wordArg);
@@ -228,66 +336,90 @@
 
         document.getElementById("word").oninput();
 
-        document.getElementById("to").innerHTML = "";
-        if (from == "OE") {
-            let ModE = document.createElement("option");
-            ModE.value = "ModE";
-            ModE.innerHTML = "Modern English";
-            document.getElementById("to").append(ModE);
-
-            let scots = document.createElement("option");
-            scots.value = "scots";
-            scots.innerHTML = "Modern Scots";
-            document.getElementById("to").append(scots);
-
-            if (to != "scots")
-                to = "ModE";
-        } else if (from == "lat") {
-            let ModF = document.createElement("option");
-            ModF.value = "ModF";
-            ModF.innerHTML = "Modern French";
-            document.getElementById("to").append(ModF);
-
-            let ModPort = document.createElement("option");
-            ModPort.value = "ModPort";
-            ModPort.innerHTML = "Modern Portuguese";
-            document.getElementById("to").append(ModPort);
-
-            let ModSp = document.createElement("option");
-            ModSp.value = "ModSp";
-            ModSp.innerHTML = "Modern Spanish";
-            document.getElementById("to").append(ModSp);
-
-            if (to != "ModF" && to != "ModPort")
-                to = "ModSp";
+        let name;
+        let descendants;
+        let defaultId;
+        switch (from) {
+            case "AttGr":
+                name = "Anceint Greek";
+                descendants = {ModGr: "Modern Greek"};
+                defaultId = "ModGr";
+                break;
+            case "lat":
+                name = "Classical Latin";
+                descendants = {ModF: "Modern French", ModPort: "Modern Portuguese", ModSp: "Modern Spanish"};
+                defaultId = "ModSp";
+                break;
+            case "OE":
+                name = "Old English";
+                descendants = {ModE: "Modern English", ModSc: "Modern Scots"};
+                defaultId = "ModE";
+                break;
         }
+
+        document.getElementById("to").innerHTML = "";
+        for (let id in descendants) {
+            let option = document.createElement("option");
+            option.value = id;
+            option.innerHTML = descendants[id];
+            document.getElementById("to").append(option);
+        }
+        if (!descendants[to])
+            to = defaultId;
 
         document.getElementById("from").value = from;
         document.getElementById("to").value = to;
 
-        if (from == "OE")
-            document.getElementById("word").placeholder = "Enter Old English word";
-        else if (from == "lat")
-            document.getElementById("word").placeholder = "Enter Classical Latin word";
+        document.getElementById("word").placeholder = `Enter ${name} word`;
 
         let specialChars;
-        if (from == "OE")
-            specialChars = ["ċ", "ġ", "þ", "æ", "ā", "ē", "ī", "ō", "ū", "ȳ", "ǣ"];
-        else if (from == "lat")
-            specialChars = ["ā", "ē", "ī", "ō", "ū", "ȳ"];
+        switch (from) {
+            case "AttGr":
+                specialChars = ["ā", "ē", "ī", "ō", "ȳ", "´", "^", "¨"];
+                break;
+            case "lat":
+                specialChars = ["ā", "ē", "ī", "ō", "ū", "ȳ"];
+                break;
+            case "OE":
+                specialChars = ["ċ", "ġ", "þ", "æ", "ā", "ē", "ī", "ō", "ū", "ȳ", "ǣ"];
+                break;
+        }
         document.getElementById("buttons").innerHTML = "";
         specialChars.forEach(char => {
+            let inputChar;
+            switch (char) {
+                case "´":
+                    inputChar = "\u0301";
+                    break;
+                case "^":
+                    inputChar = "\u0302";
+                    break;
+                case "¨":
+                    inputChar = "\u0308";
+                    break;
+                default:
+                    inputChar = char;
+            }
+
             let button = document.createElement("input");
             button.value = char;
             button.type = "button";
             button.onclick = () => {
                 let wordInput = document.getElementById("word");
-                wordInput.setRangeText(char, wordInput.selectionStart, wordInput.selectionEnd, "end");
+                wordInput.setRangeText(inputChar, wordInput.selectionStart, wordInput.selectionEnd, "end");
                 wordInput.oninput();
                 wordInput.focus();
             };
             document.getElementById("buttons").append(button);
         });
+
+        if (from == "AttGr") {
+            document.getElementById("inputNote").innerHTML = "Note: Latin- and Greek-script inputs are both accepted.";
+            document.getElementById("inputNote").style.display = "";
+        } else {
+            document.getElementById("inputNote").innerHTML = "";
+            document.getElementById("inputNote").style.display = "none";
+        }
 
         if (from == "OE") {
             document.getElementById("stressLabel").style.display = "";
@@ -296,21 +428,33 @@
         } else {
             document.getElementById("stressLabel").style.display = "none";
             document.getElementById("stress").style.display = "none";
+            document.getElementById("stress").value = "";
         }
 
-        if (from == "OE") {
-            document.getElementById("pos").innerHTML = `
-                <option value="inf">Infinitive verb</option>
-                <option value="conjVerb">Conjugated verb</option>
-                <option value="pastPtcp">Past participle</option>
-                <option value="other" selected>Other</option>
+
+        switch (from) {
+            case "AttGr":
+                document.getElementById("pos").innerHTML = `
+                    <option value="noun">Noun</option>
+                    <option value="verb">Verb</option>
+                    <option value="other" selected>Other</option>
             `;
-        } else if (from == "lat") {
-            document.getElementById("pos").innerHTML = `
-                <option value="inf">Infinitive verb</option>
-                <option value="conjVerb">Conjugated verb</option>
-                <option value="other" selected>Other</option>
+                break;
+            case "lat":
+                document.getElementById("pos").innerHTML = `
+                    <option value="inf">Infinitive verb</option>
+                    <option value="conjVerb">Conjugated verb</option>
+                    <option value="other" selected>Other</option>
             `;
+                break;
+            case "OE":
+                document.getElementById("pos").innerHTML = `
+                    <option value="inf">Infinitive verb</option>
+                    <option value="conjVerb">Conjugated verb</option>
+                    <option value="pastPtcp">Past participle</option>
+                    <option value="other" selected>Other</option>
+            `;
+                break;
         }
 
         if (Array.from(document.getElementById("pos").options).some(option => option.value == partOfSpeech))
@@ -373,7 +517,7 @@
 
         let row = document.createElement("tr");
         row.id = id;
-        row.innerHTML = `<td>${name}</td> <td>c. ${date}</td> <td class="spelling">${spelling}</td> <td>[${word}]</td>`;
+        row.innerHTML = `<td>${name}</td> <td>${date ? "c. " + date : ""}</td> <td class="spelling">${spelling}</td> <td>[${word}]</td>`;
         if (hidden)
             row.classList.add("hidden");
         document.getElementById("table").append(row);
@@ -387,52 +531,65 @@
         word.partOfSpeech = partOfSpeech;
 
         try {
-            if (from == "OE" && to == "ModE") {
-                getIPA_OE();
-                OE_to_EME();
-                EME_to_LME();
-                LME_to_EModE();
-                EModE_to_ModE();
-                ModE_to_UK();
-                ModE_to_US();
-                UK_to_AU();
-            } else if (from == "OE" && to == "scots") {
-                getIPA_OE();
-                OE_to_EME("northumbrian");
-                EME_to_LME("scots");
-                LME_to_EModE("scots");
-                EModE_to_ModE("scots");
-                ModE_to_ModSc();
-            } else if (from == "lat" && to == "ModSp") {
-                getIPA_lat();
-                lat_to_LL();
-                LL_to_WR("spanish");
-                WR_to_IR();
-                IR_to_OSp();
-                OSp_to_ModSp();
-            } else if (from == "lat" && to == "ModF") {
-                getIPA_lat();
-                lat_to_LL();
-                LL_to_WR("french");
-                WR_to_EOF();
-                EOF_to_LOF();
-                LOF_to_MF();
-                MF_to_ModF();
-            } else if (from == "lat" && to == "ModPort") {
-                getIPA_lat();
-                lat_to_LL();
-                LL_to_WR("portuguese");
-                WR_to_IR();
-                IR_to_OGP();
-                OGP_to_ModPort();
-                ModPort_to_Port();
-                ModPort_to_Br();
+            switch (from) {
+                case "AttGr":
+                    getIPA_AttGr();
+                    AttGr_to_ModGr();
+                    break;
+                case "lat":
+                    getIPA_lat();
+                    lat_to_LL();
+                    switch (to) {
+                        case "ModF":
+                            LL_to_WR("french");
+                            WR_to_EOF();
+                            EOF_to_LOF();
+                            LOF_to_MF();
+                            MF_to_ModF();
+                            break;
+                        case "ModPort":
+                            LL_to_WR("portuguese");
+                            WR_to_IR();
+                            IR_to_OGP();
+                            OGP_to_ModPort();
+                            ModPort_to_Port();
+                            ModPort_to_Br();
+                            break;
+                        case "ModSp":
+                            LL_to_WR("spanish");
+                            WR_to_IR();
+                            IR_to_OSp();
+                            OSp_to_ModSp();
+                            break;
+                    }
+                    break;
+                case "OE":
+                    getIPA_OE();
+                    switch (to) {
+                        case "ModE":
+                            OE_to_EME();
+                            EME_to_LME();
+                            LME_to_EModE();
+                            EModE_to_ModE();
+                            ModE_to_UK();
+                            ModE_to_US();
+                            UK_to_AU();
+                            break;
+                        case "ModSc":
+                            OE_to_EME("northumbrian");
+                            EME_to_LME("scots");
+                            LME_to_EModE("scots");
+                            EModE_to_ModE("scots");
+                            ModE_to_ModSc();
+                            break;
+                    }
+                    break;
             }
 
             document.getElementById("outcomes").style.display = "block";
         } catch (err) {
             console.error(err);
-            alert("Error: invalid word");
+            alert((typeof err == "string") ? err : "Error: invalid word");
         }
     }
 
@@ -588,10 +745,26 @@
             this.remove = () => this.word.splice(this.i, 1);
             this.toString = () => {
                 let str = "";
-                for (let char of this.value) {
+                for (let i in this.value) {
+                    let char = this.value[i];
                     str += char;
-                    if (this.nasalized && char != "̯")
-                        str += "̃";
+                    if (this.nasalized && !char.match(/[\u0300-\u036f]/))
+                        str += "\u0303";
+                    if (i == 0 && this.pitch)
+                        switch (this.pitch) {
+                            case "low":
+                                str += "\u0300";
+                                break;
+                            case "high":
+                                str += "\u0301";
+                                break;
+                            case "rising":
+                                str += "\u030C";
+                                break;
+                            case "falling":
+                                str += "\u0302";
+                                break;
+                        }
                 }
                 if (this.stressed && !this.relIdx(-1).stressed)
                     str = "ˈ" + str;
@@ -910,16 +1083,117 @@
                         segment.value = "yː";
                         break;
                 }
-                segment.value = segment.value.slice(0, 1) + "̃" + segment.value.slice(1);
+                segment.value = segment.value.slice(0, 1) + "\u0303" + segment.value.slice(1);
                 segment.relIdx(1).remove();
             }
         });
         if (word.at(-1).value == "m" && word.at(-2).type == "vowel" && !word.at(-2).stressed) {
-            word.at(-2).value = word.at(-2).value.slice(0, 1) + "̃" + word.at(-2).value.slice(1);
+            word.at(-2).value = word.at(-2).value.slice(0, 1) + "\u0303" + word.at(-2).value.slice(1);
             word.at(-1).remove();
         }
 
         addRow("lat", "Classical Latin", "AD 50", getSpelling_lat(), word);
+    }
+
+    function getIPA_AttGr() {
+        let charToPhoneme = [
+            ["a", "a"],
+            ["ā", "aː"],
+            ["ai", "ai̯"],
+            ["āi", "aːi̯"],
+            ["au", "au̯"],
+            ["āu", "aːu̯"],
+            ["b", "b"],
+            ["ch", "kʰ"],
+            ["d", "d"],
+            ["e", "e"],
+            ["ē", "ɛː"],
+            ["ei", "eː"],
+            ["ēi", "ɛːi̯"],
+            ["eu", "eu̯"],
+            ["ēu", "ɛːu̯"],
+            ["g", "g"],
+            ["h", "h"],
+            ["i", "i"],
+            ["ī", "iː"],
+            ["k", "k"],
+            ["l", "l"],
+            ["m", "m"],
+            ["n", "n"],
+            ["o", "o"],
+            ["ō", "ɔː"],
+            ["oi", "oi̯"],
+            ["ōi", "ɔːi̯"],
+            ["ou", "uː"],
+            ["p", "p"],
+            ["ph", "pʰ"],
+            ["r", "r"],
+            ["rh", "r̥"],
+            ["s", "s"],
+            ["t", "t"],
+            ["th", "tʰ"],
+            ["x", "k,s"],
+            ["y", "y"],
+            ["ȳ", "yː"],
+            ["yi", "yi̯"],
+            ["z", "z,d"],
+        ];
+
+        let noAccents = wordArg.normalize("NFD").replaceAll("\u0301", "").replaceAll(/(?<=[iu])\u0302/g, "").replaceAll(/(?<=\u0304)\u0308/g, "").replaceAll(/\u0308(?=\u0302)/g, "").normalize("NFC");
+        for (let i = 0; i < noAccents.length; i++) {
+            let phonemes;
+            let digraphPair = charToPhoneme.find(pair => pair[0] == noAccents[i].normalize("NFD").replace("\u0308", "").normalize("NFC") + noAccents[i + 1]);
+            if (digraphPair) {
+                phonemes = digraphPair[1];
+                i++;
+            } else {
+                let noAccents = wordArg.normalize("NFD").replaceAll("\u0301", "").replaceAll("\u0302", "\u0304").replaceAll("\u0308", "").normalize("NFC");
+                phonemes = charToPhoneme.find(pair => pair[0] == noAccents[i])[1];
+            }
+            phonemes.split(",").forEach(phoneme => word.insert(phoneme, word.length));
+
+            let accent = wordArg.normalize("NFD").replaceAll("\u0304", "").replaceAll("\u0308", "")[i + 1];
+            if (accent == "\u0301" && word.at(-1).value.length == 1)
+                word.at(-1).pitch = "high";
+            else if (accent == "\u0301")
+                word.at(-1).pitch = "rising";
+            else if (accent == "\u0302")
+                word.at(-1).pitch = "falling";
+        }
+
+        if (word.some(segment => segment.type == "consonant" && segment.pitch))
+            throw new Error("Accented consonant");
+        if (wordArg[0].match(/[\u0301\u0302]/))
+            throw new Error("Uncombined accent");
+        if (word.vowels.length > 1 && !wordArg.normalize("NFD").match(/[\u0301\u0302]/g))
+            throw "At least one vowel must be accented in multi-syllabic words";
+        if (wordArg.normalize("NFD").match(/[\u0301\u0302]/g)?.length > 1)
+            throw "Only one accent per word";
+
+        //Allophones
+        word.replace("n", "ŋ", "_k/kʰ/g");
+        word.replace("g", "ŋ", "_m");
+        word.replace("s", "z", "_m/n/b/d/g");
+        word.replace("r", "r̥", "_r̥");
+
+        word.forEach(segment => {
+            if ((segment.value.endsWith("i̯") || segment.value.endsWith("u̯")) && segment.relIdx(1).type == "vowel")
+                segment.value += "ː";
+        });
+
+        word.forEach(segment => {
+            if (segment.value == "k" && segment.relIdx(1).match("b", "d", "g")) {
+                segment.value = "g";
+                segment.voiced = true;
+            }
+
+            if (segment.value == "yi̯") {
+                segment.value = "yː";
+                segment.diphthong = true;
+            }
+        });
+
+        addRow("AttGr", "Attic Ancient Greek", "400 BC", getSpelling_AttGr(), word);
     }
 
     function OE_to_EME(variety) {
@@ -1333,7 +1607,7 @@
                 && (segment.relIdx(2).type == "vowel" || segment.relIdx(2).value == "j" || segment.relIdx(2).value == segment.relIdx(1).value)
                 && !(segment.relIdx(2) == word.at(-1) && segment.relIdx(2).value == "ə" && segment.relIdx(1).value != "s")
                 && !(segment.relIdx(-1).value == "t͡ʃ" && segment.relIdx(1).value == "s")
-                && !segment.relIdx(2).inSuffix
+                && !(segment.relIdx(2).inSuffix && segment.relIdx(2).match("ə", "i"))
             )
                 segment.remove();
         });
@@ -2233,7 +2507,7 @@
                 segment.remove();
         });
 
-        addRow("UK", "Modern English (UK)", "2000", word.modernSpelling, word);
+        addRow("UK", "Modern English (UK)", "", word.modernSpelling, word);
     }
 
     function ModE_to_US() {
@@ -2312,7 +2586,7 @@
         word.replace("i", "iə̯", "_ɫ,C/#");
         word.replace("u", "uə̯", "_ɫ,C/#");
 
-        addRow("US", "Modern English (US)", "2000", word.modernSpelling, word, true);
+        addRow("US", "Modern English (US)", "", word.modernSpelling, word, true);
     }
 
     function UK_to_AU() {
@@ -2380,7 +2654,7 @@
                 segment.value = "ɪə̯";
         });
 
-        addRow("AU", "Modern English (AU)", "2000", word.modernSpelling, word, true);
+        addRow("AU", "Modern English (AU)", "", word.modernSpelling, word, true);
     }
 
     function ModE_to_ModSc() {
@@ -2545,7 +2819,7 @@
 
         word.replace("øː", "eː", "_#");
 
-        addRow("scots", "Modern Scots", "2000", getSpelling_ModSc(word), word);
+        addRow("scots", "Modern Scots", "", getSpelling_ModSc(word), word);
     }
 
     function lat_to_LL() {
@@ -2567,7 +2841,7 @@
             word[0].remove();
 
         //Denasalization
-        if (word.at(-1).value.endsWith("̃"))
+        if (word.at(-1).value.endsWith("\u0303"))
             word.at(-1).value = word.at(-1).value[0];
 
         word.replace("m", "n", "_#");
@@ -2879,6 +3153,12 @@
         word.replace("n", "ɲ", "_ɲ");
         word.replace("lʲ", "ʎ", "V/C_");
         word.replace("l", "ʎ", "_ʎ");
+
+        if (variety == "french")
+            word.forEach(segment => {
+                if (segment.type == "vowel" && segment.relIdx(-2).type == "vowel" && segment.relIdx(-1).match("k", "g") && segment.relIdx(1).match("l", "r", "t") && !segment.stressed)
+                    segment.remove();
+            });
 
         word.replace("k", "kʲ", "_ɛ/ɛː/e/eː/ɪ/ɪː/i/iː");
         word.replace("g", "gʲ", "_ɛ/ɛː/e/eː/ɪ/ɪː/i/iː");
@@ -3875,7 +4155,7 @@
 
         word.replace("x", "χ");
 
-        addRow("Spain", "Modern Spanish (Spain)", "2000", getSpelling_ModSp(EModSpWord), word);
+        addRow("Spain", "Modern Spanish (Spain)", "", getSpelling_ModSp(EModSpWord), word);
 
 
         word = beforeSplit;
@@ -3883,7 +4163,7 @@
         word.replace("s̺", "s");
         word.replace("z̺", "z");
 
-        addRow("LatAm", "Modern Spanish (Lat. Am.)", "2000", getSpelling_ModSp(EModSpWord), word, true);
+        addRow("LatAm", "Modern Spanish (Lat. Am.)", "", getSpelling_ModSp(EModSpWord), word, true);
     }
 
     function IR_to_OGP() {
@@ -3940,7 +4220,7 @@
 
         word.replace("b", "β", "ɫ/ɾ_");
 
-        if (word.at(-1).value == "n" && !word.at(-2).stressed && word.partOfSpeech != "conjVerb")
+        if (word.at(-1).value == "n" && !word.vowels.at(-1).stressed && word.partOfSpeech != "conjVerb")
             word.at(-1).remove();
 
         word.replace("w", "β", "ð/ɫ_");
@@ -3971,12 +4251,14 @@
         });
 
         //Nasalization
+        word.remove("j", "_m/n/ŋ,C/#");
+        word.remove("w", "_m/n/ŋ,C/#");
         word.forEach(segment => {
             if (segment.type == "vowel" && segment.relIdx(1).match("m", "n", "ŋ") && (segment.relIdx(2).type != "vowel" || segment.relIdx(1).value == "n") && !segment.relIdx(2).match("m", "n", "j", "w")) {
                 if (segment.relIdx(2).value == "i" && segment.relIdx(2).stressed && segment.relIdx(3).type == "vowel")
-                    segment.relIdx(2).value += "̃";
+                    segment.relIdx(2).value += "\u0303";
                 else
-                    segment.value += "̃";
+                    segment.value += "\u0303";
                 segment.relIdx(1).remove();
             }
         });
@@ -4031,7 +4313,7 @@
 
         word.forEach(segment => {
             if (segment.value.endsWith("ʲ")) {
-                if (segment.relIdx(-1).type == "vowel" && !segment.relIdx(-1).value.endsWith("̃"))
+                if (segment.relIdx(-1).type == "vowel" && !segment.relIdx(-1).value.endsWith("\u0303"))
                     word.insert("j", segment.i);
                 segment.value = segment.value.slice(0, -1);
             }
@@ -4077,7 +4359,7 @@
         word.replace("u", "ũ", "ũ_");
 
         word.forEach(segment => {
-            if (segment.value == "j" && segment.relIdx(-1).value.endsWith("̃") && segment.relIdx(1).match("t", "d", "t͡s", "d͡z"))
+            if (segment.value == "j" && segment.relIdx(-1).value.endsWith("\u0303") && segment.relIdx(1).match("t", "d", "t͡s", "d͡z"))
                 segment.remove();
         });
 
@@ -4264,10 +4546,10 @@
 
         //Denasalization before vowels and certain consonants
         word.forEach(segment => {
-            if (segment.value.endsWith("̃") && (segment.relIdx(1).type == "vowel" || segment.relIdx(1).match("ɾ", "m", "n", "ɲ")))
+            if (segment.value.endsWith("\u0303") && (segment.relIdx(1).type == "vowel" || segment.relIdx(1).match("ɾ", "m", "n", "ɲ")))
                 segment.value = segment.value[0];
 
-            if (segment.value.endsWith("̃") && segment.relIdx(1).match("j", "w") && segment.relIdx(2).match("ɾ", "m", "n", "ɲ"))
+            if (segment.value.endsWith("\u0303") && segment.relIdx(1).match("j", "w") && segment.relIdx(2).match("ɾ", "m", "n", "ɲ"))
                 segment.value = segment.value[0];
         });
 
@@ -4294,15 +4576,12 @@
         word.replace("t͡ʃ", "ʃ");
         word.replace("d͡ʒ", "ʒ");
 
-        word.forEach(segment => {
-            if (segment.value.endsWith("̃") && segment.relIdx(1).match("j", "w"))
-                segment.relIdx(1).value += "̃";
-        });
+        word.replace("j", "ɪ̯", "V_");
+        word.replace("w", "ʊ̯", "V_");
 
-        //Gemination of intervocalic semivowels
         word.forEach(segment => {
-            if (segment.match("j", "w") && segment.relIdx(-1).type == "vowel" && segment.relIdx(1).type == "vowel")
-                word.insert(segment.value, segment.i);
+            if (segment.value.endsWith("\u0303") && segment.relIdx(1).match("ɪ̯", "ʊ̯"))
+                segment.relIdx(1).value += "\u0303";
         });
 
         word.replace("r", "ʁ");
@@ -4317,7 +4596,7 @@
         word = outcomes.ModPort.duplicate();
 
         word.forEach(segment => {
-            if (segment.i != 0 && segment.relIdx(-1).value != "ɫ" && !segment.relIdx(-1).value.endsWith("̃")) {
+            if (segment.i != 0 && segment.relIdx(-1).value != "ɫ" && !segment.relIdx(-1).value.endsWith("\u0303")) {
                 switch (segment.value) {
                     case "b":
                         segment.value = "β";
@@ -4360,11 +4639,11 @@
         });
 
         word.forEach(segment => {
-            if (segment.value == "e" && !segment.stressed && !segment.relIdx(1).match("j", "w"))
+            if (segment.value == "e" && !segment.stressed && !segment.relIdx(1).match("ɪ̯", "ʊ̯"))
                 segment.value = "ɨ";
 
             if (
-                segment.value == "i" && !segment.stressed && !segment.relIdx(1).match("j", "w")
+                segment.value == "i" && !segment.stressed && !segment.relIdx(1).value != "ʊ̯"
                 && (segment.relIdx(-1).match("ʎ", "ɲ", "ʃ", "ʒ") || segment.relIdx(1).match("ʎ", "ɲ", "ʃ", "ʒ") || segment.prevVowel().match("i", "ĩ") || segment.nextVowel().match("i", "ĩ"))
             )
                 segment.value = "ɨ";
@@ -4373,7 +4652,7 @@
             word.at(-1).value = "ɨ";
 
         word.forEach(segment => {
-            if (segment.value == "o" && !segment.stressed && !segment.relIdx(1).match("j", "w", "ɫ"))
+            if (segment.value == "o" && !segment.stressed && !segment.relIdx(1).match("ɪ̯", "ʊ̯", "ɫ"))
                 segment.value = "u";
         });
 
@@ -4382,19 +4661,23 @@
 
         word.replace("l", "ɫ");
 
-        word.remove("w", "o_");
+        word.remove("ʊ̯", "o_");
 
-        word.replace("e", "ɜ", "_j/ʎ/ɲ/ʒ");
-        word.replace("ẽ", "ɜ̃", "_j̃");
+        word.replace("e", "ɜ", "_ɪ̯/ʎ/ɲ/ʒ");
+        word.replace("ẽ", "ɜ̃", "_ɪ̯̃");
 
-        addRow("Port", "Modern Portuguese (Portugal)", "2000", getSpelling_ModPort(word.EModPortWord), word);
+        //Gemination of intervocalic semivowels
+        word.replace("ɪ̯", "ɪ̯ː", "_V");
+        word.replace("ʊ̯", "ʊ̯ː", "_V");
+
+        addRow("Port", "Modern Portuguese (Portugal)", "", getSpelling_ModPort(word.EModPortWord), word);
     }
 
     function ModPort_to_Br() {
         word = outcomes.ModPort.duplicate();
 
         if (word.stressedVowel.relIdx(1).match("m", "n", "ɲ"))
-            word.stressedVowel.value += "̃";
+            word.stressedVowel.value += "\u0303";
         word.replace("ɛ̃", "ẽ");
         word.replace("ɔ̃", "õ");
 
@@ -4414,9 +4697,9 @@
 
         word.replace("ɲ", "j̃");
 
-        word.remove("w", "o_");
+        word.remove("ʊ̯", "o_");
 
-        word.replace("ɫ", "w", "_C/#");
+        word.replace("ɫ", "ʊ̯");
 
         word.replace("t", "t͡ʃ", "_i");
         word.replace("d", "d͡ʒ", "_i");
@@ -4428,9 +4711,13 @@
             word.remove("h", "_#");
 
         if (word.at(-1).value == "s" && word.at(-2).match("a", "ɛ", "e", "ɔ", "o", "u") && word.at(-2).stressed)
-            word.insert("j", -1);
+            word.insert("ɪ̯", -1);
 
-        addRow("Br", "Modern Portuguese (Brazil)", "2000", getSpelling_ModPort(word.EModPortWord, "br"), word, true);
+        //Gemination of intervocalic semivowels
+        word.replace("ɪ̯", "ɪ̯ː", "_V");
+        word.replace("ʊ̯", "ʊ̯ː", "_V");
+
+        addRow("Br", "Modern Portuguese (Brazil)", "", getSpelling_ModPort(word.EModPortWord, "br"), word, true);
     }
 
     function WR_to_EOF(variety) {
@@ -4808,6 +5095,8 @@
                 segment.value = segment.value.slice(0, -1);
         });
 
+        console.log(word.toString());
+
         //Unstressed final vowel loss
         let finalVowel = word.vowels.at(-1);
         if (!finalVowel.stressed) {
@@ -4817,6 +5106,7 @@
                 || (finalVowel.relIdx(-2).value == "d" && finalVowel.relIdx(-1).value == "d͡z")
                 || (finalVowel.relIdx(1).type == "consonant" && finalVowel.relIdx(2).type == "consonant")
                 || (finalVowel.relIdx(-2).value == "ð" && finalVowel.relIdx(-1).value == "β")
+                || (word.partOfSpeech == "inf" && word.vowels.length == 2)
             )
                 finalVowel.value = "ə";
             else
@@ -5361,9 +5651,9 @@
         word.forEach(segment => {
             segment.nasalized = false;
             if (segment.type == "vowel" && segment.relIdx(1).match("m", "n", "ɲ", "ŋ") && segment.relIdx(2).type != "vowel" && !segment.relIdx(2).match("j", "w")) {
-                segment.value = segment.value.slice(0, 1) + "̃" + segment.value.slice(1);
+                segment.value = segment.value.slice(0, 1) + "\u0303" + segment.value.slice(1);
                 if (segment.value.length > 2)
-                    segment.value += "̃";
+                    segment.value += "\u0303";
                 else if (segment.value != "ə̃")
                     segment.value += "ː";
                 segment.relIdx(1).remove();
@@ -5385,7 +5675,7 @@
         word = outcomes.MF.duplicate();
 
         word.forEach(segment => {
-            if (segment.value == "j" && segment.relIdx(-1).match("ʃ", "ʒ", "ʎ", "ɲ") && !segment.relIdx(1).value.includes("̃")) {
+            if (segment.value == "j" && segment.relIdx(-1).match("ʃ", "ʒ", "ʎ", "ɲ") && !segment.relIdx(1).value.includes("\u0303")) {
                 word.lateOFWord.vowels[word.vowels.indexOf(segment.nextVowel())].relIdx(-1).remove();
                 segment.remove();
             }
@@ -5494,7 +5784,360 @@
         word.replace("ʁ", "χ", "_p/t/k/f/s/ʃ");
         word.replace("ʁ", "χ", "V_#");
 
-        addRow("ModF", "Modern French", "2000", getSpelling_ModF(word.lateOFWord), word);
+        addRow("ModF", "Modern French", "", getSpelling_ModF(word.lateOFWord), word);
+    }
+
+    function AttGr_to_ModGr() {
+        word = outcomes.AttGr.duplicate();
+
+        word.forEach(segment => {
+            if (segment.value.endsWith("i̯ː") || segment.value.endsWith("u̯ː"))
+                segment.value = segment.value.slice(0, -1);
+        });
+
+        //Attic verb contraction
+        if (word.partOfSpeech == "verb")
+            word.forEach(segment => {
+                if (segment.type == "vowel" && segment.relIdx(1).type == "vowel" && segment.pitch == "high") {
+                    switch (segment.value) {
+                        case "a":
+                            switch (segment.relIdx(1).value) {
+                                case "a":
+                                case "aː":
+                                case "e":
+                                case "ɛː":
+                                    segment.value = "aː";
+                                    break;
+                                case "ai̯":
+                                case "i":
+                                    segment.value = "ai̯";
+                                    break;
+                                case "aːi̯":
+                                case "eː":
+                                case "ɛːi̯":
+                                    segment.value = "aːi̯";
+                                    break;
+                                case "o":
+                                case "uː":
+                                case "ɔː":
+                                    segment.value = "ɔː";
+                                    break;
+                                case "oi̯":
+                                case "ɔːi̯":
+                                    segment.value = "ɔːi̯";
+                                    break;
+                            }
+                            segment.pitch = "falling";
+                            segment.relIdx(1).remove();
+                            break;
+                        case "e":
+                            if (segment != word.vowels[0] || segment.relIdx(1).match("e", "eː")) {
+                                switch (segment.relIdx(1).value) {
+                                    case "a":
+                                    case "aː":
+                                    case "ɛː":
+                                        segment.value = "ɛː";
+                                        break;
+                                    case "ai̯":
+                                    case "ɛːi̯":
+                                        segment.value = "ɛːi̯";
+                                        break;
+                                    case "e":
+                                    case "eː":
+                                    case "i":
+                                        segment.value = "eː";
+                                        break;
+                                    case "o":
+                                    case "uː":
+                                        segment.value = "uː";
+                                        break;
+                                    case "oi̯":
+                                        segment.value = "oi̯";
+                                        break;
+                                    case "ɔː":
+                                        segment.value = "ɔː";
+                                        break;
+                                    case "ɔːi̯":
+                                        segment.value = "ɔːi̯";
+                                        break;
+                                    case "y":
+                                        segment.value = "eu̯";
+                                        break;
+                                }
+                                segment.pitch = "falling";
+                                segment.relIdx(1).remove();
+                            }
+                            break;
+                        case "o":
+                            switch (segment.relIdx(1).value) {
+                                case "a":
+                                case "ɛː":
+                                case "ɔː":
+                                    segment.value = "ɔː";
+                                    break;
+                                case "e":
+                                case "o":
+                                case "uː":
+                                    segment.value = "uː";
+                                    break;
+                                case "eː":
+                                case "i":
+                                case "oi̯":
+                                    segment.value = "oi̯";
+                                    break;
+                                case "ɛːi̯":
+                                case "ɔːi̯":
+                                    segment.value = "ɔːi̯";
+                                    break;
+                            }
+                            segment.pitch = "falling";
+                            segment.relIdx(1).remove();
+                            break;
+                    }
+                }
+                segment.AttGrValue = segment.value;
+            });
+        word.ancientSpelling = getSpelling_AttGr();
+
+        word.replace("ŋ", "g", "_m");
+
+        word.replace("aːi̯", "aː");
+        word.replace("ɛːi̯", "ɛː");
+        word.replace("ɔːi̯", "ɔː");
+
+        word.forEach(segment => {
+            if (segment.value.endsWith("u̯")) {
+                segment.value = segment.value.slice(0, -2);
+                word.insert("β", segment.i + 1);
+            }
+        });
+
+        word.replace("ɛː", "eː");
+        word.replace("ɔː", "oː");
+
+        word.replace("ai̯", "ɛː");
+        word.replace("oi̯", "yː");
+
+        word.replace("eː", "iː");
+        word.replace("ɛː", "eː");
+
+        word.forEach(segment => {
+            if (segment.value.includes("ː"))
+                segment.value = segment.value[0] + segment.value.slice(2);
+        });
+
+        word.remove("h");
+        word.replace("r̥", "r");
+
+        word.replace("k", "c", "_e/i/y");
+        word.replace("kʰ", "cʰ", "_e/i/y");
+        word.replace("g", "ɟ", "_e/i/y");
+        word.replace("k", "c", "_c/cʰ");
+        word.replace("g", "ɟ", "_ɟ");
+        word.replace("ŋ", "ɲ", "_c/cʰ/ɟ");
+
+        //Spirantization
+        word.remove("d", "z_");
+        word.replace("pʰ", "ɸ");
+        word.replace("tʰ", "θ");
+        word.replace("cʰ", "ç");
+        word.replace("kʰ", "x");
+        word.forEach(segment => {
+            switch (segment.value) {
+                case "b":
+                    if (segment.relIdx(-1).value != "m")
+                        segment.value = "β";
+                    break;
+                case "d":
+                    if (segment.relIdx(-1).value != "n")
+                        segment.value = "ð";
+                    break;
+                case "ɟ":
+                    if (segment.relIdx(-1).value != "ɲ")
+                        segment.value = "ʝ";
+                    break;
+                case "g":
+                    if (segment.relIdx(-1).value != "ŋ")
+                        segment.value = "ɣ";
+                    break;
+            }
+        });
+
+
+        word.forEach(segment => {
+            if (segment.pitch) {
+                segment.stressed = true;
+                if (segment.relIdx(-1).type == "consonant")
+                    segment.relIdx(-1).stressed = true;
+                if (segment.relIdx(-2).match("p", "t", "k", "ɸ", "θ", "x", "β", "ð", "ɣ") && segment.relIdx(-1).match("l", "r", "n"))
+                    segment.relIdx(-2).stressed = true;
+                segment.ancientPitch = segment.pitch;
+                delete segment.pitch;
+            }
+        });
+        word.forEach(segment => {
+            if (word.vowels[0].stressed && segment.i < word.vowels[0].i)
+                segment.stressed = true;
+        });
+
+        word.replace("β", "ɸ", "_p/t/c/k/ɸ/θ/ç/x/s/#");
+
+        addRow("KoiGr", "Koine Greek", "AD 400", getSpelling_KoiGr(), word);
+
+
+        word.replace("p", "b", "m_");
+        word.replace("t", "d", "n_");
+        word.replace("c", "ɟ", "ɲ_");
+        word.replace("k", "g", "ŋ_");
+        word.replace("b", "p", "_t/s");
+        word.replace("d", "t", "_s");
+        word.replace("g", "k", "_t/s");
+
+        word.replace("ɸ", "f");
+        word.replace("β", "v");
+
+        //Degemination
+        for (let i = 0; i < word.length; i++) {
+            let segment = word[i];
+            if (segment.type == "consonant" && segment.value == segment.relIdx(-1).value) {
+                segment.relIdx(-1).remove();
+                segment.degeminated = true;
+                i--;
+            }
+        }
+
+        word.forEach(segment => {
+            if (segment.value == "ɣ" && segment.relIdx(1).value == "v") {
+                let temp = segment.relIdx(1);
+                word[segment.i + 1] = segment;
+                word[segment.i] = temp;
+            }
+        });
+        word.replace("ɣ", "ʝ", "_e/i/y");
+
+        word.replace("p", "f", "_t/k");
+        word.replace("t", "θ", "_p/k");
+        word.replace("k", "x", "_p/t");
+        word.replace("f", "p", "_s");
+        word.replace("θ", "t", "_s");
+        word.replace("x", "k", "_s");
+        word.replace("f", "p", "θ/x_");
+        word.replace("θ", "t", "f/s/x_");
+        word.replace("ç", "c", "f/θ/s_");
+        word.replace("x", "k", "f/θ/s_");
+        word.replace("f", "p", "m_t/k");
+        word.replace("x", "k", "ŋ_p/t");
+
+        word.replace("y", "i");
+
+        word.remove("n", "_#");
+
+        word.remove("m", "_f");
+        word.remove("n", "_θ/s");
+        word.remove("ɲ", "_ç");
+        word.remove("ŋ", "_x");
+
+        if (word.partOfSpeech == "verb" && word[0].value == "e" && !word[0].stressed && word.vowels.length > 1 && !(word[1].match("l", "r") && word[2].type == "consonant"))
+            word[0].remove();
+
+        for (let i = 0; i < word.length; i++) {
+            let segment = word[i];
+            if (segment.type == "vowel" && segment.value == segment.relIdx(-1).value) {
+                if (segment.stressed)
+                    segment.relIdx(-1).stressed = true;
+                segment.remove();
+                i--;
+            }
+        }
+
+        word.forEach(segment => {
+            if (word.partOfSpeech == "noun" && segment.KoiGrValue == "i" && segment.relIdx(1).value == "o" && segment.relIdx(1) == word.vowels.at(-1)) {
+                segment.relIdx(1).value = "i";
+                if (segment.stressed)
+                    segment.relIdx(1).stressed = true;
+                segment.remove();
+            }
+
+            if (segment.match("e", "i") && segment.relIdx(1).type == "vowel" && segment.relIdx(1).value != "i" && !(segment.relIdx(-1).value == "r" && segment.relIdx(-2).type == "consonant")) {
+                segment.value = "j";
+                segment.type = "consonant";
+                if (segment.stressed)
+                    segment.relIdx(1).stressed = true;
+                if (segment.relIdx(1).stressed)
+                    segment.stressed = true;
+            }
+        });
+        word.remove("j", "j_");
+
+        word.replace("v", "m", "_n");
+        word.remove("v", "_m");
+
+        word.replace("l", "r", "_θ");
+
+        let earlyModernWord = word.duplicate();
+
+        word.replaceSeq("m,b", "ᵐb");
+        word.replaceSeq("n,d", "ⁿd");
+        word.replaceSeq("ɲ,ɟ", "ᶮɟ");
+        word.replaceSeq("ŋ,g", "ᵑg");
+
+        //Syllabification
+        if (word.vowels.length > 1) {
+            let nonLiquidClusters = ["ft", "xt", "vð", "ɣð", "vʝ", "vɣ", "tm", "ðm", "pn", "kn", "θn", "xn", "ɣn", "mn"];
+            if (word.stressedVowel.relIdx(-1).type == "consonant") {
+                word.stressedVowel.relIdx(-1).stressed = true;
+                if (word.stressedVowel.relIdx(-2).match("s", "z"))
+                    word.stressedVowel.relIdx(-2).stressed = true;
+            }
+            if (word.stressedVowel.relIdx(-2).type == "consonant" && word.stressedVowel.relIdx(-1).value == "j") {
+                word.stressedVowel.relIdx(-2).stressed = true;
+                if (word.stressedVowel.relIdx(-3).match("s", "z"))
+                    word.stressedVowel.relIdx(-3).stressed = true;
+            }
+            if (word.stressedVowel.relIdx(-2).match("p", "t", "k", "ᵐb", "ⁿd", "ᵑg", "f", "θ", "x", "v", "ð", "ɣ") && word.stressedVowel.relIdx(-1).match("l", "r")) {
+                word.stressedVowel.relIdx(-2).stressed = true;
+                if (word.stressedVowel.relIdx(-3).value == "s")
+                    word.stressedVowel.relIdx(-3).stressed = true;
+            }
+            if (word.stressedVowel.relIdx(-3).match("p", "t", "k", "ᵐb", "ⁿd", "ᵑg", "f", "θ", "x", "v", "ð", "ɣ") && word.stressedVowel.relIdx(-2).value == "l" && word.stressedVowel.relIdx(-1).value == "j") {
+                word.stressedVowel.relIdx(-3).stressed = true;
+                word.stressedVowel.relIdx(-2).stressed = true;
+                if (word.stressedVowel.relIdx(-4).value == "s")
+                    word.stressedVowel.relIdx(-4).stressed = true;
+            }
+            if (nonLiquidClusters.includes(word.stressedVowel.relIdx(-2).value + word.stressedVowel.relIdx(-1).value))
+                word.stressedVowel.relIdx(-2).stressed = true;
+            if (nonLiquidClusters.includes(word.stressedVowel.relIdx(-3).value + word.stressedVowel.relIdx(-2).value) && word.stressedVowel.relIdx(-1).value == "j") {
+                word.stressedVowel.relIdx(-3).stressed = true;
+                word.stressedVowel.relIdx(-2).stressed = true;
+            }
+        }
+        word.forEach(segment => {
+            if (word.vowels[0].stressed && segment.i < word.vowels[0].i)
+                segment.stressed = true;
+        });
+
+        word.replace("ᵐb", "b", "#/C_");
+        word.replace("ⁿd", "d", "#/C_");
+        word.replace("ᶮɟ", "ɟ", "#/C_");
+        word.replace("ᵑg", "g", "#/C_");
+
+        word.remove("j", "c/ɟ/ç/ʝ_");
+        word.replace("j", "ɲ", "m_");
+        word.replaceSeq("n,j", "ɲ");
+        word.replaceSeq("l,j", "ʎ");
+        word.replace("j", "ʝ");
+        word.replace("ʝ", "ç", "p/t/f/θ/s_");
+
+        word.replace("a", "ɐ");
+
+        word.replace("r", "ɾ", "#/V_V");
+
+        word.replaceSeq("t,s", "t͡s");
+
+        addRow("Poly", "Modern Greek (Polytonic)", "", getSpelling_ModGr(earlyModernWord, true), word, true);
+
+        addRow("ModGr", "Modern Greek", "", getSpelling_ModGr(earlyModernWord,), word);
     }
 
     function getSpelling_OE() {
@@ -6101,7 +6744,7 @@
         let finalE = false;
         if (word.droppedE && (word.vowels.at(-1).stressed || (word.at(-1).type == "vowel" && !word.at(-1).stressed)) && !word.at(-1).match("eː", "ɛː") && word.at(-1).value != "θ")
             finalE = true;
-        if (laterWord.vowels.at(-1).value.length > 1 && !word.sSuffix && !word.pastTense && !word.vowels.at(-1).droppedH && word.at(-1).type != "vowel" && word.at(-1).value != "θ")
+        if (laterWord.vowels.at(-1).value.length > 1 && !word.sSuffix && !word.pastTense && !word.vowels.at(-1).droppedH && word.at(-1).type != "vowel" && word.at(-1).value != "θ" && !(word.at(-1).value == "z" && !laterWord.vowels.at(-1).stressed && !laterWord.vowels.at(-1).match("ɛː", "əi̯")))
             finalE = true;
         if (word.at(-1).match("v", "d͡ʒ") || (word.at(-1).match("ð", "z") && word.at(-2).type == "vowel" && word.at(-2).value.length > 1 && word.at(-2).stressed && !word.sSuffix))
             finalE = true;
@@ -8091,7 +8734,7 @@
                     break;
                 case "i":
                     if (
-                        (segment.OGPValue == "e" || segment.OGPValue == "ẽ") && !segment.relIdx(1).match("ɛ", "e", "ẽ", "i", "ĩ")
+                        (segment.OGPValue == "e" || segment.OGPValue == "ẽ" || !segment.OGPValue) && !segment.relIdx(1).match("ɛ", "e", "ẽ", "i", "ĩ")
                         && !(segment.relIdx(1).match("u", "ũ")
                             && ((segment.OGPValue == "o" || segment.OGPValue == "õ" || (segment == word.vowels.at(-1) && !segment.stressed))
                                 && !segment.relIdx(1).match("ɔ", "o", "õ")))
@@ -8464,8 +9107,6 @@
                 case "t͡s":
                     if (segment == word.at(-1))
                         str += "z";
-                    else if (modernTypography && !["ɛ", "e", "æ", "ə", "i"].includes(segment.relIdx(1).value[0]))
-                        str += "ç";
                     else
                         str += "c";
                     break;
@@ -8656,8 +9297,6 @@
                 case "t͡s":
                     if (segment == word.at(-1))
                         str += "z";
-                    else if (modernTypography && !segment.relIdx(1).match(...frontVowels))
-                        str += "ç";
                     else
                         str += "c";
                     break;
@@ -9249,6 +9888,382 @@
         }
 
         return str;
+    }
+
+    function getSpelling_AttGr() {
+        let str = "";
+
+        for (let i = 0; i < word.length; i++) {
+            let segment = word[i];
+
+            switch (segment.value) {
+                case "a":
+                case "aː":
+                    str += "α";
+                    break;
+                case "ɛː":
+                    str += "η";
+                    break;
+                case "e":
+                    str += "ε";
+                    break;
+                case "i":
+                case "iː":
+                    str += "ι";
+                    break;
+                case "ɔː":
+                    str += "ω";
+                    break;
+                case "o":
+                    str += "ο";
+                    break;
+                case "y":
+                case "yː":
+                    if (segment.diphthong)
+                        str += "υι";
+                    else
+                        str += "υ";
+                    break;
+                case "ai̯":
+                case "aːi̯":
+                case "ai̯ː":
+                case "aːi̯ː":
+                    str += "αι";
+                    break;
+                case "au̯":
+                case "aːu̯":
+                case "au̯ː":
+                case "aːu̯ː":
+                    str += "αυ";
+                    break;
+                case "ɛːi̯":
+                case "ɛːi̯ː":
+                    str += "ηι";
+                    break;
+                case "ɛːu̯":
+                case "ɛːu̯ː":
+                    str += "ηυ";
+                    break;
+                case "eː":
+                    str += "ει";
+                    break;
+                case "eu̯":
+                case "eu̯ː":
+                    str += "ευ";
+                    break;
+                case "ɔːi̯":
+                case "ɔːi̯ː":
+                    str += "ωι";
+                    break;
+                case "oi̯":
+                case "oi̯ː":
+                    str += "οι";
+                    break;
+                case "uː":
+                    str += "ου";
+                    break;
+                case "b":
+                    str += "β";
+                    break;
+                case "g":
+                case "ŋ":
+                    if (segment.voiced || (segment.value == "g" && segment.relIdx(1).value == "g"))
+                        str += "κ";
+                    else
+                        str += "γ";
+                    break;
+                case "d":
+                    str += "δ";
+                    break;
+                case "tʰ":
+                    str += "θ";
+                    break;
+                case "k":
+                    if (segment.relIdx(1).value == "s") {
+                        str += "ξ";
+                        i++;
+                    } else {
+                        str += "κ";
+                    }
+                    break;
+                case "l":
+                    str += "λ";
+                    break;
+                case "m":
+                    str += "μ";
+                    break;
+                case "n":
+                    str += "ν";
+                    break;
+                case "p":
+                    if (segment.relIdx(1).value == "s") {
+                        str += "ψ";
+                        i++;
+                    } else {
+                        str += "π";
+                    }
+                    break;
+                case "r":
+                case "r̥":
+                    str += "ρ";
+                    break;
+                case "s":
+                case "z":
+                    if (segment.relIdx(1).value == "d") {
+                        str += "ζ";
+                        i++;
+                    } else if (segment == word.at(-1)) {
+                        str += "ς";
+                    } else {
+                        str += "σ";
+                    }
+                    break;
+                case "t":
+                    str += "τ";
+                    break;
+                case "pʰ":
+                    str += "φ";
+                    break;
+                case "kʰ":
+                    str += "χ";
+                    break;
+            }
+        }
+
+        return str;
+    }
+
+    function getSpelling_KoiGr() {
+        let str = word.ancientSpelling;
+
+        //Convert to Latin script for the font
+        let greekToLatin = {
+            α: "a",
+            β: "b",
+            γ: "g",
+            δ: "d",
+            ε: "e",
+            ζ: "z",
+            η: "h",
+            θ: "q",
+            ι: "i",
+            κ: "k",
+            λ: "l",
+            μ: "m",
+            ν: "n",
+            ξ: "c",
+            ο: "o",
+            π: "p",
+            ρ: "r",
+            σ: "s",
+            ς: "s",
+            τ: "t",
+            υ: "u",
+            φ: "f",
+            χ: "x",
+            ψ: "y",
+            ω: "w"
+        };
+        if (!modernTypography)
+            for (let char in greekToLatin)
+                str = str.replaceAll(char, `<span class="greekChar">${greekToLatin[char]}</span>`);
+
+        return str;
+    }
+
+    function getSpelling_ModGr(earlyModernWord, polytonic) {
+        let word = earlyModernWord;
+        let str = "";
+
+        for (let i = 0; i < word.length; i++) {
+            let segment = word[i];
+
+            switch (segment.value) {
+                case "a":
+                    str += "α";
+                    break;
+                case "e":
+                    if (segment.AttGrValue.startsWith("e"))
+                        str += "ε";
+                    else
+                        str += "αι";
+                    break;
+                case "i":
+                case "j":
+                    if (segment.value == "j" && segment.i == 0)
+                        str += "γ";
+                    switch (segment.AttGrValue) {
+                        case "ɛː":
+                        case "ɛːi̯":
+                        case "ɛːu̯":
+                            str += "η";
+                            break;
+                        case "y":
+                        case "yː":
+                            str += "υ";
+                            //Dieresis
+                            if (str.at(-2)?.match(/[αεηο]/) || (segment.relIdx(-1).type == "vowel" && polytonic))
+                                str += "\u0308";
+                            if (segment.diphthong)
+                                str += "ι";
+                            break;
+                        case "eː":
+                            str += "ει";
+                            break;
+                        case "oi̯":
+                            str += "οι";
+                            break;
+                        default:
+                            str += "ι";
+                            //Dieresis
+                            if (str.at(-2)?.match(/[αεο]/) || (segment.relIdx(-1).type == "vowel" && polytonic))
+                                str += "\u0308";
+                            break;
+                    }
+                    break;
+                case "o":
+                    if (segment.AttGrValue == "o")
+                        str += "ο";
+                    else
+                        str += "ω";
+                    break;
+                case "u":
+                    str += "ου";
+                    break;
+                case "v":
+                    if (segment.relIdx(-1).AttGrValue?.endsWith("u̯"))
+                        str += "υ";
+                    else
+                        str += "β";
+                    if (segment.degeminated && segment.i != 0)
+                        str += "β";
+                    break;
+                case "ɣ":
+                case "ŋ":
+                case "ʝ":
+                case "ɲ":
+                    if (!(segment.relIdx(1).value == "j" && segment.relIdx(-1).type == "consonant"))
+                        str += "γ";
+                    break;
+                case "g":
+                case "ɟ":
+                    if (segment.AttGrValue == "g")
+                        str += "γ";
+                    else
+                        str += "κ";
+                    break;
+                case "ð":
+                    if (segment.degeminated && segment.i != 0)
+                        str += "δδ";
+                    else
+                        str += "δ";
+                    break;
+                case "z":
+                    if (segment.relIdx(1).type == "consonant" && segment.relIdx(1).value != "j")
+                        str += "σ";
+                    else
+                        str += "ζ";
+                    break;
+                case "θ":
+                    str += "θ";
+                    break;
+                case "k":
+                case "c":
+                    if (segment.relIdx(1).value == "s") {
+                        str += "ξ";
+                        i++;
+                    } else if (segment.degeminated && segment.i != 0) {
+                        str += "κκ";
+                    } else {
+                        str += "κ";
+                    }
+                    break;
+                case "l":
+                    if (segment.degeminated && segment.i != 0)
+                        str += "λλ";
+                    else
+                        str += "λ";
+                    break;
+                case "m":
+                    if (segment.degeminated && segment.i != 0)
+                        str += "μμ";
+                    else
+                        str += "μ";
+                    break;
+                case "n":
+                    if (segment.degeminated && segment.i != 0)
+                        str += "νν";
+                    else
+                        str += "ν";
+                    break;
+                case "p":
+                case "b":
+                    if (segment.relIdx(1).value == "s") {
+                        str += "ψ";
+                        i++;
+                    } else if (segment.degeminated && segment.i != 0) {
+                        str += "ππ";
+                    } else {
+                        str += "π";
+                    }
+                    break;
+                case "r":
+                    if (segment.degeminated && segment.i != 0)
+                        str += "ρρ";
+                    else
+                        str += "ρ";
+                    break;
+                case "s":
+                    if (segment == word.at(-1))
+                        str += "ς";
+                    else if (segment.degeminated && segment.i != 0)
+                        str += "σσ";
+                    else
+                        str += "σ";
+                    break;
+                case "t":
+                case "d":
+                    if (segment.degeminated && segment.i != 0)
+                        str += "ττ";
+                    else
+                        str += "τ";
+                    break;
+                case "f":
+                    if (segment.relIdx(-1).AttGrValue?.endsWith("u̯"))
+                        str += "υ";
+                    else
+                        str += "φ";
+                    break;
+                case "x":
+                case "ç":
+                    str += "χ";
+                    break;
+            }
+
+            if (polytonic && (segment.type == "vowel" || segment.value == "j")) {
+                if (segment.type == "vowel") {
+                    //Breathings
+                    if (segment.i == 0 && wordArg.startsWith("h"))
+                        str += "\u0314";
+                    else if (segment.i == 0)
+                        str += "\u0313";
+                    //Accents
+                    if (segment.stressed) {
+                        if (segment.ancientPitch == "falling")
+                            str += "\u0342";
+                        else
+                            str += "\u0301";
+                    }
+                }
+                //Iota subscript
+                if (segment.AttGrValue == "aːi̯" || segment.AttGrValue == "ɛːi̯" || segment.AttGrValue == "ɔːi̯")
+                    str += "\u0345";
+            } else if (segment.type == "vowel" && segment.stressed && word.vowels.length > 1) {
+                str += "\u0301";
+            }
+        }
+
+        return str.normalize("NFC");
     }
 </script>
 

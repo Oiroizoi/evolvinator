@@ -1,15 +1,16 @@
 # Evolvinator
-This program applies phonological changes to predict the development of historical words. It currently includes Old English to Modern English, Old English to Modern Scots, Classical Latin to Modern French, Classical Latin to Modern Portuguese, and Classical Latin to Modern Spanish.\
+This program applies phonological changes to predict the development of historical words. It currently includes Old English to Modern English, Old English to Modern Scots, Classical Latin to Modern French, Classical Latin to Modern Portuguese, Classical Latin to Modern Spanish, and Ancient Greek to Modern Greek.\
 \
 You can try it [here](https://oiroizoi.github.io/evolvinator/).
 
 ## Input instructions
-### Old English
-- Enter an Old English word, using standard diacritics (i.e., dots for palatalization and macrons for long vowels).
-- If the Old English word's spelling does not reflect its pronunciation, modify your input to match the pronunciation. For example, enter "ġung" for _geong_ [juŋg].
-- Select the syllable on which the primary stress falls.
-- Choose the appropriate part of speech. For present participles, select "Conjugated verb".
-- Predicted outcomes are more accurate for single-stem words than for compounds. For better results, enter each component of a compound word separately.
+
+### Ancient Greek
+- Enter an Ancient Greek word. You can enter the original word or its romanization. (Greek-script inputs will be automatically converted to Latin-script).
+- Mark all long vowels and accents. If a diphthong or vowel digraph is accented, the accent mark should go on the second element (e.g., "āí", "oû").
+- Use a dieresis (¨) to indicate that an "i" or "y" is pronounced separately from the preceding vowel.
+- Choose the appropriate part of speech.
+
 ### Classical Latin
 - Enter a Latin word, marking all long vowels with macrons.
 - Use "u" for the vowel /u/ and "v" for the consonant /w/.
@@ -17,10 +18,17 @@ You can try it [here](https://oiroizoi.github.io/evolvinator/).
 - Choose the appropriate part of speech.
 - Note that most words in French, Spanish, and Portuguese derive from Latin accusative forms (e.g., "canem", not "canis").
 
+### Old English
+- Enter an Old English word, using standard diacritics (i.e., dots for palatalization and macrons for long vowels).
+- If the Old English word's spelling does not reflect its pronunciation, modify your input to match the pronunciation. For example, enter "ġung" for _geong_ [juŋg].
+- Select the syllable on which the primary stress falls.
+- Choose the appropriate part of speech. For present participles, select "Conjugated verb".
+- Predicted outcomes are more accurate for single-stem words than for compounds. For better results, enter each component of a compound word separately.
+
 ## Other notes
 - You can click on "Expected outcomes" to see more information, including additional steps in the word's development and outcomes in other dialects.
-- In many cases, spellings and pronunciations have varied greatly by region and individual. The ones shown are only representative examples.
 - Words appear approximately as they would have been written at the time. You can select "Use modern typography" to show the words with modern letterforms instead.
+- In many cases, spellings and pronunciations have varied greatly by region and individual. The ones shown are only representative examples.
 - Results will not always be accurate. Incorrect predictions may be due to unexpected word developments or flaws in the program.
 - If you find a bug or have other feedback, please create an issue!
 
@@ -32,5 +40,15 @@ You can try it [here](https://oiroizoi.github.io/evolvinator/).
 - [Phonological history of English](https://en.wikipedia.org/wiki/Phonological_history_of_French)
 - [From Latin to Modern French with Especial Consideration of Anglo-Norman](https://archive.org/details/fromlatintomoder0000unse)
 - [From Latin to Portuguese](https://hdl.handle.net/2027/mdp.39015034652472)
-- [From Latin to Spanish](https://www.google.com/books/edition/From_Latin_to_Spanish_Historical_phonolo/_QkNAAAAIAAJ?hl=en)\
-Medieval fonts from [Dr. Pfeffer’s Fonts](https://robert-pfeffer.net/schriftarten/englisch/index.html)
+- [From Latin to Spanish](https://www.google.com/books/edition/From_Latin_to_Spanish_Historical_phonolo/_QkNAAAAIAAJ?hl=en)
+- [Greek: A History of Language and Its Speakers](https://openlibrary.org/works/OL17197733W/Greek?edition=key%3A/books/OL25769450M)
+- [Ranieri's Greek Pronunciation Chronology](https://docs.google.com/spreadsheets/d/1fv46XgPPJy-ky9FUSApiemOVmtc8i6q7ZL5XkqtmMWA/edit?gid=1919026778#gid=1919026778)
+
+### Historical fonts used
+- [Pfeffer Mediæval](https://robert-pfeffer.net/schriftarten/englisch/pfeffer_mediaeval.html)
+- [Pfeffer Simpelgotisch](https://robert-pfeffer.net/schriftarten/englisch/pfeffer_simpelgotisch.html)
+- [EB Garamond](https://fonts.google.com/specimen/EB+Garamond)
+- [Cinzel](https://fonts.google.com/specimen/Cinzel)
+- [Rustic Capitals](https://www.fontspace.com/rustic-capitals-font-f7460)
+- [Stoix](https://www.dafont.com/stoix.font)
+- [P39](http://individual.utoronto.ca/atloder/uncialfonts.html)
