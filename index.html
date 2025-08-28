@@ -5893,8 +5893,8 @@
                             break;
                     }
                 }
-                segment.AttGrValue = segment.value;
             });
+        word.forEach(segment => segment.AttGrValue = segment.value);
         word.ancientSpelling = getSpelling_AttGr();
 
         word.replace("ŋ", "g", "_m");
