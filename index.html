@@ -4546,10 +4546,10 @@
 
         //Denasalization before vowels and certain consonants
         word.forEach(segment => {
-            if (segment.value.endsWith("\u0303") && (segment.relIdx(1).type == "vowel" || segment.relIdx(1).match("ɾ", "m", "n", "ɲ")))
+            if (segment.value.endsWith("\u0303") && (segment.relIdx(1).type == "vowel" || segment.relIdx(1).match("l", "ʎ", "ɾ", "r", "m", "n", "ɲ")))
                 segment.value = segment.value[0];
 
-            if (segment.value.endsWith("\u0303") && segment.relIdx(1).match("j", "w") && segment.relIdx(2).match("ɾ", "m", "n", "ɲ"))
+            if (segment.value.endsWith("\u0303") && segment.relIdx(1).match("j", "w") && segment.relIdx(2).match("l", "ʎ", "ɾ", "r", "m", "n", "ɲ"))
                 segment.value = segment.value[0];
         });
 
