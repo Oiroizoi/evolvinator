@@ -3103,6 +3103,16 @@
                 segment.value = "o";
         });
 
+        word.forEach(segment => {
+            if (segment.nextVowel().stressed && segment != word.vowels[0]) {
+                if (segment.value == "i")
+                    segment.value = "ɪ";
+
+                if (segment.value == "u")
+                    segment.value = "ʊ";
+            }
+        });
+
         //Assimilation of /d/
         word.forEach(segment => {
             if (segment.value == "d" && ["m", "n", "p", "t", "k", "b", "d", "g", "f", "β"].includes(segment.relIdx(1).value[0]))
