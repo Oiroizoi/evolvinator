@@ -16,7 +16,7 @@ You can try it [here](https://oiroizoi.github.io/evolvinator/).
 - Use "u" for the vowel /u/ and "v" for the consonant /w/.
 - Use "i" for both the vowel /i/ and the consonant /j/. Its phonetic value will be determined based on its position. (These sounds contrasted in Classical Latin, but the difference is unimportant in the development of the Romance Languages).
 - Choose the appropriate part of speech.
-- Note that most words in French, Spanish, and Portuguese derive from Latin accusative forms (e.g., "canem", not "canis").
+- Note that most words in the Romance languages derive from Latin accusative forms (e.g., "canem", not "canis").
 
 ### Old English
 - Enter an Old English word, using standard diacritics (i.e., dots for palatalization and macrons for long vowels).
@@ -37,10 +37,12 @@ You can try it [here](https://oiroizoi.github.io/evolvinator/).
 - [englesaxe](https://adoneilson.com/eme/index.html)
 - [A History of Scots to 1700](https://web.archive.org/web/20140703144921fw_/http://www.dsl.ac.uk/dsl/SCOTSHIST/index.html)
 - [The Edinburgh History of the Scots Language](https://openlibrary.org/books/OL453735M/The_Edinburgh_history_of_the_Scots_language)
-- [Phonological history of English](https://en.wikipedia.org/wiki/Phonological_history_of_French)
 - [From Latin to Modern French with Especial Consideration of Anglo-Norman](https://archive.org/details/fromlatintomoder0000unse)
+- [Phonological history of French](https://en.wikipedia.org/wiki/Phonological_history_of_French)
 - [From Latin to Portuguese](https://hdl.handle.net/2027/mdp.39015034652472)
 - [From Latin to Spanish](https://www.google.com/books/edition/From_Latin_to_Spanish_Historical_phonolo/_QkNAAAAIAAJ?hl=en)
+- [From Latin to Italian](https://archive.org/details/fromlatintoitali0000unse)
+- [A Linguistic History of Italian](https://www.google.com/books/edition/A_Linguistic_History_of_Italian/DwTKAwAAQBAJ?hl=en)
 - [Greek: A History of Language and Its Speakers](https://openlibrary.org/works/OL17197733W/Greek?edition=key%3A/books/OL25769450M)
 - [Ranieri's Greek Pronunciation Chronology](https://docs.google.com/spreadsheets/d/1fv46XgPPJy-ky9FUSApiemOVmtc8i6q7ZL5XkqtmMWA/edit?gid=1919026778#gid=1919026778)
 
