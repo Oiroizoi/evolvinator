@@ -1066,8 +1066,9 @@
         word.replace("t", "s", "_s");
         word.replace("r", "r̥", "_r̥");
 
+        //Nasalization (with lengthening)
         word.forEach(segment => {
-            if (segment.relIdx(1).match("m", "n") && segment.relIdx(2).match("f", "s")) {
+            if (segment.type == "vowel" && ((segment.relIdx(1).match("m", "n") && segment.relIdx(2).match("f", "s")) || (segment.relIdx(1).value == "m" && segment == word.at(-2)))) {
                 switch (segment.value) {
                     case "a":
                         segment.value = "aː";
@@ -1092,10 +1093,6 @@
                 segment.relIdx(1).remove();
             }
         });
-        if (word.at(-1).value == "m" && word.at(-2).type == "vowel" && !word.at(-2).stressed) {
-            word.at(-2).value = word.at(-2).value.slice(0, 1) + "\u0303" + word.at(-2).value.slice(1);
-            word.at(-1).remove();
-        }
 
         addRow("Lat", "Classical Latin", "AD 50", getSpelling_Lat(), word);
     }
@@ -2845,15 +2842,36 @@
         if (word[0].match("p", "t", "k", "b", "d", "g", "f") && word[1].type == "consonant" && !word[1].match("l", "r"))
             word[0].remove();
 
-        //Denasalization
-        if (word.at(-1).value.endsWith("\u0303"))
-            word.at(-1).value = word.at(-1).value[0];
-
-        word.replace("m", "n", "_#");
-
         word.replace("ʏ", "ɪ");
         word.replace("yː", "iː");
         word.replace("y", "i");
+
+        //Denasalization
+        word.forEach(segment => {
+            if (segment.value.includes("\u0303")) {
+                if (segment == word.at(-1) && segment.stressed) {
+                    switch (segment.value) {
+                        case "ãː":
+                            segment.value = "a";
+                            break;
+                        case "ẽː":
+                            segment.value = "ɛ";
+                            break;
+                        case "ĩː":
+                            segment.value = "ɪ";
+                            break;
+                        case "õː":
+                            segment.value = "ɔ";
+                            break;
+                        case "ũː":
+                            segment.value = "ʊ";
+                            break;
+                    }
+                    word.insert("n", word.length);
+                }
+                segment.value = segment.value[0] + segment.value.slice(1);
+            }
+        });
 
         word.forEach(segment => {
             if (segment.match("a", "ɛ", "ɪ", "ɔ", "ʊ") && segment.relIdx(1).value == segment.value) {
@@ -3195,8 +3213,6 @@
             word.remove("p", "_pʲ");
             word.remove("b", "_bʲ");
         }
-
-        word.replace("ʊ", "u", "_#");
 
         //Consonant assimilation
         word.replace("p", "s", "_s/sʲ");
@@ -4759,8 +4775,6 @@
         word.replace("ɪː", "eː");
         word.replace("ʊ", "o");
         word.replace("ʊː", "oː");
-
-        word.replace("u", "o", "_#");
 
         word.replace("ɛ", "ie̯", "_j");
         word.replace("ɔ", "uo̯", "_j");
