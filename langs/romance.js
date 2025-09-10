@@ -2951,7 +2951,7 @@ function LOF_to_MF() {
     //Loss of internal schwa
     word.forEach(segment => {
         if (
-            segment.value == "ə" && segment.nextVowel().stressed && !segment.relIdx(-1).match("s̺", "z̺", "t͡s", "d͡z", "l")
+            segment.value == "ə" && segment.nextVowel().stressed && !segment.relIdx(-1).match("s̺", "z̺", "t͡s", "d͡z", "l") && !segment.ctxMatch("#,C_")
             && !(segment.ctxMatch("C,l/ɾ_") && segment.relIdx(-1).value != segment.relIdx(1).value)
         ) {
             if (segment.relIdx(-1).value == segment.relIdx(1).value)
