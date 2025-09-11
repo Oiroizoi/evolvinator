@@ -1844,7 +1844,8 @@ function getSpelling_EME() {
                 str += "s";
                 break;
             case "ʃ":
-                str += "sch";
+                if (segment.relIdx(1).value != "ʃ")
+                    str += "sch";
                 break;
             case "t":
                 if (segment.relIdx(1).value == "t͡ʃ")
