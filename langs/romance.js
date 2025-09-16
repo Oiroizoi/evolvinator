@@ -1169,9 +1169,6 @@ function IR_to_OSp() {
     word.replace("ɛ", "ie̯");
     word.replace("ɔ", "ue̯");
 
-    word.remove("j", "e_C");
-    word.remove("w", "o_");
-
     word.replace("f", "ɸ");
 
     if (word.atIdx(0).value == "j" && word.atIdx(1).value == "a" && !word.atIdx(1).stressed)
@@ -1190,6 +1187,9 @@ function IR_to_OSp() {
     word.remove("j", "i_C");
 
     word.replace("t", "t͡ʃ", "j_V");
+
+    word.remove("j", "e_C");
+    word.remove("w", "o_");
 
     word.remove("p", "_ʎ");
     word.remove("k", "_ʎ");
