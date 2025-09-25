@@ -324,7 +324,7 @@
                     break;
                 case "OE":
                     wordArg = wordArg.replaceAll("ð", "þ").replaceAll("ƿ", "w").replaceAll("k", "c"); //Alternative spellings
-                    wordArg = wordArg.replaceAll("io", "eo").replaceAll("īo", "ēo").replaceAll("oe", "e").replaceAll("ōe", "ē").replaceAll("œ", "e").replaceAll("œ̄", "ē"); //Dialectal vowels
+                    wordArg = wordArg.replaceAll("io", "eo").replaceAll("īo", "ēo").replaceAll("oe", "e").replaceAll("ōe", "ē").replaceAll("œ̄", "ē").replaceAll("œ", "e"); //Dialectal vowels
                     break;
             }
 
@@ -453,7 +453,7 @@
                     <option value="inf">Infinitive verb</option>
                     <option value="conjVerb">Conjugated verb</option>
                     <option value="pastPtcp">Past participle</option>
-                    <option value="other" selected>Other</option>
+                    <option value="other" selected>Noun/other</option>
             `;
                 break;
         }
@@ -477,6 +477,10 @@
 
     document.getElementById("from").onchange = () => {
         from = document.getElementById("from").value;
+        if (from == (params.get("from") || "OE"))
+            partOfSpeech = params.get("pos");
+        else
+            partOfSpeech = "";
         init();
     };
 
@@ -660,7 +664,7 @@
 
             this.replace = (original, replacement, context = "_") => {
                 word.forEach(segment => {
-                    if (segment.value == original && segment.ctxMatch(context))
+                    if (segment.selfMatch(original) && segment.ctxMatch(context))
                         segment.value = replacement;
                 });
             };
@@ -668,7 +672,7 @@
             this.remove = (original, context = "_") => {
                 for (let i = 0; i < this.length; i++) {
                     let segment = this.atIdx(i);
-                    if (segment.value == original && segment.ctxMatch(context)) {
+                    if (segment.selfMatch(original) && segment.ctxMatch(context)) {
                         segment.remove();
                         i--;
                     }
@@ -735,29 +739,105 @@
             this.prevVowel = () => this.word.slice(0, this.idx).reverse().find(s => s.type == "vowel") || new Segment("", this.word);
             this.remove = () => this.word.splice(this.idx, 1);
 
-            this.ctxMatch = (ctx) => {
-                let segmentMatch = (segment, chkValues) => {
-                    if (!chkValues)
-                        return true;
-                    chkValues = chkValues.split("/");
-                    if (chkValues.includes(segment.value))
-                        return true;
-                    if (chkValues.includes("C") && segment.type == "consonant")
-                        return true;
-                    if (chkValues.includes("V") && segment.type == "vowel")
-                        return true;
-                    if (chkValues.includes("#") && !segment.value)
-                        return true;
-                    return false;
-                };
+            this.selfMatch = chk => {
+                if (!chk)
+                    return true;
 
+                let chkArr = [];
+
+                //Distribute the properties of a group to each value
+                let groupProperties;
+                for (let i = 0; i < chk.length; i++)
+                    if (chk[i] == "{") {
+                        let startIdx = chk.indexOf("}") + 1;
+                        let endIdx = startIdx + chk.slice(startIdx).indexOf("/");
+                        if (endIdx < startIdx)
+                            endIdx = Infinity;
+                        groupProperties = chk.slice(startIdx, endIdx);
+                        chk = chk.slice(0, i) + chk.slice(i + 1);
+                        i--;
+                    } else if (chk[i] == "}") {
+                        groupProperties = "";
+                        chk = chk.slice(0, i) + chk.slice(i + 1);
+                        i--;
+                    } else if (chk[i] == "/" && groupProperties) {
+                        chk = chk.slice(0, i) + groupProperties + chk.slice(i);
+                        i += groupProperties.length;
+                    }
+
+                //Split chk at each slash that is not inside brackets
+                let startIdx = 0;
+                let bracketsDepth = 0;
+                for (let i = 0; i < chk.length; i++)
+                    if (chk[i] == "/" && !bracketsDepth) {
+                        chkArr.push(chk.slice(startIdx, i));
+                        startIdx = i + 1;
+                    } else if (chk[i] == "[") {
+                        bracketsDepth++;
+                    } else if (chk[i] == "]") {
+                        bracketsDepth--;
+                    }
+                chkArr.push(chk.slice(startIdx));
+
+                for (let str of chkArr) {
+                    let value;
+                    let properties;
+
+                    let boundary = str.indexOf("[");
+                    if (boundary > -1) {
+                        value = str.slice(0, boundary);
+                        properties = str.slice(boundary);
+                    } else {
+                        value = str;
+                    }
+
+                    if (properties) {
+                        properties = properties.slice(1, -1).split("][");
+                        if (!properties.every(property => this.propMatch(property)))
+                            continue;
+                    }
+
+                    if (value == this.value)
+                        return true;
+                    if (value == "")
+                        return true;
+                    if (value == "C" && this.type == "consonant")
+                        return true;
+                    if (value == "V" && this.type == "vowel")
+                        return true;
+                    if (value == "#" && !this.value)
+                        return true;
+                }
+
+                return false;
+            };
+
+            this.propMatch = property => {
+                let negate = property.includes("!");
+                property = property.replace("!", "");
+
+                let result;
+
+                if (property.startsWith("=")) {
+                    result = this.selfMatch(property.slice(1));
+                } else if (property.includes("=")) {
+                    let splitIdx = property.indexOf("=");
+                    result = this[property.slice(0, splitIdx)] == property.slice(splitIdx + 1);
+                } else {
+                    result = this[property];
+                }
+
+                return negate ? !result : result;
+            };
+
+            this.ctxMatch = ctx => {
                 ctx = ctx.split("_");
                 let ctxBefore = ctx[0].split(",").reverse();
                 let ctxAfter = ctx[1].split(",");
 
-                if (!ctxBefore.every((chkValues, i) => segmentMatch(this.relIdx(-1 - i), chkValues)))
+                if (!ctxBefore.every((chkValues, i) => this.relIdx(-1 - i).selfMatch(chkValues)))
                     return false;
-                if (!ctxAfter.every((chkValues, i) => segmentMatch(this.relIdx(1 + i), chkValues)))
+                if (!ctxAfter.every((chkValues, i) => this.relIdx(1 + i).selfMatch(chkValues)))
                     return false;
 
                 return true;
