@@ -1,7 +1,41 @@
 # Evolvinator
-This program applies phonological changes to predict the development of historical words. It currently includes Old English to Modern English, Old English to Modern Scots, Classical Latin to Modern French, Classical Latin to Modern Portuguese, Classical Latin to Modern Spanish, and Ancient Greek to Modern Greek.\
-\
-You can try it [here](https://oiroizoi.github.io/evolvinator/).
+
+This program applies phonological changes to predict the development of historical words. You can try it [here](https://oiroizoi.github.io/evolvinator/).
+
+## Available languages
+
+<table>
+    <tr>
+        <th>Input</th>
+        <th>Output</th>
+    </tr>
+    <tr>
+        <td>Ancient Greek</td>
+        <td>Modern Greek</td>
+    </tr>
+    <tr>
+        <td rowspan=4>Classical Latin</td>
+        <td>Modern French</td>
+    </tr>
+    <tr>
+        <td>Modern Italian</td>
+    </tr>
+    <tr>
+        <td>Modern Portuguese</td>
+    </tr>
+    <tr>
+        <td>Modern Spanish</td>
+    </tr>
+    <tr>
+        <td rowspan=2>Old English</td>
+        <td>Modern English</td>
+    </tr>
+    <tr>
+        <td>Modern Scots</td>
+    </tr>
+</table>
+
+More languages coming soon!
 
 ## Input instructions
 
@@ -26,11 +60,93 @@ You can try it [here](https://oiroizoi.github.io/evolvinator/).
 - Predicted outcomes are more accurate for single-stem words than for compounds. For better results, enter each component of a compound word separately.
 
 ## Other notes
-- You can click on "Expected outcomes" to see more information, including additional steps in the word's development and outcomes in other dialects.
+- You can click on the "Expected outcomes" header to see more information, including additional steps in the word's development and outcomes in other dialects.
 - Words appear approximately as they would have been written at the time. You can select "Use modern typography" to show the words with modern letterforms instead.
 - In many cases, spellings and pronunciations have varied greatly by region and individual. The ones shown are only representative examples.
 - Results will not always be accurate. Incorrect predictions may be due to unexpected word developments or flaws in the program.
-- If you find a bug or have other feedback, please create an issue!
+- If you find a bug or have other feedback, please [create an issue](https://github.com/Oiroizoi/evolvinator/issues/new)!
+
+## Example inputs
+These examples demonstrate the form of valid inputs as well as some of the major developments of the daughter languages.
+
+### Ancient Greek
+- ángelos ("messegner, angel", Noun)
+- bréchei ("he/she wets, it rains", Verb)
+- déndron ("tree", Noun)
+- ekbaínō ("I go out", Verb)
+- elégomen ("we said", Verb)
+- ennéa ("nine", Other)
+- gráphō ("I draw, I write", Verb)
+- hērōïkós ("heroic", Other)
+- hyiós ("son", Noun)
+- kardía ("heart", Noun)
+- nýmphē ("bride", Noun)
+- ouranós ("sky, heaven", Noun)
+- paidíon ("little child", Noun)
+- polloí ("many", Other)
+- psȳchḗ ("soul")
+- pterón ("wing, feather", Noun)
+- rhíza ("root", Noun)
+- thálassa ("sea", Noun)
+
+### Classical Latin
+- adiūtāre ("to help", Infinitive verb)
+- audīre ("to hear", Infinitive verb)
+- cantō ("I sing", Conjugated verb)
+- caelum ("sky, heaven", Noun)
+- carcerem ("prison", Noun)
+- cāseum ("cheese", Noun)
+- duōs ("two", Other)
+- falsum ("deceived, false", Other)
+- fēcī ("I did", Conjugated verb)
+- fēminās ("women", Noun)
+- flammam ("flame", Noun)
+- īnsulam ("island", Noun)
+- locum ("place", Noun)
+- mōnstrāre ("to show", Infinitive verb)
+- nitidum ("shining", Other)
+- novum ("new", Other)
+- oculōs ("eyes", Noun)
+- parabolam ("comparison, parable, word", Noun)
+- quattuor ("four", Other)
+- ratiōnem ("reason, calculation", Noun)
+- signum ("sign", Noun)
+- solvere ("to loosen, to solve", Infinitive verb)
+- strictum ("tightened", Other)
+- undecim ("eleven", Other)
+- vēritātem ("truth", Noun)
+
+### Old English
+All words are stressed on the first syllable unless otherwise noted.
+- ǣfre ("ever", Other)
+- æppel ("apple", Noun)
+- āsċamod ("ashamed", Past participle, 2nd syllable stressed)
+- bāt ("boat", Noun)
+- blētsian ("to bless", Infinitive verb)
+- boga ("bow", Noun)
+- ċiriċe ("church", Noun)
+- cnīfas ("knives", Noun)
+- cwiculīċe ("quickly", Other)
+- drincþ ("drinks", Conjugated Verb)
+- flēoge ("fly", Noun)
+- folgian ("to follow", Infinitive verb)
+- ġēar ("year", Noun)
+- ġeboren ("born", Past participle, 2nd syllable stressed)
+- ġeolwe ("yellow", Other)
+- ġeþōht ("thought", Noun, 2nd syllable stressed)
+- hāliġ ("holy", Other)
+- hræfn ("raven", Noun)
+- hundas ("dogs", Noun)
+- hwēol ("wheel", Noun)
+- lōcian ("to look", Infinitive verb)
+- mȳs ("mice", Noun)
+- plegodon ("played (plural)", Conjugated verb)
+- sihþ ("sight", Noun)
+- sneġel ("snail, slug", Noun)
+- steorra ("star", Noun)
+- ūle ("owl", Noun)
+- weorold ("world", Noun)
+- wrist ("wrist", Noun)
 
 ## Main sources
 - [Phonological history of English](https://en.wikipedia.org/wiki/Phonological_history_of_English)
@@ -54,3 +170,4 @@ You can try it [here](https://oiroizoi.github.io/evolvinator/).
 - [Rustic Capitals](https://www.fontspace.com/rustic-capitals-font-f7460)
 - [Stoix](https://www.dafont.com/stoix.font)
 - [P39](http://individual.utoronto.ca/atloder/uncialfonts.html)
+- [0800 Theophanes](https://web.archive.org/web/20240529071259/http://www.sch%C3%A4ffel.ch/de_gruppe1.html)

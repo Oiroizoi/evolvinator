@@ -16,6 +16,8 @@
         href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400..900&family=EB+Garamond:ital,wght@0,400..800;1,400..800"
         rel="stylesheet">
 
+    <link rel="icon" href="favicon.png">
+
     <style>
         @font-face {
             font-family: "Pfeffer Mediæval";
@@ -48,6 +50,11 @@
         @font-face {
             font-family: "P39";
             src: url("fonts/P39.ttf") format("truetype");
+        }
+
+        @font-face {
+            font-family: "0800_theophanes";
+            src: url("fonts/0800_theophanes.otf") format("opentype");
         }
 
         body {
@@ -166,6 +173,12 @@
                 font-size: 14px;
                 font-style: normal;
             }
+
+            #ByzGr .spelling {
+                font-family: "0800_theophanes";
+                font-size: 20px;
+                font-style: normal;
+            }
         }
 
         .nonHist {
@@ -183,6 +196,26 @@
 
         #checkboxes label {
             margin-right: 10px;
+        }
+
+        #githubLink {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            border-radius: 40px;
+            font-size: 30px;
+            text-align: center;
+            line-height: 40px;
+            font-weight: 500;
+            font-style: italic;
+            background-color: #999;
+            color: white;
+        }
+
+        #githubLink:hover {
+            background-color: #b4f;
         }
     </style>
 </head>
@@ -223,6 +256,10 @@
         </table>
         <div id="checkboxes"></div>
     </div>
+
+    <a href="https://github.com/Oiroizoi/evolvinator" target="_blank">
+        <div id="githubLink">i</div>
+    </a>
 </body>
 
 <script src="langs/germanic.js"></script>
@@ -450,10 +487,11 @@
                 break;
             case "OE":
                 document.getElementById("pos").innerHTML = `
+                    <option value="noun" selected>Noun</option>
                     <option value="inf">Infinitive verb</option>
                     <option value="conjVerb">Conjugated verb</option>
                     <option value="pastPtcp">Past participle</option>
-                    <option value="other" selected>Noun/other</option>
+                    <option value="other">Other</option>
             `;
                 break;
         }
@@ -875,10 +913,6 @@
                 this.type = "vowel";
             else if (this.value)
                 this.type = "consonant";
-        }
-
-        get i() {
-            throw "";
         }
 
         get idx() {

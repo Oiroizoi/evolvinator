@@ -851,8 +851,8 @@ function EME_to_LME(variety) {
 function LME_to_EModE(variety) {
     word = outcomes.LME.duplicate();
 
-    //Drop y- prefix from verbs (was also lost from many nouns and adjectives, but remained in some)
-    if (word.atIdx(0).value == "i" && !word.atIdx(0).stressed && (word.atIdx(1).stressed || word.atIdx(1).type == "vowel") && ["inf", "conjVerb", "pastPtcp"].includes(word.partOfSpeech))
+    //Drop y- prefix from verbs and nouns
+    if (word.atIdx(0).value == "i" && !word.atIdx(0).stressed && (word.atIdx(1).stressed || word.atIdx(1).type == "vowel") && ["noun", "inf", "conjVerb", "pastPtcp"].includes(word.partOfSpeech))
         word.atIdx(0).remove();
 
     if (word.partOfSpeech == "conjVerb" && word.toString().endsWith("ənd") && variety != "scots") {
@@ -881,6 +881,8 @@ function LME_to_EModE(variety) {
     word.replace("i", "iː", "_V[!inSuffix]");
 
     word.replace("e[!stressed]", "i");
+    if (variety == "scots")
+        word.replace("i", "ɪ", "_C");
 
     //Reduction of vowels in prefixes
     word.forEach(segment => {
@@ -1467,7 +1469,7 @@ function UK_to_AU() {
             segment.value = "ɪə̯";
     });
 
-    addRow("AU", "Modern English (AU)", "", word.modernSpelling, word, true);
+    addRow("AU", "Modern English (Australia)", "", word.modernSpelling, word, true);
 }
 
 function ModE_to_ModSc() {
@@ -1501,13 +1503,7 @@ function ModE_to_ModSc() {
                     segment.value = "i";
                     break;
                 case "eː":
-                    if (segment.idx == 0) {
-                        segment.value = "ɪ";
-                        word.insert("j", segment.idx);
-                        segment.relIdx(-1).stressed = segment.stressed;
-                    }
-                    else
-                        segment.value = "e";
+                    segment.value = "e";
                     break;
                 case "oː":
                     segment.value = "o";
@@ -2141,7 +2137,7 @@ function getSpelling_ESc() {
                 } else if (segment.degeminated) {
                     str += "kk";
                 } else if (
-                    segment.relIdx(1).match("e", "ə", "ɛː", "eː", "ɪ", "iː", "ɛu̯", "iu̯", "j", "n")
+                    segment.relIdx(1).match("e", "ə", "ɛː", "eː", "ɪ", "iː", "ɛu̯", "iu̯", "j", "s", "n", "l", "h")
                     || (segment.relIdx(1).value == "æi̯" && (segment.relIdx(1).EMEValue != "a"))
                     || segment.negIdx == -1
                 ) {
@@ -2565,17 +2561,17 @@ function getSpelling_MSc(word) {
     for (let i = 0; i < word.length; i++) {
         let segment = word.atIdx(i);
 
+        let addI = false;
+        if (segment.negIdx == -2 && word.sSuffix && !segment.match("ɪ", "eː", "ɛː"))
+            addI = true;
+
         let addE = false;
-        if (segment.match("d͡ʒ", "v") && segment.relIdx(1).type == "consonant")
+        if (segment.match("d͡ʒ", "v") && segment.relIdx(1).type == "consonant" && !addI)
             addE = true;
         if (segment.value == "iː" && segment.ctxMatch("_rˠ,#") && !segment.stressed)
             addE = true;
         if (finalE && segment.negIdx == -1)
             addE = true;
-
-        let addI = false;
-        if (segment.negIdx == -2 && word.sSuffix && !segment.match("ɪ", "eː", "ɛː"))
-            addI = true;
 
         let doubleCons = segment.relIdx(-1).match("a", "e", "ɪ", "ɔ", "u") && segment.relIdx(-1).stressed && (segment.relIdx(1).type == "vowel" || addE || addI);
 
@@ -2725,7 +2721,7 @@ function getSpelling_MSc(word) {
                 } else if (doubleCons) {
                     str += "kk";
                 } else if (
-                    segment.relIdx(1).match("e", "ɛː", "eː", "ɪ", "iː", "ɛu̯", "iu̯", "j", "n", "h")
+                    segment.relIdx(1).match("e", "ɛː", "eː", "ɪ", "iː", "ɛu̯", "iu̯", "j", "s", "n", "l", "h")
                     || (segment.relIdx(1).value == "ə" && !segment.relIdx(2).match("m", "p", "b", "k"))
                     || addE || addI || segment.negIdx == -1 || (segment.negIdx == -2 && word.sSuffix)
                 ) {
@@ -3160,13 +3156,13 @@ function getSpelling_ModSc(scotsWord) {
     let shortVowels = ["a", "aː", "ɛ", "ɛː", "ɪ", "ɔ", "ɔː", "ʌ", "ə"];
 
     let finalE = false;
-    if (word.atIdx(-2).match("əi̯", "aɪ̯") && word.atIdx(-2).LMEValue == "iː" && word.atIdx(-1).type == "consonant" && !word.sSuffix && !word.pastTense)
+    if (word.atIdx(-2).match("əi̯", "aɪ̯") && word.atIdx(-2).LMEValue == "iː" && word.atIdx(-1).type == "consonant" && !word.atIdx(-1).droppedD && !word.sSuffix && !word.pastTense)
         finalE = true;
     if (word.atIdx(-2).match("e", "eː") && word.atIdx(-1).type == "consonant" && word.droppedE && !word.sSuffix && !word.pastTense && word.atIdx(-2).LMEValue != "æi̯")
         finalE = true;
     if (word.atIdx(-2).match("o", "oː") && word.atIdx(-1).type == "consonant" && !word.sSuffix && !word.pastTense)
         finalE = true;
-    if (word.atIdx(-1).match("v", "ð", "d͡ʒ", "ʒ") || (word.atIdx(-1).value == "z" && word.atIdx(-2).type == "vowel" && !word.sSuffix))
+    if (word.atIdx(-1).match("v", "ð", "d͡ʒ", "ʒ"))
         finalE = true;
     if (word.atIdx(-1).value == "s" && word.atIdx(-2).match(...longVowels))
         finalE = true;
@@ -3239,7 +3235,7 @@ function getSpelling_ModSc(scotsWord) {
                 else if (segment.LMEValue == "øː" || segment.LMEValue == "ɛu̯" || segment.LMEValue == "iu̯")
                     str += "eu";
                 else
-                    str += "ou";
+                    str += "oo";
                 break;
             case "ʏ":
             case "øː":
@@ -3281,7 +3277,10 @@ function getSpelling_ModSc(scotsWord) {
                 str += "o";
                 break;
             case "ʌ":
-                str += "u";
+                if (segment.EModEValue == "ɪ")
+                    str += "i";
+                else
+                    str += "u";
                 break;
             case "ə":
                 if (segment.stressed || (segment.inSuffix && word.partOfSpeech != "pastPtcp") || (segment.LMEValue == "ɪ" && segment.relIdx(1).value == "n" && segment.idx > word.stressedVowel.idx)) {
@@ -3355,7 +3354,7 @@ function getSpelling_ModSc(scotsWord) {
                 } else if (segment.relIdx(1).value == "w") {
                     str += "qu";
                     i++;
-                } else if (segment.relIdx(-1).match(...shortVowels) && !segment.stressed && (segment.ctxMatch("_s/n/l/h/V/#") || addE)) {
+                } else if (segment.relIdx(-1).match(...shortVowels) && !segment.stressed && (segment.ctxMatch("_s/n/ɫ/h/V/#") || addE)) {
                     str += "ck";
                 } else if (
                     segment.relIdx(1).match("e", "eː", "ɛ", "ɛː", "i", "iː", "ɪ", "əi̯", "aɪ̯", "ɚ", "ɫ̩", "n̩", "j", "n", "h")
@@ -3370,7 +3369,7 @@ function getSpelling_ModSc(scotsWord) {
             case "ɫ":
                 if (segment.droppedD)
                     str += "ld";
-                else if (segment.relIdx(-1).match(...shortVowels) && segment.relIdx(-1).stressed && (segment.relIdx(1).ctxMatch("_z/V/#") || addE))
+                else if (segment.relIdx(-1).match(...shortVowels) && segment.relIdx(-1).stressed && (segment.ctxMatch("_z/V/#") || addE))
                     str += "ll";
                 else
                     str += "l";
@@ -3453,7 +3452,10 @@ function getSpelling_ModSc(scotsWord) {
                     str += "y";
                 break;
             case "z":
-                str += "s";
+                if (segment.relIdx(-1).match(...shortVowels) && segment.relIdx(-1).stressed && (segment.relIdx(1).type != "consonant" || addE))
+                    str += "zz";
+                else
+                    str += "s";
                 break;
         }
         if (addE)
