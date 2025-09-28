@@ -2234,7 +2234,7 @@ function getSpelling_EModE(word) {
     let str = "";
 
     let finalE = false;
-    if (word.droppedE && (word.vowels.atIdx(-1).stressed || (word.atIdx(-1).type == "vowel" && !word.atIdx(-1).stressed)) && !word.atIdx(-1).match("eː", "ɛː") && word.atIdx(-1).value != "θ")
+    if (word.droppedE && (word.vowels.atIdx(-1).stressed || (word.atIdx(-1).type == "vowel" && !word.atIdx(-1).stressed)) && !word.atIdx(-1).match("eː", "ɛː") && !word.pastTense && word.atIdx(-1).value != "θ")
         finalE = true;
     if (laterWord.vowels.atIdx(-1).value.length > 1 && !word.sSuffix && !word.pastTense && !word.vowels.atIdx(-1).droppedH && word.atIdx(-1).type != "vowel" && word.atIdx(-1).value != "θ" && !(word.atIdx(-1).value == "z" && !laterWord.vowels.atIdx(-1).stressed && !laterWord.vowels.atIdx(-1).match("ɛː", "əi̯")))
         finalE = true;
@@ -2255,16 +2255,18 @@ function getSpelling_EModE(word) {
             addE = true;
         if (segment.negIdx == -2 && word.sSuffix && laterWord.vowels.atIdx(-1).value.length > 1 && !word.vowels.atIdx(-1).droppedH && segment.type != "vowel" && segment.value != "θ")
             addE = true;
-        if (segment.negIdx == -2 && word.pastTense && !(segment.type == "vowel" && segment.value.length == 1) && !(segment.type == "vowel" && segment.relIdx(1).value == "t") && !(segment.value == "eː" && segment.stressed))
-            addE = true;
-        if (segment.negIdx == -4 && word.conjPastTense && !(segment.type == "vowel" && segment.value.length == 1) && !(segment.type == "vowel" && segment.relIdx(1).value == "t") && segment.value != "eː")
-            addE = true;
         if (segment.match("d͡ʒ", "v") && segment.relIdx(1).type == "consonant")
             addE = true;
         if (segment.value == "iː" && segment.ctxMatch("_rˠ,#") && !segment.stressed)
             addE = true;
         if (finalE && segment.negIdx == -1)
             addE = true;
+
+        let addApostrophe = false;
+        if (segment.negIdx == -2 && word.pastTense && !(segment.type == "vowel" && segment.value.length == 1) && !(segment.type == "vowel" && segment.relIdx(1).value == "t") && !(segment.value == "eː" && segment.stressed))
+            addApostrophe = true;
+        if (segment.negIdx == -4 && word.conjPastTense && !(segment.type == "vowel" && segment.value.length == 1) && !(segment.type == "vowel" && segment.relIdx(1).value == "t") && segment.value != "eː")
+            addApostrophe = true;
 
         let doubleCons = segment.relIdx(-1).match("a", "e", "i", "ɔ", "u") && segment.relIdx(-1).stressed && (segment.relIdx(1).type == "vowel" || addE);
 
@@ -2346,7 +2348,7 @@ function getSpelling_EModE(word) {
                     str += "ough";
                 else if (segment.relIdx(1).match("m", "p", "b", "f", "v"))
                     str += "oo";
-                else if (segment.relIdx(1).type == "consonant" && !addE && !segment.ctxMatch("_n/l/ɫ,z/V/#") && !(word.sSuffix && segment.ctxMatch("_z,#")))
+                else if (segment.relIdx(1).type == "consonant" && !addE && !addApostrophe && !segment.ctxMatch("_n/l/ɫ,z/V/#") && !(word.sSuffix && segment.ctxMatch("_z,#")))
                     str += "ou";
                 else
                     str += "ow";
@@ -2356,7 +2358,7 @@ function getSpelling_EModE(word) {
                     str += "ough";
                 else if (segment.droppedH)
                     str += "augh";
-                else if (segment.relIdx(1).type == "consonant" && !addE && !segment.ctxMatch("_n/l/ɫ,z/V/#") && !(word.sSuffix && segment.ctxMatch("_z,#")))
+                else if (segment.relIdx(1).type == "consonant" && !addE && !addApostrophe && !segment.ctxMatch("_n/l/ɫ,z/V/#") && !(word.sSuffix && segment.ctxMatch("_z,#")))
                     str += "au";
                 else
                     str += "aw";
@@ -2364,7 +2366,7 @@ function getSpelling_EModE(word) {
             case "æi̯":
                 if (segment.droppedH)
                     str += "eigh";
-                else if (segment.relIdx(1).type == "consonant" && !addE && !(word.sSuffix && segment.ctxMatch("_z,#")))
+                else if (segment.relIdx(1).type == "consonant" && !addE && !addApostrophe && !(word.sSuffix && segment.ctxMatch("_z,#")))
                     str += "ai";
                 else
                     str += "ay";
@@ -2539,6 +2541,8 @@ function getSpelling_EModE(word) {
         }
         if (addE)
             str += "e";
+        if (addApostrophe)
+            str += "'";
     }
 
     return str;
