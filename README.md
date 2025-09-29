@@ -124,6 +124,7 @@ All words are stressed on the first syllable unless otherwise noted.
 - bāt ("boat", Noun)
 - blētsian ("to bless", Infinitive verb)
 - boga ("bow", Noun)
+- bryċġe ("bridge", Noun)
 - ċiriċe ("church", Noun)
 - cnīfas ("knives", Noun)
 - cwiculīċe ("quickly", Other)
