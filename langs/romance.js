@@ -128,7 +128,7 @@ function getIPA_Lat() {
     stressedVowel.stressed = true;
     if (stressedVowel.relIdx(-1).type == "consonant")
         stressedVowel.relIdx(-1).stressed = true;
-    if (stressedVowel.relIdx(-2).match("p", "t", "k", "b", "d", "g", "pʰ", "tʰ", "kʰ", "f") && stressedVowel.relIdx(-1).match("l", "r"))
+    if (stressedVowel.relIdx(-2).match("p", "t", "k", "b", "d", "g", "pʰ", "tʰ", "kʰ", "f") && stressedVowel.relIdx(-1).match("l", "ɫ", "r"))
         stressedVowel.relIdx(-2).stressed = true;
     if (stressedVowel.relIdx(-2).value == "s" && stressedVowel.relIdx(-1).match("p", "t", "k", "pʰ", "tʰ", "kʰ")
         && stressedVowel.relIdx(-3).type == "consonant")
@@ -275,7 +275,7 @@ function Lat_to_LL() {
         }
     });
 
-    if (word.vowels.atIdx(-2).ctxMatch("_C,C")) {
+    if (word.vowels.atIdx(-2).ctxMatch("_C,C") && word.vowels.atIdx(-3).stressed) {
         word.vowels.atIdx(-2).stressed = true;
         word.vowels.atIdx(-3).stressed = false;
     }
@@ -459,7 +459,7 @@ function Lat_to_LL() {
 
         if (
             segment.type == "vowel" && segment.stressed && segment.value.length == 1
-            && (segment.relIdx(1).type == "vowel" || segment.ctxMatch("_C,V") || segment.ctxMatch("_p/t/k/b/d/g/f/β,l/r/w,V"))
+            && (segment.ctxMatch("_V/#") || segment.ctxMatch("_C,V") || segment.ctxMatch("_p/t/k/b/d/g/f/β,l/r/w,V"))
         )
             segment.value += "ː";
     });
@@ -1009,7 +1009,7 @@ function WR_to_IR() {
     word.replace("s̺", "ʃ", "ʃ_");
 
     word.remove("j", "i_C[!=j]/#");
-    word.remove("j", "u_");
+    word.remove("w", "u_");
 
     word.forEach(segment => {
         if (segment.value == "ð" && segment.ctxMatch("V/j/w_V/l/r") && !segment.ctxMatch("a/ɔ/o/u_a/ɔ/o/u"))
@@ -1388,6 +1388,9 @@ function OSp_to_ModSp() {
             segment.type = "consonant";
         }
     });
+
+    if (word.partOfSpeech == "conjVerb" && word.atIdx(-1).value == "o" && word.atIdx(-1).LLValue == "oː")
+        word.insert("j", word.length);
 
     word.forEach(segment => {
         if (segment.value == "e" && segment.ctxMatch("j_ʎ")) {
@@ -1790,7 +1793,7 @@ function OGP_to_ModPort() {
                     break;
                 case "e":
                 case "i":
-                    if (segment.relIdx(-1).match("e", "ẽ", "i", "ĩ"))
+                    if (segment.relIdx(-1).match("e", "ẽ", "i", "ĩ", "u", "ũ"))
                         segment.remove();
                     else
                         segment.value = "i";
@@ -1847,11 +1850,12 @@ function OGP_to_ModPort() {
             segment.type = "consonant";
         }
 
-        if (segment.value == "u" && !segment.stressed && segment.relIdx(-1).type == "vowel" && segment.relIdx(-1).value != "i" && !(segment.relIdx(-1).match("e", "ẽ") && segment.relIdx(-1).stressed)) {
+        if (segment.value == "u" && !segment.stressed && segment.ctxMatch("V[!=i/ĩ]_") && !segment.ctxMatch("e/ẽ[stressed]_")) {
             segment.value = "w";
             segment.type = "consonant";
         }
     });
+    word.remove("j", "w_C");
 
     //Denasalization before vowels and certain consonants
     word.forEach(segment => {
@@ -1889,8 +1893,16 @@ function OGP_to_ModPort() {
     word.replace("t͡ʃ", "ʃ");
     word.replace("d͡ʒ", "ʒ");
 
-    word.replace("j", "ɪ̯", "V_");
-    word.replace("w", "ʊ̯", "V_");
+    //Gemination of intervocalic semivowels
+    word.forEach(segment => {
+        if (segment.type == "vowel" && segment.ctxMatch("V,j/w_")) {
+            word.insert(segment.relIdx(-1).value, segment.idx);
+            segment.relIdx(-1).stressed = segment.stressed;
+        }
+    });
+
+    word.replace("j", "ɪ̯", "V/ɪ̯_");
+    word.replace("w", "ʊ̯", "V/ʊ̯_");
 
     //Nasalize semivowels after nasal vowels
     word.forEach(segment => {
@@ -1937,7 +1949,7 @@ function ModPort_to_Port() {
             }
         }
 
-        if (segment.value == "u" && !segment.stressed && segment.relIdx(1).type == "vowel" && segment.relIdx(-1).value != "ɾ") {
+        if (segment.value == "u" && !segment.stressed && segment.relIdx(1).type == "vowel" && !segment.relIdx(-1).match("ɾ", "j")) {
             segment.value = "w";
             segment.type = "consonant";
             if (segment.relIdx(1).stressed) {
@@ -1976,10 +1988,6 @@ function ModPort_to_Port() {
     word.replace("e", "ɜ", "_ɪ̯/ʎ/ɲ/ʒ");
     word.replace("ẽ", "ɜ̃", "_ɪ̯̃");
 
-    //Gemination of intervocalic semivowels
-    word.replace("ɪ̯", "ɪ̯ː", "_V");
-    word.replace("ʊ̯", "ʊ̯ː", "_V");
-
     addRow("Port", "Modern Portuguese (Portugal)", "", getSpelling_ModPort(word.EModPortWord), word);
 }
 
@@ -2014,10 +2022,6 @@ function ModPort_to_Br() {
 
     if (word.atIdx(-1).value == "s" && word.atIdx(-2).match("a", "ɛ", "e", "ɔ", "o", "u") && word.atIdx(-2).stressed)
         word.insert("ɪ̯", -1);
-
-    //Gemination of intervocalic semivowels
-    word.replace("ɪ̯", "ɪ̯ː", "_V");
-    word.replace("ʊ̯", "ʊ̯ː", "_V");
 
     addRow("Br", "Modern Portuguese (Brazil)", "", getSpelling_ModPort(word.EModPortWord, "br"), word, true);
 }
@@ -3051,16 +3055,11 @@ function LL_to_ModIt() {
     word.replace("lʲ", "ʎ", "V/C_");
     word.replace("l", "ʎ", "_ʎ");
 
-    word.replace("ŋ", "ɲ", "_n/ɲ");
-    word.replace("n", "ɲ", "ɲ_");
-
     word.replace("k", "c", "_ɛ/ɛː/e/eː/ɪ/ɪː/i/iː");
     word.replace("g", "ɟ", "_ɛ/ɛː/e/eː/ɪ/ɪː/i/iː");
     word.replace("k", "c", "_c");
     word.replace("g", "ɟ", "_ɟ");
     word.replace("ŋ", "ɲ", "_c/ɟ");
-
-    word.replace("ʊ", "u", "_#");
 
     word.replace("ɟ", "j");
     word.replace("d͡zʲ", "j", "#_");
@@ -3095,12 +3094,17 @@ function LL_to_ModIt() {
     word.replace("ʊ", "o");
     word.replace("ʊː", "oː");
 
+    word.replace("e", "i", "_ɲ/ʎ");
+
+    word.replace("ŋ", "ɲ", "_n/ɲ");
+    word.replace("n", "ɲ", "ɲ_");
+
     word.forEach(segment => {
         if (segment.value == "t͡sʲ" && segment.relIdx(-1).type == "vowel")
             word.insert("t", segment.idx);
     });
 
-    word.remove("k", "_s,#");
+    word.remove("k/p", "_s,#");
 
     if (word.atIdx(-1).type == "consonant" && word.atIdx(-2).type == "consonant" && !word.atIdx(-2).match("j", "w"))
         word.atIdx(-1).remove();
@@ -3340,9 +3344,9 @@ function LL_to_ModIt() {
 
     word.replace("ɔ", "o", "_m/n/ɲ/ŋ,C[!=n]");
 
-    word.replace("e", "i", "_ŋ/ɲ/ʎ");
-    word.replace("e", "i", "_s,k,j");
+    word.replace("e", "i", "_ŋ");
     word.replace("o", "u", "_ŋ");
+    word.replace("e", "i", "_s,k,j");
 
     word.remove("j", "t͡ʃ/d͡ʒ/ʃ/ʎ/ɲ_");
     word.remove("j", "C,r_");
@@ -4051,7 +4055,7 @@ function getSpelling_ModPort(EModPortWord, variety) {
             defaultStress = true;
         if (segment == word.vowels.atIdx(-1) && segment.relIdx(1).type == "consonant" && segment.relIdx(1).value != "s")
             defaultStress = true;
-        if (segment.match("i", "ĩ", "u", "ũ") && segment.relIdx(-1).type == "vowel" && segment.relIdx(1).value != "ɲ" && !(segment.value == "i" && segment.relIdx(1).value == "ɾ" && segment.negIdx == -2))
+        if (segment.match("i", "u") && segment.relIdx(-1).type == "vowel" && segment.relIdx(1).value != "ɲ" && !(segment.value == "i" && segment.ctxMatch("_ɾ,#")))
             defaultStress = false;
         if (segment == word.vowels.atIdx(-2) && word.atIdx(-1).value == "ɐ̃")
             defaultStress = false;

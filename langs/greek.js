@@ -105,7 +105,7 @@ function getIPA_AttGr() {
 function AttGr_to_ModGr() {
     word = outcomes.AttGr.duplicate();
 
-    //Attic verb contraction
+    //Attic verb contraction (noun contraction also occurred, but less predictably)
     if (word.partOfSpeech == "verb")
         word.forEach(segment => {
             if (segment.type == "vowel" && segment.relIdx(1).type == "vowel" && segment.pitch == "high") {
