@@ -136,6 +136,7 @@ These examples demonstrate the form of valid inputs as well as some of the major
 - hasta ("hand", Noun/adjective)
 - jihvā ("tongue", Noun/adjective)
 - pañca ("five", Other)
+- pibati ("he/she/it drinks")
 - pipāsā ("thirst", Noun/adjective)
 - saṃsāra ("world, samsara", Noun/adjective)
 - vyāghraḥ ("tiger", Noun/adjective)
