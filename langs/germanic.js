@@ -1605,7 +1605,7 @@ function ModE_to_ModSc() {
 
     for (let i = 0; i < word.length; i++) {
         let segment = word.atIdx(i);
-        if (segment.match("t", "t͡ʃ") && !segment.stressed && (segment.relIdx(-1).type == "vowel" || segment.relIdx(-1).match("n", "ɫ", "ɾ")) && segment.relIdx(1).type != "vowel") {
+        if (segment.match("t", "t͡ʃ") && !segment.stressed && segment.ctxMatch("V/n/ɫ/ɾ_n̩/C[!=ɾ]/#")) {
             word.insert("ʔ", segment.idx);
             i++;
         }

@@ -14,7 +14,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400..900&family=EB+Garamond:ital,wght@0,400..800;1,400..800"
+        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400..900&family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Noto+Sans+Siddham&family=Noto+Nastaliq+Urdu:wght@400..700"
         rel="stylesheet">
 
     <link rel="icon" href="favicon.png">
@@ -65,6 +65,10 @@
 
         form {
             line-height: 200%;
+        }
+
+        #word {
+            width: 175px;
         }
 
         label {
@@ -182,6 +186,22 @@
             }
         }
 
+        .from_San .spelling {
+            font-style: normal;
+        }
+
+        #Apa .spelling {
+            font-family: "Noto Sans Siddham";
+            transform: translateY(5px);
+            font-style: normal;
+        }
+
+        .to_ModUr #OH .spelling,
+        #ModUr .spelling {
+            font-family: "Noto Nastaliq Urdu";
+            font-style: normal;
+        }
+
         .nonHist {
             font-feature-settings: initial !important;
         }
@@ -226,6 +246,7 @@
         <select name="from" id="from">
             <option value="AttGr">Ancient Greek</option>
             <option value="Lat">Classical Latin</option>
+            <option value="San">Classical Sanskrit</option>
             <option value="OE" selected>Old English</option>
         </select>
         →
@@ -266,6 +287,7 @@
 <script src="langs/germanic.js"></script>
 <script src="langs/romance.js"></script>
 <script src="langs/greek.js"></script>
+<script src="langs/indo-iranian.js"></script>
 <script>
     let params = new URLSearchParams(window.location.search);
     let wordArg = params.get("word");
@@ -360,6 +382,78 @@
                     wordArg = wordArg.replaceAll("k", "c").replaceAll("j", "i").replace(/^w/, "gu");
                     wordArg = wordArg.replaceAll(/(?<=[eouyāēīōūȳ])u(?=[aeiouyāēīōūȳ])/g, "v");
                     break;
+                case "San":
+                    wordArg = wordArg.replaceAll("ē", "e")
+                        .replaceAll("ō", "o")
+                        .replaceAll("r̥", "ṛ")
+                        .replaceAll("l̥", "ḷ")
+                        .replaceAll("ṁ", "ṃ")
+                        .replaceAll(/(?<=j)n/g, "ñ");
+                    wordArg = wordArg.normalize("NFD");
+                    //Remove all accents
+                    wordArg = wordArg.replaceAll(/(?<!s)\u0301/g, "")
+                        .replaceAll("\u0300", "")
+                        .replaceAll("\u0951", "")
+                        .replaceAll("\u0952", "");
+                    //Convert Devanagari input to Latin script
+                    wordArg = wordArg.replaceAll("अ", "a")
+                        .replaceAll(/आ|\u093E/g, "ā")
+                        .replaceAll(/इ|\u093F/g, "i")
+                        .replaceAll(/ई|\u0940/g, "ī")
+                        .replaceAll(/उ|\u0941/g, "u")
+                        .replaceAll(/ऊ|\u0942/g, "ū")
+                        .replaceAll(/ऋ|\u0943/g, "ṛ")
+                        .replaceAll(/ॠ|\u0944/g, "ṝ")
+                        .replaceAll(/ए|\u0947/g, "e")
+                        .replaceAll(/ऐ|\u0948/g, "ai")
+                        .replaceAll(/ओ|\u094B/g, "o")
+                        .replaceAll(/औ|\u094C/g, "au")
+                        .replaceAll(/ऌ|\u0962/g, "ḷ")
+                        .replaceAll(/\u0902/g, "ṃ")
+                        .replaceAll(/\u0903/g, "ḥ");
+                    let consMap = {
+                        "क": "k",
+                        "ख": "kh",
+                        "ग": "g",
+                        "घ": "gh",
+                        "ङ": "ṅ",
+                        "च": "c",
+                        "छ": "ch",
+                        "ज": "j",
+                        "झ": "jh",
+                        "ञ": "ñ",
+                        "ट": "ṭ",
+                        "ठ": "ṭh",
+                        "ड": "ḍ",
+                        "ढ": "ḍh",
+                        "ण": "ṇ",
+                        "त": "t",
+                        "थ": "th",
+                        "द": "d",
+                        "ध": "dh",
+                        "न": "n",
+                        "प": "p",
+                        "फ": "ph",
+                        "ब": "b",
+                        "भ": "bh",
+                        "म": "m",
+                        "य": "y",
+                        "र": "r",
+                        "ल": "l",
+                        "व": "v",
+                        "श": "ś",
+                        "ष": "ṣ",
+                        "स": "s",
+                        "ह": "h",
+                    };
+                    for (let cons in consMap) {
+                        let lat = consMap[cons];
+                        let noInherent = new RegExp(cons + "(?!(a|e|i|o|u|ṛ|ḷ|\u094D))", "g");
+                        wordArg = wordArg.replaceAll(noInherent, lat + "a").replaceAll(cons, lat);
+                    }
+                    wordArg = wordArg.replaceAll("\u094D", "");
+                    wordArg = wordArg.normalize("NFC");
+                    break;
                 case "OE":
                     wordArg = wordArg.replaceAll("ð", "þ").replaceAll("ƿ", "w").replaceAll("k", "c"); //Alternative spellings
                     wordArg = wordArg.replaceAll("io", "eo").replaceAll("īo", "ēo").replaceAll("oe", "e").replaceAll("ōe", "ē").replaceAll("œ̄", "ē").replaceAll("œ", "e"); //Dialectal vowels
@@ -388,6 +482,11 @@
                 name = "Classical Latin";
                 descendants = {ModF: "Modern French", ModIt: "Modern Italian", ModPort: "Modern Portuguese", ModSp: "Modern Spanish"};
                 defaultId = "ModSp";
+                break;
+            case "San":
+                name = "Classical Sanskrit";
+                descendants = {ModH: "Modern Hindi", ModUr: "Modern Urdu"};
+                defaultId = "ModH";
                 break;
             case "OE":
                 name = "Old English";
@@ -418,6 +517,9 @@
                 break;
             case "Lat":
                 specialChars = ["ā", "ē", "ī", "ō", "ū", "ȳ"];
+                break;
+            case "San":
+                specialChars = ["ḍ", "ḥ", "ṃ", "ṇ", "ñ", "ṅ", "ṣ", "ś", "ṭ", "ḷ", "ṛ", "ā", "ī", "ū", "ṝ"];
                 break;
             case "OE":
                 specialChars = ["ċ", "ġ", "þ", "æ", "ā", "ē", "ī", "ō", "ū", "ȳ", "ǣ"];
@@ -486,6 +588,12 @@
                     <option value="other">Other</option>
             `;
                 break;
+            case "San":
+                document.getElementById("pos").innerHTML = `
+                    <option value="noun" selected>Noun/adjective</option>
+                    <option value="other">Other</option>
+            `;
+                break;
             case "OE":
                 document.getElementById("pos").innerHTML = `
                     <option value="noun" selected>Noun</option>
@@ -501,6 +609,9 @@
             document.getElementById("pos").value = partOfSpeech;
 
         document.getElementById("outcomes").style.display = "none";
+
+        document.getElementById("table").classList.add("from_" + from);
+        document.getElementById("table").classList.add("to_" + to);
 
         document.getElementById("header").onclick = () => {
             document.getElementById("outcomes").classList.toggle("expanded");
@@ -561,7 +672,7 @@
 
         let row = document.createElement("tr");
         row.id = id;
-        row.innerHTML = `<td>${name}</td> <td>${date ? "c. " + date : ""}</td> <td class="spelling">${spelling}</td> <td>[${word}]</td>`;
+        row.innerHTML = `<td>${name}</td> <td>${date ? "c. " + date : "—"}</td> <td class="spelling">${spelling || "—"}</td> <td>[${word}]</td>`;
         if (hidden)
             row.classList.add("hidden");
         document.getElementById("table").append(row);
@@ -609,6 +720,13 @@
                             OSp_to_ModSp();
                             break;
                     }
+                    break;
+                case "San":
+                    getIPA_San();
+                    San_to_EPr();
+                    EPr_to_Apa();
+                    Apa_to_OH((to == "ModUr") ? "urdu" : "hindi");
+                    OH_to_ModH((to == "ModUr") ? "urdu" : "hindi");
                     break;
                 case "OE":
                     getIPA_OE();
@@ -773,7 +891,7 @@
             this.word = word;
 
             this.match = (...vals) => vals.includes(this.value);
-            this.relIdx = diff => this.word[this.idx + diff] || new Segment("", this.word);
+            this.relIdx = diff => !this.value ? new Segment("", this.word) : (this.word[this.idx + diff] || new Segment("", this.word));
             this.nextVowel = () => this.word.slice(this.idx + 1).find(s => s.type == "vowel") || new Segment("", this.word);
             this.prevVowel = () => this.word.slice(0, this.idx).reverse().find(s => s.type == "vowel") || new Segment("", this.word);
             this.remove = () => this.word.splice(this.idx, 1);
@@ -887,7 +1005,7 @@
                 for (let i in this.value) {
                     let char = this.value[i];
                     str += char;
-                    if (this.nasalized && !char.match(/[\u0300-\u036f]/))
+                    if (this.nasalized && !char.match(/[\u0300-\u036fː̃]/))
                         str += "\u0303";
                     if (i == 0 && this.pitch)
                         switch (this.pitch) {
@@ -910,7 +1028,13 @@
                 return str;
             };
 
-            if (this.value && ["a", "e", "i", "o", "u", "ɑ", "y", "æ", "ə", "ɛ", "ɪ", "ɔ", "ʊ", "ʏ"].includes(this.value[0]))
+            if (
+                this.value && [
+                    "a", "æ", "ɛ", "e", "ɪ", "i", "ɶ", "œ", "ø", "ʏ", "y",
+                    "ɐ", "ɜ", "ə", "ɘ", "ɨ", "ɞ", "ɵ", "ʉ",
+                    "ɑ", "ʌ", "ɤ", "ɯ", "ɒ", "ɔ", "o", "ʊ", "u"
+                ].includes(this.value[0])
+            )
                 this.type = "vowel";
             else if (this.value)
                 this.type = "consonant";

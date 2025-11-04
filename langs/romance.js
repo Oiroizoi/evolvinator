@@ -3325,7 +3325,7 @@ function LL_to_ModIt() {
     word.replace("β", "v");
     word.replace("n", "ɱ", "_v");
 
-    word.replace("e[stressed]", "ɛ", "j_"); ////only long?
+    word.replace("e[stressed]", "ɛ", "j_");
     word.replace("eː[stressed]", "ɛː", "j_");
 
     word.forEach(segment => {

@@ -25,6 +25,13 @@ This program applies phonological changes to predict the development of historic
         <td>Modern Spanish</td>
     </tr>
     <tr>
+        <td rowspan=2>Classical Sanskrit</td>
+        <td>Modern Hindi</td>
+    </tr>
+    <tr>
+        <td>Modern Urdu</td>
+    </tr>
+    <tr>
         <td rowspan=2>Old English</td>
         <td>Modern English</td>
     </tr>
@@ -49,6 +56,11 @@ More languages coming soon!
 - Use "i" for both the vowel /i/ and the consonant /j/. Its phonetic value will be determined based on its position. (These sounds contrasted in Classical Latin, but the difference is unimportant in the development of the Romance Languages).
 - Choose the appropriate part of speech.
 - Note that most words in the Romance languages derive from Latin accusative forms (e.g., "canem", not "canis").
+
+### Classical Sanskrit
+- Enter a Classical Sanskrit word. You can enter the word in Devanagari or its IAST/ISO 15919 romanization. (Devanagari inputs will be automatically converted to Latin).
+- Choose the appropriate part of speech.
+- Infinitives in Modern Hindi and Urdu contain a suffix derived from _-anaka_. You can add this suffix to a a Sanskrit verb stem to get its predicted modern infinitive form.
 
 ### Old English
 - Enter an Old English word, using standard diacritics (i.e., dots for palatalization and macrons for long vowels).
@@ -114,6 +126,21 @@ These examples demonstrate the form of valid inputs as well as some of the major
 - undecim ("eleven", Other)
 - vēritātem ("truth", Noun)
 
+### Classical Sanskrit
+- adya ("today", Other)
+- ātmā ("soul, self", Noun/adjective)
+- caturtha ("fourth", Noun/adjective)
+- ghoṭaka ("horse", Noun/adjective)
+- ghṛta ("ghee", Noun/adjective)
+- grāma ("village", Noun/adjective)
+- hasta ("hand", Noun/adjective)
+- jihvā ("tongue", Noun/adjective)
+- pañca ("five", Other)
+- pipāsā ("thirst", Noun/adjective)
+- saṃsāra ("world, samsara", Noun/adjective)
+- vyāghraḥ ("tiger", Noun/adjective)
+- yūthikā ("juhi flower", Noun/adjective)
+
 ### Old English
 All words are stressed on the first syllable unless otherwise noted.
 - ǣfre ("ever", Other)
@@ -160,6 +187,9 @@ All words are stressed on the first syllable unless otherwise noted.
 - [From Latin to Spanish](https://www.google.com/books/edition/From_Latin_to_Spanish_Historical_phonolo/_QkNAAAAIAAJ?hl=en)
 - [Greek: A History of Language and Its Speakers](https://openlibrary.org/works/OL17197733W/Greek?edition=key%3A/books/OL25769450M)
 - [Ranieri's Greek Pronunciation Chronology](https://docs.google.com/spreadsheets/d/1fv46XgPPJy-ky9FUSApiemOVmtc8i6q7ZL5XkqtmMWA/edit?gid=1919026778#gid=1919026778)
+- [Development of Prakrit from Old Indo-Aryan](https://en.wikipedia.org/wiki/Prakrit#Development_of_Prakrit_from_Old_Indo-Aryan)
+- [Phonological history of Hindustani](https://en.wikipedia.org/wiki/Phonological_history_of_Hindustani)
+- [Historical Phonology of Modern Standard Hindi: Proto-Indo-European to the Present](https://openlibrary.org/works/OL38602141W/Historical_phonology_of_modern_standard_Hindi)
 
 ### Historical fonts used
 - [Pfeffer Mediæval](https://robert-pfeffer.net/schriftarten/englisch/pfeffer_mediaeval.html)
