@@ -113,8 +113,8 @@ function San_to_EPr() {
             word.atIdx(-1).value = word.atIdx(-1).value[0];
 
     //Monophthongization
-    word.replace("ɑi̯", "eː");
-    word.replace("ɑu̯", "oː");
+    word.replace("ɑj", "eː");
+    word.replace("ɑw", "oː");
     word.replaceSeq("ɜ,j,ɜ", "eː");
     word.replaceSeq("ɜ,j,i", "eː");
     word.replaceSeq("ɜ,j,oː", "eː");
@@ -975,7 +975,7 @@ function getSpelling_Apa() {
             continue;
 
         //Virama
-        if (segment.match("C[mʱ/nʱ/lʱ/ɾʱ]") && segment.value[0] == segment.relIdx(-1).value)
+        if (segment.match("C[!=mʱ/nʱ/lʱ/ɾʱ]") && segment.value[0] == segment.relIdx(-1).value)
             str += "\uD805\uDDBF";
 
         switch (segment.value) {
