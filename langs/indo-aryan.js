@@ -2,8 +2,8 @@ function getIPA_San() {
     let charToPhoneme = [
         ["a", "ɜ"],
         ["ā", "ɑː"],
-        ["ai", "ɑi̯"],
-        ["au", "ɑu̯"],
+        ["ai", "ɑj"],
+        ["au", "ɑw"],
         ["b", "b"],
         ["bh", "bʱ"],
         ["c", "t͡ɕ"],
@@ -63,12 +63,12 @@ function getIPA_San() {
     }
 
     word.forEach(segment => {
-        if (segment.match("l̩", "r̩", "r̩ː"))
+        if (segment.match("l̩/r̩/r̩ː"))
             segment.type = "vowel";
     });
 
     word.forEach(segment => {
-        if (segment.match("h", "N") && segment.relIdx(-1).type != "vowel")
+        if (segment.match("h/N", "#/C_"))
             throw new Error("Invalid diacritic placement");
     });
 
@@ -77,7 +77,7 @@ function getIPA_San() {
     word.replace("N", "l̃", "_l");
 
     word.forEach(segment => {
-        if (segment.relIdx(1).value == "N") {
+        if (segment.ctxMatch("_N")) {
             segment.nasalized = true;
             segment.relIdx(1).remove();
         }
@@ -92,25 +92,24 @@ function getIPA_San() {
 function San_to_EPr() {
     word = outcomes.San.duplicate();
 
-    if (word.atIdx(-2).value == "ɜ" && word.atIdx(-1).value == "h")
-        word.atIdx(-2).value = "oː";
+    word.replace("ɜ", "oː", "_h,#");
 
     word.remove("h");
 
-    while (word.atIdx(-1).type == "consonant") {
-        if (word.atIdx(-1).match("m", "n", "ɳ", "ɲ", "ŋ") && word.atIdx(-2).type == "vowel")
+    while (word.endMatch("C")) {
+        if (word.endMatch("V,m/n/ɳ/ɲ/ŋ"))
             word.atIdx(-2).nasalized = true;
-        else if (word.atIdx(-2).value == "ɜ")
+        else if (word.endMatch("ɜ,C"))
             word.atIdx(-2).value = "ɑː";
-        else if (word.atIdx(-2).match("i", "u"))
+        else if (word.endMatch("i/u,C"))
             word.atIdx(-2).value += "ː";
         word.atIdx(-1).remove();
     }
 
     if (word.atIdx(-1).nasalized)
-        if (word.atIdx(-1).value == "ɑː")
+        if (word.endMatch("ɑː"))
             word.atIdx(-1).value = "ɜ";
-        else if (word.atIdx(-2).match("iː", "uː"))
+        else if (word.endMatch("iː/uː"))
             word.atIdx(-1).value = word.atIdx(-1).value[0];
 
     //Monophthongization
@@ -123,8 +122,8 @@ function San_to_EPr() {
     word.replaceSeq("ɜ,ʋ,ɜ", "oː");
 
     word.forEach(segment => {
-        if (segment.match("r̩", "r̩ː", "l̩")) {
-            if (segment.match("r̩", "r̩ː") && segment.idx == 0)
+        if (segment.match("r̩/r̩ː/l̩")) {
+            if (segment.match("r̩/r̩ː", "#_"))
                 word.insert("ɾ", segment.idx);
             if (segment.ctxMatch("m/p/pʰ/b/bʱ_"))
                 segment.value = "u";
@@ -143,7 +142,7 @@ function San_to_EPr() {
     word.replaceSeq("j̃,j", "ɲ,ɲ");
 
     word.forEach(segment => {
-        if (segment.match("l", "ɾ") && segment.ctxMatch("V,m_"))
+        if (segment.match("l/ɾ", "V,m_"))
             word.insert("b", segment.idx);
     });
 
@@ -154,7 +153,7 @@ function San_to_EPr() {
     word.replace("bʱ/dʱ/ɖʱ/gʱ", "d͡ʑʱ", "_j");
     word.remove("j", "t͡ɕ,s_");
 
-    while (word.atIdx(-1).type == "consonant")
+    while (word.endMatch("C"))
         word.atIdx(-1).remove();
 
     word.forEach(segment => {
@@ -183,18 +182,18 @@ function San_to_EPr() {
     word.replace("s", "ɦ", "_p/pʰ/b/bʱ/t/tʰ/d/dʱ/ʈ/ʈʰ/ɖ/ɖʱ/t͡ɕ/t͡ɕʰ/d͡ʑ/d͡ʑʱ/k/kʰ/g/gʱ/m/n/ɳ/ɲ/ŋ");
 
     word.forEach(segment => {
-        if (segment.type == "consonant" && segment.relIdx(-1).value == "ɦ") {
+        if (segment.match("C", "ɦ_")) {
             word.insert("ɦ", segment.idx + 1);
             segment.relIdx(-1).remove();
         }
     });
 
     word.forEach(segment => {
-        if (segment.value == "ɦ" && segment.ctxMatch("C[!=m/n/ɳ/ɲ/ŋ/l/ʋ/j/ɾ]_")) {
+        if (segment.match("ɦ", "C[!=m/n/ɳ/ɲ/ŋ/l/ʋ/j/ɾ]_")) {
             segment.value = segment.relIdx(-1).value;
-            if (segment.match("p", "t", "ʈ", "t͡ɕ", "k"))
+            if (segment.match("p/t/ʈ/t͡ɕ/k"))
                 segment.value += "ʰ";
-            else if (segment.match("b", "d", "ɖ", "d͡ʑ", "g"))
+            else if (segment.match("b/d/ɖ/d͡ʑ/g"))
                 segment.value += "ʱ";
             if (segment.idx == 1)
                 segment.relIdx(-1).remove();
@@ -210,7 +209,7 @@ function San_to_EPr() {
     word.replace("n", "ŋ", "_ŋ/k/kʰ/g/gʱ");
 
     word.forEach(segment => {
-        if (segment.type == "vowel")
+        if (segment.match("V"))
             while (segment.ctxMatch("C,C,C_"))
                 if (segment.relIdx(-2).value == segment.relIdx(-1).value[0])
                     segment.relIdx(-2).remove();
@@ -227,28 +226,28 @@ function San_to_EPr() {
             let strengthHierarchy = ["p/pʰ/b/bʱ/t/tʰ/d/dʱ/ʈ/ʈʰ/ɖ/ɖʱ/t͡ɕ/t͡ɕʰ/d͡ʑ/d͡ʑʱ/k/kʰ/g/gʱ", "s", "m/n/ɳ/ɲ/ŋ", "l", "ʋ", "j", "ɾ", "ɦ"];
             let stronger;
             for (let group of strengthHierarchy) {
-                if (vowel.relIdx(-1).selfMatch(group)) {
+                if (vowel.relIdx(-1).match(group)) {
                     stronger = vowel.relIdx(-1);
                     break;
-                } else if (vowel.relIdx(-2).selfMatch(group)) {
+                } else if (vowel.relIdx(-2).match(group)) {
                     stronger = vowel.relIdx(-2);
                     break;
                 }
             }
 
             vowel.relIdx(-1).value = stronger.value;
-            for (let j = vowel.idx - 2; word.atIdx(j).type == "consonant"; j--)
+            for (let j = vowel.idx - 2; word.atIdx(j).match("C"); j--)
                 word.atIdx(j).value = stronger.value[0];
         }
     }
     word.remove("C", "#/C_C[!=ɦ]");
 
     word.forEach(segment => {
-        if (segment.value == "ɦ" && segment.ctxMatch("C[!=m/n/ɳ/ɲ/ŋ/l/ʋ/j/ɾ]_")) {
+        if (segment.match("ɦ", "C[!=m/n/ɳ/ɲ/ŋ/l/ʋ/j/ɾ]_")) {
             segment.value = segment.relIdx(-1).value;
-            if (segment.match("p", "t", "ʈ", "t͡ɕ", "k"))
+            if (segment.match("p/t/ʈ/t͡ɕ/k"))
                 segment.value += "ʰ";
-            else if (segment.match("b", "d", "ɖ", "d͡ʑ", "g"))
+            else if (segment.match("b/d/ɖ/d͡ʑ/g"))
                 segment.value += "ʱ";
             if (segment.idx == 1)
                 segment.relIdx(-1).remove();
@@ -257,7 +256,7 @@ function San_to_EPr() {
         }
     });
 
-    if (word.atIdx(0).type == "consonant" && word.atIdx(1).value == "ɦ")
+    if (word.startMatch("C,ɦ"))
         word.insert("ɜ", 1);
 
     addRow("EPr", "Early Prakrit", "300 BC", getSpelling_EPr(), word, true);
@@ -301,7 +300,7 @@ function EPr_to_Apa() {
     word.remove("j", "V_V");
 
     word.forEach(segment => {
-        if ((segment.match("ɜ", "ɑː") && segment.relIdx(1).match("ɜ", "ɑː")) || (segment.match("i", "iː", "e") && segment.relIdx(1).type == "vowel"))
+        if (segment.match("ɜ/ɑː", "_ɜ/ɑː") || segment.match("i/iː/e", "_V"))
             word.insert("j", segment.idx + 1);
     });
 
@@ -313,7 +312,7 @@ function EPr_to_Apa() {
     word.replace("d͡ʑʱ", "d͡ʒʱ");
 
     word.forEach(segment => {
-        if (segment.value == "ɦ" && segment.ctxMatch("C[!=ɦ]_"))
+        if (segment.match("ɦ", "C[!=ɦ]_"))
             segment.value = segment.relIdx(-1).value + "ʱ";
     });
 
@@ -341,7 +340,7 @@ function EPr_to_Apa() {
     else
         word.vowels.at(-4).stressed = true;
 
-    if (word.stressedVowel.relIdx(-1).type == "consonant")
+    if (word.stressedVowel.ctxMatch("C_"))
         word.stressedVowel.relIdx(-1).stressed = true;
 
     addRow("Apa", "Apabhramsha", "900", getSpelling_Apa(), word, true);
@@ -362,23 +361,23 @@ function Apa_to_OH(variety) {
 
     //Contraction of most vowels in hiatus
     word.slice().reverse().forEach(segment => {
-        if (segment.match("ɜ", "ɑː") && segment.relIdx(1).match("ɜ", "ɑː")) {
+        if (segment.match("ɜ/ɑː", "_ɜ/ɑː")) {
             segment.value = "ɑː";
             if (segment.relIdx(1).stressed)
                 segment.stressed = true;
             if (segment.relIdx(1).nasalized)
                 segment.nasalized = true;
             segment.relIdx(1).remove();
-        } else if (segment.value == "ɜ" && segment.relIdx(1).value == "i") {
+        } else if (segment.match("ɜ", "_i")) {
             segment.value = "ɜɪ̯";
             if (segment.relIdx(1).stressed)
                 segment.stressed = true;
             if (segment.relIdx(1).nasalized)
                 segment.nasalized = true;
             segment.relIdx(1).remove();
-        } else if (segment.value == "ɜ" && (segment.relIdx(1).value == "u" || segment.ctxMatch("_ʋ,ɜ"))) {
+        } else if (segment.match("ɜ", "_u") || segment.match("ɜ", "_ʋ,ɜ")) {
             segment.value = "ɜʊ̯";
-            if (segment.relIdx(2).value == "ɜ")
+            if (segment.relIdx(2).match("ɜ"))
                 segment.relIdx(2).remove();
             if (segment.relIdx(1).stressed)
                 segment.stressed = true;
@@ -386,7 +385,7 @@ function Apa_to_OH(variety) {
                 segment.nasalized = true;
             segment.relIdx(1).remove();
         } else if (
-            segment.match("eː", "i", "iː", "oː", "u", "uː")
+            segment.match("eː/i/iː/oː/u/uː")
             && (segment.value[0] == segment.relIdx(1).value[0] || (segment.ctxMatch("_V[!stressed]") && segment.relIdx(1).value.length == 1))
         ) {
             segment.value = segment.value[0] + "ː";
@@ -396,7 +395,7 @@ function Apa_to_OH(variety) {
                 segment.nasalized = true;
             segment.relIdx(1).remove();
         }
-        if (segment.type == "vowel" && segment.value == segment.relIdx(1).value) {
+        if (segment.match("V") && segment.value == segment.relIdx(1).value) {
             if (segment.relIdx(1).stressed)
                 segment.stressed = true;
             if (segment.relIdx(1).nasalized)
@@ -407,10 +406,10 @@ function Apa_to_OH(variety) {
 
     word.forEach(segment => {
         if (segment.ctxMatch("ɜ/ɑː_")) {
-            if (segment.value == "i") {
+            if (segment.match("i")) {
                 segment.value = "j";
                 segment.type = "consonant";
-            } else if (segment.value == "u" && !(segment.ctxMatch("_C,C") && segment.relIdx(1).value != segment.relIdx(2).value[0])) {
+            } else if (segment.match("u") && !(segment.ctxMatch("_C,C") && segment.relIdx(1).value != segment.relIdx(2).value[0])) {
                 segment.value = "ʋ";
                 segment.type = "consonant";
             }
@@ -425,14 +424,14 @@ function Apa_to_OH(variety) {
 
     //Cluster reduction & compensatory lengthening
     word.slice().reverse().forEach(segment => {
-        if (segment.type == "vowel" && segment.ctxMatch("_C,C")) {
+        if (segment.match("V", "_C,C")) {
             if (
                 (segment.stressed && segment.value.length == 1
-                    && !(segment.ctxMatch("V/C,C_") || segment.prevVowel().value.length > 1) || segment.match("e", "o"))
+                    && !(segment.ctxMatch("V/C,C_") || segment.prevVowel().value.length > 1) || segment.match("e/o"))
             ) {
-                if (segment.value == "ɜ")
+                if (segment.match("ɜ"))
                     segment.value = "ɑ";
-                if (segment.relIdx(1).match("m", "n", "ɳ", "ɲ", "ŋ") && segment.relIdx(1).value != segment.relIdx(2).value[0])
+                if (segment.ctxMatch("_m/n/ɳ/ɲ/ŋ") && segment.relIdx(1).value != segment.relIdx(2).value[0])
                     segment.nasalized = true;
                 segment.value += "ː";
                 segment.relIdx(1).remove();
@@ -448,7 +447,7 @@ function Apa_to_OH(variety) {
     word.replace("ɖʱ", "ɽʱ", "V_V");
 
     word.forEach(segment => {
-        if (segment.value == "ʋ̃") {
+        if (segment.match("ʋ̃")) {
             segment.relIdx(-1).nasalized = true;
             segment.value = "ʋ";
         }
@@ -465,7 +464,7 @@ function Apa_to_OH(variety) {
         word.vowels.at(-4).stressed = true;
 
     word.forEach(segment => {
-        if (segment.match("eː", "i", "iː", "oː", "u", "uː") && (segment.ctxMatch("_V[!stressed]") && segment.relIdx(1).value.length == 1)) {
+        if (segment.match("eː/i/iː/oː/u/uː", "_V[!stressed]") && segment.relIdx(1).value.length == 1) {
             segment.value = segment.value[0] + "ː";
             if (segment.relIdx(1).stressed)
                 segment.stressed = true;
@@ -482,19 +481,19 @@ function Apa_to_OH(variety) {
 
     word.forEach(segment => {
         if (segment.ctxMatch("_V[stressed]")) {
-            if (segment.match("i", "iː")) {
+            if (segment.match("i/iː")) {
                 segment.value = "j";
                 segment.type = "consonant";
-            } if (segment.match("u", "uː")) {
+            } if (segment.match("u/uː")) {
                 segment.value = "ʋ";
                 segment.type = "consonant";
             }
         }
     });
 
-    if (word.stressedVowel.relIdx(-1).type == "consonant")
+    if (word.stressedVowel.ctxMatch("C_"))
         word.stressedVowel.relIdx(-1).stressed = true;
-    if (word.stressedVowel.relIdx(-1).match("j", "ʋ") && word.stressedVowel.relIdx(-2).type == "consonant")
+    if (word.stressedVowel.ctxMatch("C,j/ʋ_"))
         word.stressedVowel.relIdx(-2).stressed = true;
 
     addRow("OH", "Old Hindi", "1300", (variety == "urdu") ? getSpelling_OH_persian() : getSpelling_OH_devanagari(), word);
@@ -507,7 +506,7 @@ function OH_to_ModH(variety) {
         word.replace("ɜʊ̯", "ɑː", "_#");
 
     word.forEach(segment => {
-        if (segment.match("i", "u") && segment.idx > word.stressedVowel.idx)
+        if (segment.match("i/u") && segment.idx > word.stressedVowel.idx)
             segment.value = "ɜ";
     });
 
@@ -516,7 +515,7 @@ function OH_to_ModH(variety) {
 
     //Schwa deletion
     word.slice().reverse().forEach(segment => {
-        if (segment.value == "ɜ" && (segment.ctxMatch("V,C_C,V") || segment.ctxMatch("V,m/n/ɳ/ɲ/ŋ,C_C,V") || segment.ctxMatch("_#")) && word.vowels.length > 1) {
+        if (segment.match("ɜ") && (segment.ctxMatch("V,C_C,V") || segment.ctxMatch("V,m/n/ɳ/ɲ/ŋ,C_C,V") || segment.ctxMatch("_#")) && word.vowels.length > 1) {
             segment.relIdx(-1).droppedSchwa = true;
             segment.remove();
         }
@@ -524,7 +523,7 @@ function OH_to_ModH(variety) {
 
     word.forEach(segment => {
         if (
-            segment.type == "vowel" && !segment.stressed && !segment.value.endsWith("ː") && segment.value.length < 3
+            segment.match("V[!stressed]") && !segment.value.endsWith("ː") && segment.value.length < 3
             && (segment.ctxMatch("V,C_C,V") || (segment.ctxMatch("#_C,V") && word.vowels.length > 2))
         ) {
             segment.relIdx(-1).droppedSchwa = true;
@@ -533,7 +532,7 @@ function OH_to_ModH(variety) {
     });
 
     word.forEach(segment => {
-        if (segment.match("ɑː", "eː", "iː", "oː", "uː")) {
+        if (segment.match("ɑː/eː/iː/oː/uː")) {
             let followingVowels = word.vowels.filter(v => v.idx > segment.idx);
             if (followingVowels.length > 1 && followingVowels.some(v => v.value.length > 1 || v.ctxMatch("_C,C"))) {
                 segment.value = segment.value.slice(0, -1);
@@ -548,17 +547,17 @@ function OH_to_ModH(variety) {
     });
 
     word.forEach(segment => {
-        if (segment.nasalized && segment.relIdx(1).match("b", "bʱ"))
+        if (segment.match("V[nasalized]", "_b/bʱ"))
             segment.relIdx(1).value = "m" + segment.relIdx(1).value.slice(1);
 
-        if (segment.value == "m" && segment.relIdx(1).match("b", "bʱ")) {
+        if (segment.match("m", "_b/bʱ")) {
             segment.relIdx(1).value = "m" + segment.relIdx(1).value.slice(1);
             segment.remove();
         }
     });
 
     word.forEach(segment => {
-        if (segment.type == "vowel" && segment.ctxMatch("_m/n/ɳ/ɲ/ŋ,C/#"))
+        if (segment.match("V", "_m/n/ɳ/ɲ/ŋ,C/#"))
             segment.nasalized = true;
     });
 
@@ -569,7 +568,7 @@ function OH_to_ModH(variety) {
     word.replace("ʋ", "w", "#,C_");
 
     word.forEach(segment => {
-        if (segment.value == "i" && segment.ctxMatch("_V"))
+        if (segment.match("i", "_V"))
             word.insert("j", segment.idx + 1);
     });
 
@@ -589,12 +588,12 @@ function OH_to_ModH(variety) {
 
     if (variety == "urdu")
         word.forEach(segment => {
-            if (segment.value == "j" && segment.ctxMatch("V_C/#")) {
+            if (segment.match("j", "V_C/#")) {
                 segment.value = "eː";
                 segment.type = "vowel";
             }
 
-            if (segment.value == "ʋ" && segment.ctxMatch("V_C/#")) {
+            if (segment.match("ʋ", "V_C/#")) {
                 segment.value = "oː";
                 segment.type = "vowel";
             }
@@ -612,57 +611,58 @@ function getSpelling_EPr() {
     for (let i = 0; i < word.length; i++) {
         let segment = word.atIdx(i);
 
-        if (segment.type == "consonant" && segment.value == segment.relIdx(1).value[0] && !segment.match("m", "n", "ɳ", "ɲ", "ŋ"))
+        if (segment.match("C[!=m/n/ɳ/ɲ/ŋ]") && segment.value == segment.relIdx(1).value[0])
             continue;
 
-        if (segment.type == "consonant" && segment.relIdx(-1).type == "consonant" && segment.value[0] != segment.relIdx(-1).value && str.at(-1) != "\uDC01")
+        //Virama
+        if (segment.match("C", "C_") && segment.value[0] != segment.relIdx(-1).value && str.at(-1) != "\uDC01")
             str += "\uD804\uDC46";
 
         switch (segment.value) {
             case "ɜ":
-                if (segment.relIdx(-1).type != "consonant")
+                if (!segment.ctxMatch("C_"))
                     str += "𑀅";
                 break;
             case "ɑː":
-                if (segment.relIdx(-1).type == "consonant")
+                if (segment.ctxMatch("C_"))
                     str += "\uD804\uDC38";
                 else
                     str += "𑀆";
                 break;
             case "i":
-                if (segment.relIdx(-1).type == "consonant")
+                if (segment.ctxMatch("C_"))
                     str += "\uD804\uDC3A";
                 else
                     str += "𑀇";
                 break;
             case "iː":
-                if (segment.relIdx(-1).type == "consonant")
+                if (segment.ctxMatch("C_"))
                     str += "\uD804\uDC3B";
                 else
                     str += "𑀈";
                 break;
             case "u":
-                if (segment.relIdx(-1).type == "consonant")
+                if (segment.ctxMatch("C_"))
                     str += "\uD804\uDC3C";
                 else
                     str += "𑀉";
                 break;
             case "uː":
-                if (segment.relIdx(-1).type == "consonant")
+                if (segment.ctxMatch("C_"))
                     str += "\uD804\uDC3D";
                 else
                     str += "𑀊";
                 break;
             case "eː":
             case "e":
-                if (segment.relIdx(-1).type == "consonant")
+                if (segment.ctxMatch("C_"))
                     str += "\uD804\uDC42";
                 else
                     str += "𑀉";
                 break;
             case "oː":
             case "o":
-                if (segment.relIdx(-1).type == "consonant")
+                if (segment.ctxMatch("C_"))
                     str += "\uD804\uDC44";
                 else
                     str += "𑀑";
@@ -790,10 +790,11 @@ function getSpelling_ShPr() {
     for (let i = 0; i < word.length; i++) {
         let segment = word.atIdx(i);
 
-        if (segment.match("m", "n", "l", "ɾ") && segment.relIdx(1).value == segment.value + "ʱ")
+        if (segment.match("m/n/l/ɾ") && segment.relIdx(1).value == segment.value + "ʱ")
             continue;
 
-        if (segment.type == "consonant" && segment.value[0] == segment.relIdx(-1).value && !segment.match("mʱ", "nʱ", "lʱ", "ɾʱ"))
+        //Virama
+        if (segment.match("C[!=mʱ/nʱ/lʱ/ɾʱ]") && segment.value[0] == segment.relIdx(-1).value)
             str += "\uD804\uDC46";
 
         switch (segment.value) {
@@ -905,7 +906,7 @@ function getSpelling_ShPr() {
                 str += "𑀠";
                 break;
             case "t":
-                if (segment.relIdx(1).match("t͡ʃ", "t͡ʃʰ"))
+                if (segment.ctxMatch("_t͡ʃ/t͡ʃʰ"))
                     str += "𑀘";
                 else
                     str += "𑀢";
@@ -914,7 +915,7 @@ function getSpelling_ShPr() {
                 str += "𑀣";
                 break;
             case "d":
-                if (segment.relIdx(1).match("d͡ʒ", "d͡ʒʱ"))
+                if (segment.ctxMatch("_d͡ʒ/d͡ʒʱ"))
                     str += "𑀚";
                 else
                     str += "𑀤";
@@ -970,10 +971,11 @@ function getSpelling_Apa() {
     for (let i = 0; i < word.length; i++) {
         let segment = word.atIdx(i);
 
-        if (segment.match("m", "n", "l", "ɾ") && segment.relIdx(1).value == segment.value + "ʱ")
+        if (segment.match("m/n/l/ɾ") && segment.relIdx(1).value == segment.value + "ʱ")
             continue;
 
-        if (segment.type == "consonant" && segment.value[0] == segment.relIdx(-1).value && !segment.match("mʱ", "nʱ", "lʱ", "ɾʱ"))
+        //Virama
+        if (segment.match("C[mʱ/nʱ/lʱ/ɾʱ]") && segment.value[0] == segment.relIdx(-1).value)
             str += "\uD805\uDDBF";
 
         switch (segment.value) {
@@ -1085,7 +1087,7 @@ function getSpelling_Apa() {
                 str += "𑖛";
                 break;
             case "t":
-                if (segment.relIdx(1).match("t͡ʃ", "t͡ʃʰ"))
+                if (segment.ctxMatch("_t͡ʃ/t͡ʃʰ"))
                     str += "𑖓";
                 else
                     str += "𑖝";
@@ -1094,7 +1096,7 @@ function getSpelling_Apa() {
                 str += "𑖞";
                 break;
             case "d":
-                if (segment.relIdx(1).match("d͡ʒ", "d͡ʒʱ"))
+                if (segment.ctxMatch("_d͡ʒ/d͡ʒʱ"))
                     str += "𑖕";
                 else
                     str += "𑖟";
@@ -1153,59 +1155,59 @@ function getSpelling_OH_devanagari() {
 
         switch (segment.value) {
             case "ɜ":
-                if (segment.relIdx(-1).type != "consonant")
+                if (!segment.ctxMatch("C_"))
                     str += "अ";
                 break;
             case "i":
-                if (segment.relIdx(-1).type == "consonant")
+                if (segment.ctxMatch("C_"))
                     str += "\u093F";
                 else
                     str += "इ";
                 break;
             case "u":
-                if (segment.relIdx(-1).type == "consonant")
+                if (segment.ctxMatch("C_"))
                     str += "\u0941";
                 else
                     str += "उ";
                 break;
             case "ɑː":
-                if (segment.relIdx(-1).type == "consonant")
+                if (segment.ctxMatch("C_"))
                     str += "\u093E";
                 else
                     str += "आ";
                 break;
             case "ɜɪ̯":
-                if (segment.relIdx(-1).type == "consonant")
+                if (segment.ctxMatch("C_"))
                     str += "\u0948";
                 else
                     str += "ऐ";
                 break;
             case "eː":
-                if (segment.relIdx(-1).type == "consonant")
+                if (segment.ctxMatch("C_"))
                     str += "\u0947";
                 else
                     str += "ए";
                 break;
             case "iː":
-                if (segment.relIdx(-1).type == "consonant")
+                if (segment.ctxMatch("C_"))
                     str += "\u0940";
                 else
                     str += "ई";
                 break;
             case "ɜʊ̯":
-                if (segment.relIdx(-1).type == "consonant")
+                if (segment.ctxMatch("C_"))
                     str += "\u094C";
                 else
                     str += "औ";
                 break;
             case "oː":
-                if (segment.relIdx(-1).type == "consonant")
+                if (segment.ctxMatch("C_"))
                     str += "\u094B";
                 else
                     str += "ओ";
                 break;
             case "uː":
-                if (segment.relIdx(-1).type == "consonant")
+                if (segment.ctxMatch("C_"))
                     str += "\u0942";
                 else
                     str += "ऊ";
@@ -1294,7 +1296,7 @@ function getSpelling_OH_devanagari() {
                 str += "भ";
                 break;
             case "j":
-                if (segment.relIdx(-1).type == "consonant")
+                if (segment.ctxMatch("C_"))
                     str += "\u094D";
                 str += "य";
                 break;
@@ -1311,7 +1313,7 @@ function getSpelling_OH_devanagari() {
                 str += "ल्ह";
                 break;
             case "ʋ":
-                if (segment.relIdx(-1).type == "consonant")
+                if (segment.ctxMatch("C_"))
                     str += "\u094D";
                 str += "व";
                 break;
@@ -1517,60 +1519,60 @@ function getSpelling_ModH() {
             case "ɜ":
             case "ɛ":
             case "ɔ":
-                if (segment.relIdx(-1).type != "consonant")
+                if (!segment.ctxMatch("C_"))
                     str += "अ";
                 break;
             case "ɪ":
             case "i":
-                if (segment.relIdx(-1).type == "consonant")
+                if (segment.ctxMatch("C_"))
                     str += "\u093F";
                 else
                     str += "इ";
                 break;
             case "ʊ":
-                if (segment.relIdx(-1).type == "consonant")
+                if (segment.ctxMatch("C_"))
                     str += "\u0941";
                 else
                     str += "उ";
                 break;
             case "aː":
-                if (segment.relIdx(-1).type == "consonant")
+                if (segment.ctxMatch("C_"))
                     str += "\u093E";
                 else
                     str += "आ";
                 break;
             case "ɛː":
-                if (segment.relIdx(-1).type == "consonant")
+                if (segment.ctxMatch("C_"))
                     str += "\u0948";
                 else
                     str += "ऐ";
                 break;
             case "eː":
-                if (segment.relIdx(-1).type == "consonant")
+                if (segment.ctxMatch("C_"))
                     str += "\u0947";
                 else
                     str += "ए";
                 break;
             case "iː":
-                if (segment.relIdx(-1).type == "consonant")
+                if (segment.ctxMatch("C_"))
                     str += "\u0940";
                 else
                     str += "ई";
                 break;
             case "ɔː":
-                if (segment.relIdx(-1).type == "consonant")
+                if (segment.ctxMatch("C_"))
                     str += "\u094C";
                 else
                     str += "औ";
                 break;
             case "oː":
-                if (segment.relIdx(-1).type == "consonant")
+                if (segment.ctxMatch("C_"))
                     str += "\u094B";
                 else
                     str += "ओ";
                 break;
             case "uː":
-                if (segment.relIdx(-1).type == "consonant")
+                if (segment.ctxMatch("C_"))
                     str += "\u0942";
                 else
                     str += "ऊ";
@@ -1663,7 +1665,7 @@ function getSpelling_ModH() {
                 str += "भ";
                 break;
             case "j":
-                if (segment.relIdx(-1).type == "consonant" && !segment.relIdx(-1).droppedSchwa)
+                if (segment.ctxMatch("C_") && !segment.relIdx(-1).droppedSchwa)
                     str += "\u094D";
                 str += "य";
                 break;
@@ -1681,7 +1683,7 @@ function getSpelling_ModH() {
                 break;
             case "ʋ":
             case "w":
-                if (segment.relIdx(-1).type == "consonant" && !segment.relIdx(-1).droppedSchwa)
+                if (segment.ctxMatch("C_") && !segment.relIdx(-1).droppedSchwa)
                     str += "\u094D";
                 str += "व";
                 break;
@@ -1694,7 +1696,7 @@ function getSpelling_ModH() {
         }
 
         if (segment.nasalized && !segment.ctxMatch("_m/n/ɳ/ɲ/ŋ")) {
-            if ((segment.selfMatch("ɪ/iː/eː/ɛː/oː/ɔː") && segment.relIdx(-1).type == "consonant") || (segment.selfMatch("iː/ɛː/oː/ɔː") && segment.relIdx(-1).type != "consonant"))
+            if (segment.match("ɪ/iː/eː/ɛː/oː/ɔː", "C_") || segment.match("iː/ɛː/oː/ɔː", "#/V_"))
                 str += "\u0902";
             else
                 str += "\u0901";

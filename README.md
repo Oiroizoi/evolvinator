@@ -19,6 +19,9 @@ This program applies phonological changes to predict the development of historic
         <td>Modern Italian</td>
     </tr>
     <tr>
+        <td>Modern Romanian</td>
+    </tr>
+    <tr>
         <td>Modern Portuguese</td>
     </tr>
     <tr>
@@ -34,6 +37,16 @@ This program applies phonological changes to predict the development of historic
     <tr>
         <td rowspan=2>Old English</td>
         <td>Modern English</td>
+    </tr>
+    <tr>
+        <td>Modern Scots</td>
+    </tr>
+    <tr>
+        <td rowspan=3>Proto-Germanic</td>
+        <td>Modern English</td>
+    </tr>
+    <tr>
+        <td>Modern German</td>
     </tr>
     <tr>
         <td>Modern Scots</td>
@@ -67,6 +80,14 @@ More languages coming soon!
 - If the Old English word's spelling does not reflect its pronunciation, modify your input to match the pronunciation. For example, enter "ġung" for _geong_ [juŋg].
 - Select the syllable on which the primary stress falls.
 - Choose the appropriate part of speech. For present participles, select "Conjugated verb".
+- Predicted outcomes are more accurate for single-stem words than for compounds. For better results, enter each component of a compound word separately.
+
+### Proto-Germanic
+- Enter a reconstructed Proto-Germanic word.
+- Use an ogonek for nasal vowels (e.g., ǫ) and a circumflex for overlong vowels (e.g., ô).
+- Use "ē" for /ɛː/ and "ē₂" for /eː/ (not "æ, ē").
+- Select the syllable on which the primary stress falls. In Proto-Germanic, stress falls on the root syllable, i.e., the first non-prefix syllable.
+- Choose the appropriate part of speech.
 - Predicted outcomes are more accurate for single-stem words than for compounds. For better results, enter each component of a compound word separately.
 
 ## Other notes
@@ -175,6 +196,33 @@ All words are stressed on the first syllable unless otherwise noted.
 - weorold ("world", Noun)
 - wrist ("wrist", Noun)
 
+### Proto-Germanic
+All words are stressed on the first syllable unless otherwise noted.
+- ajganaz ("own", Other)
+- batizô ("better", Other)
+- baþōną ("to bathe", Infinitive verb)
+- dagaz ("day", Noun (masculine singular))
+- dajlijaną ("to divide, to share", Infinitive verb)
+- draganą ("to draw, to pull, to carry", Infinitive verb)
+- drawmaz ("dream", Noun (masculine singular))
+- flewgandz ("flying", Conjugated verb)
+- gans ("goose", Noun (feminine singular))
+- garihtiją ("justice, fairness", Noun (neuter singular), 2nd syllable stressed)
+- grōtijaną ("to cause to cry, to address", Infinitive verb)
+- gulþą ("gold", Noun (neuter singular))
+- hajlagaz ("holy", Other)
+- halbaz ("half", Other)
+- hawhaz ("high", Other)
+- hawzīþi ("he/she hears", Conjugated verb)
+- hwītaz ("white", Other)
+- jērą ("year", Noun (neuter singular))
+- kambaz ("comb", Noun (masculine singular))
+- mūsiz ("mice", Noun (feminine plural))
+- tajkną ("sign, token", Noun (neuter singular))
+- tigulǭ ("tile, brick", Noun (feminine singular))
+- timrą ("building, timber", Noun (neuter singular))
+- wunskijaną ("to wish", Infinitive verb)
+
 ## Main sources
 - [Phonological history of English](https://en.wikipedia.org/wiki/Phonological_history_of_English)
 - [englesaxe](https://adoneilson.com/eme/index.html)
@@ -186,16 +234,20 @@ All words are stressed on the first syllable unless otherwise noted.
 - [A Linguistic History of Italian](https://www.google.com/books/edition/A_Linguistic_History_of_Italian/DwTKAwAAQBAJ?hl=en)
 - [From Latin to Portuguese](https://hdl.handle.net/2027/mdp.39015034652472)
 - [From Latin to Spanish](https://www.google.com/books/edition/From_Latin_to_Spanish_Historical_phonolo/_QkNAAAAIAAJ?hl=en)
+- [From Latin to Romanian: Phonological Rules](https://search.worldcat.org/title/22702001)
+- [Historical German Phonology and Morphology](https://archive.org/details/historicalgerman0000russ)
+- [A History of German: What the Past Reveals about Today's Language](https://www.google.com/books/edition/A_History_of_German/5B5pDwAAQBAJ?hl=en)
 - [Greek: A History of Language and Its Speakers](https://openlibrary.org/works/OL17197733W/Greek?edition=key%3A/books/OL25769450M)
 - [Ranieri's Greek Pronunciation Chronology](https://docs.google.com/spreadsheets/d/1fv46XgPPJy-ky9FUSApiemOVmtc8i6q7ZL5XkqtmMWA/edit?gid=1919026778#gid=1919026778)
 - [Development of Prakrit from Old Indo-Aryan](https://en.wikipedia.org/wiki/Prakrit#Development_of_Prakrit_from_Old_Indo-Aryan)
 - [Phonological history of Hindustani](https://en.wikipedia.org/wiki/Phonological_history_of_Hindustani)
 - [Historical Phonology of Modern Standard Hindi: Proto-Indo-European to the Present](https://openlibrary.org/works/OL38602141W/Historical_phonology_of_modern_standard_Hindi)
 
-### Historical fonts used
+### Historical fonts used (some slightly modified)
 - [Pfeffer Mediæval](https://robert-pfeffer.net/schriftarten/englisch/pfeffer_mediaeval.html)
 - [Pfeffer Simpelgotisch](https://robert-pfeffer.net/schriftarten/englisch/pfeffer_simpelgotisch.html)
 - [EB Garamond](https://fonts.google.com/specimen/EB+Garamond)
+- [UnifrakturMaguntia](https://unifraktur.sourceforge.net/maguntia.html)
 - [Cinzel](https://fonts.google.com/specimen/Cinzel)
 - [Rustic Capitals](https://www.fontspace.com/rustic-capitals-font-f7460)
 - [Stoix](https://www.dafont.com/stoix.font)

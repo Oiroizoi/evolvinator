@@ -5,21 +5,38 @@
     <meta charset="utf-8">
     <title>Evolvinator</title>
 
+    <link rel="preload" href="fonts/0800Theophanes.otf" as="font" type="font/otf" crossorigin>
+    <link rel="preload" href="fonts/Menaion.otf" as="font" type="font/otf" crossorigin>
+    <link rel="preload" href="fonts/P39.ttf" as="font" type="font/ttf" crossorigin>
     <link rel="preload" href="fonts/PfefferMediaeval.otf" as="font" type="font/otf" crossorigin>
     <link rel="preload" href="fonts/PfefferSimpelgotisch.otf" as="font" type="font/otf" crossorigin>
-    <link rel="preload" href="fonts/RusticCapitals.ttf" as="font" type="font/ttf" crossorigin>
     <link rel="preload" href="fonts/Stoix.ttf" as="font" type="font/ttf" crossorigin>
-    <link rel="preload" href="fonts/P39.ttf" as="font" type="font/ttf" crossorigin>
-    <link rel="preload" href="fonts/0800_theophanes.otf" as="font" type="font/otf" crossorigin>
+    <link rel="preload" href="fonts/RusticCapitals.ttf" as="font" type="font/ttf" crossorigin>
+    <link rel="preload" href="fonts/UnifrakturMaguntia16.ttf" as="font" type="font/ttf" crossorigin>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400..900&family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Noto+Sans+Siddham&family=Noto+Nastaliq+Urdu:wght@400..700"
+        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400..900&family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Noto+Nastaliq+Urdu:wght@400..700&family=Noto+Sans+Siddham"
         rel="stylesheet">
 
     <link rel="icon" href="favicon.png">
 
     <style>
+        @font-face {
+            font-family: "0800 Theophanes";
+            src: url("fonts/0800Theophanes.otf") format("opentype");
+        }
+
+        @font-face {
+            font-family: "Menaion";
+            src: url("fonts/Menaion.otf") format("opentype");
+        }
+
+        @font-face {
+            font-family: "P39";
+            src: url("fonts/P39.ttf") format("truetype");
+        }
+
         @font-face {
             font-family: "Pfeffer Mediæval";
             src: url("fonts/PfefferMediaeval.otf") format("opentype");
@@ -49,13 +66,8 @@
         }
 
         @font-face {
-            font-family: "P39";
-            src: url("fonts/P39.ttf") format("truetype");
-        }
-
-        @font-face {
-            font-family: "0800_theophanes";
-            src: url("fonts/0800_theophanes.otf") format("opentype");
+            font-family: "Unifraktur Maguntia 16";
+            src: url("fonts/UnifrakturMaguntia16.ttf") format("truetype");
         }
 
         body {
@@ -65,6 +77,10 @@
 
         form {
             line-height: 200%;
+        }
+
+        #asterisk {
+            display: none;
         }
 
         #word {
@@ -77,6 +93,12 @@
 
         input[type=button] {
             margin-left: 4px;
+        }
+
+        #stress,
+        #pos,
+        #gender {
+            margin-right: 8px;
         }
 
         #inputNote {
@@ -143,7 +165,9 @@
             #EME .spelling,
             #OSp .spelling,
             #EOF .spelling,
-            #LOF .spelling {
+            #LOF .spelling,
+            #OHG .spelling,
+            #MHG .spelling {
                 font-family: "Pfeffer Mediæval";
                 font-feature-settings: "hist";
                 font-size: 18px;
@@ -166,6 +190,18 @@
                 font-style: normal;
             }
 
+            #ORom .spelling {
+                font-family: "Menaion";
+                font-size: 18px;
+                font-style: normal;
+            }
+
+            #ENHG .spelling {
+                font-family: "Unifraktur Maguntia 16";
+                font-size: 19px;
+                font-style: normal;
+            }
+
             #AttGr .spelling {
                 font-family: "Stoix";
                 font-size: 18px;
@@ -180,12 +216,13 @@
             }
 
             #ByzGr .spelling {
-                font-family: "0800_theophanes";
+                font-family: "0800 Theophanes";
                 font-size: 20px;
                 font-style: normal;
             }
         }
 
+        #EOE .spelling,
         .from_San .spelling {
             font-style: normal;
         }
@@ -248,25 +285,30 @@
             <option value="Lat">Classical Latin</option>
             <option value="San">Classical Sanskrit</option>
             <option value="OE" selected>Old English</option>
+            <option value="PG">Proto-Germanic</option>
         </select>
         →
         <select name="to" id="to"></select>
         <br>
 
         <label for="word" id="wordLabel">Word:</label>
-        <input type="text" name="word" id="word">
+        <span id="asterisk">*</span><input type="text" name="word" id="word">
         <span id="buttons"></span>
         <br>
 
         <div id="inputNote"></div>
 
         <label for="stress" id="stressLabel">Stressed syllable:</label>
-        <select name="stress" id="stress" style="margin-right: 8px;">
+        <select name="stress" id="stress">
             <option>1</option>
         </select>
-
         <label for="pos" id="posLabel">Part of speech:</label>
         <select name="pos" id="pos"></select>
+        <label for="pos" id="genderLabel">Gender:</label>
+        <select name="gender" id="gender">
+            <option value="mn">Masculine/neuter</option>
+            <option value="f">Feminine</option>
+        </select>
         <br>
 
         <input type="submit">
@@ -284,19 +326,21 @@
     </a>
 </body>
 
-<script src="langs/germanic.js"></script>
-<script src="langs/romance.js"></script>
 <script src="langs/greek.js"></script>
-<script src="langs/indo-iranian.js"></script>
+<script src="langs/romance.js"></script>
+<script src="langs/indo-aryan.js"></script>
+<script src="langs/anglic.js"></script>
+<script src="langs/germanic.js"></script>
 <script>
     let params = new URLSearchParams(window.location.search);
     let wordArg = params.get("word");
     let from = params.get("from") || "OE";
     let to = params.get("to") || "ModE";
     let stressArg = +params.get("stress") || 1;
+    let partOfSpeech = params.get("pos");
+    let gender = params.get("gender");
     let word;
     let modernTypography = false;
-    let partOfSpeech = params.get("pos");
 
     let outcomes = {};
 
@@ -379,8 +423,9 @@
                     wordArg = wordArg.replaceAll(/.\u0304/g, match => match.normalize("NFC"));
                     break;
                 case "Lat":
-                    wordArg = wordArg.replaceAll("k", "c").replaceAll("j", "i").replace(/^w/, "gu");
-                    wordArg = wordArg.replaceAll(/(?<=[eouyāēīōūȳ])u(?=[aeiouyāēīōūȳ])/g, "v");
+                    wordArg = wordArg.normalize("NFD").replaceAll("\u0306", "").normalize("NFC") //Remove breves
+                        .replaceAll("k", "c").replaceAll("j", "i").replace(/^w/, "gu")
+                        .replaceAll(/(?<=[eouyāēīōūȳ])u(?=[aeiouyāēīōūȳ])/g, "v");
                     break;
                 case "San":
                     wordArg = wordArg.replaceAll("ē", "e")
@@ -458,6 +503,18 @@
                     wordArg = wordArg.replaceAll("ð", "þ").replaceAll("ƿ", "w").replaceAll("k", "c"); //Alternative spellings
                     wordArg = wordArg.replaceAll("io", "eo").replaceAll("īo", "ēo").replaceAll("oe", "e").replaceAll("ōe", "ē").replaceAll("œ̄", "ē").replaceAll("œ", "e"); //Dialectal vowels
                     break;
+                case "PG":
+                    wordArg = wordArg.replaceAll("y", "j")
+                        .replaceAll("x", "h")
+                        .replaceAll("ē₁", "ē")
+                        .replaceAll("ē¹", "ē")
+                        .replaceAll("ē²", "ē₂")
+                        .replaceAll("æ", "ē")
+                        .replaceAll("ǣ", "ē")
+                        .replaceAll("ē̄", "ê")
+                        .replaceAll("ō̄", "ô")
+                        .replaceAll("ǭ̄", "ǫ̂");
+                    break;
             }
 
             params.set("word", wordArg);
@@ -474,13 +531,13 @@
         let defaultId;
         switch (from) {
             case "AttGr":
-                name = "Anceint Greek";
+                name = "Ancient Greek";
                 descendants = {ModGr: "Modern Greek"};
                 defaultId = "ModGr";
                 break;
             case "Lat":
                 name = "Classical Latin";
-                descendants = {ModF: "Modern French", ModIt: "Modern Italian", ModPort: "Modern Portuguese", ModSp: "Modern Spanish"};
+                descendants = {ModF: "Modern French", ModIt: "Modern Italian", ModPort: "Modern Portuguese", ModRom: "Modern Romanian", ModSp: "Modern Spanish"};
                 defaultId = "ModSp";
                 break;
             case "San":
@@ -491,6 +548,11 @@
             case "OE":
                 name = "Old English";
                 descendants = {ModE: "Modern English", ModSc: "Modern Scots"};
+                defaultId = "ModE";
+                break;
+            case "PG":
+                name = "Proto-Germanic";
+                descendants = {ModE: "Modern English", ModG: "Modern German", ModSc: "Modern Scots"};
                 defaultId = "ModE";
                 break;
         }
@@ -508,6 +570,8 @@
         document.getElementById("from").value = from;
         document.getElementById("to").value = to;
 
+        document.getElementById("asterisk").style.display = (from == "PG") ? "inline" : "none";
+
         document.getElementById("word").placeholder = `Enter ${name} word`;
 
         let specialChars;
@@ -523,6 +587,9 @@
                 break;
             case "OE":
                 specialChars = ["ċ", "ġ", "þ", "æ", "ā", "ē", "ī", "ō", "ū", "ȳ", "ǣ"];
+                break;
+            case "PG":
+                specialChars = ["þ", "ā", "ą", "ą̄", "ē", "ē₂", "ê", "ī", "į", "į̄", "ō", "ô", "ǭ", "ǫ̂", "ū", "ų", "ų̄"];
                 break;
         }
         document.getElementById("buttons").innerHTML = "";
@@ -562,7 +629,7 @@
             document.getElementById("inputNote").style.display = "none";
         }
 
-        if (from == "OE") {
+        if (from == "OE" || from == "PG") {
             document.getElementById("stressLabel").style.display = "";
             document.getElementById("stress").style.display = "";
             document.getElementById("stress").value = stressArg;
@@ -595,6 +662,7 @@
             `;
                 break;
             case "OE":
+            case "PG":
                 document.getElementById("pos").innerHTML = `
                     <option value="noun" selected>Noun</option>
                     <option value="inf">Infinitive verb</option>
@@ -607,6 +675,8 @@
 
         if (Array.from(document.getElementById("pos").options).some(option => option.value == partOfSpeech))
             document.getElementById("pos").value = partOfSpeech;
+
+        document.getElementById("to").onchange();
 
         document.getElementById("outcomes").style.display = "none";
 
@@ -684,6 +754,7 @@
     function getOutcomes() {
         word = new Word();
         word.partOfSpeech = partOfSpeech;
+        word.gender = gender;
 
         try {
             switch (from) {
@@ -712,6 +783,10 @@
                             OGP_to_ModPort();
                             ModPort_to_Port();
                             ModPort_to_Br();
+                            break;
+                        case "ModRom":
+                            LL_to_CRom();
+                            CRom_to_ModRom();
                             break;
                         case "ModSp":
                             LL_to_WR("spanish");
@@ -749,6 +824,39 @@
                             break;
                     }
                     break;
+                case "PG":
+                    getIPA_PG();
+                    switch (to) {
+                        case "ModE":
+                            PG_to_PWG();
+                            PWG_to_EOE();
+                            EOE_to_OE();
+                            OE_to_EME();
+                            EME_to_LME();
+                            LME_to_EModE();
+                            EModE_to_ModE();
+                            ModE_to_UK();
+                            ModE_to_US();
+                            UK_to_AU();
+                            break;
+                        case "ModG":
+                            PG_to_PWG();
+                            PWG_to_OHG();
+                            OHG_to_MHG();
+                            MHG_to_ModG();
+                            break;
+                        case "ModSc":
+                            PG_to_PWG();
+                            PWG_to_EOE();
+                            EOE_to_OE();
+                            OE_to_EME("northumbrian");
+                            EME_to_LME("scots");
+                            LME_to_EModE("scots");
+                            EModE_to_ModE("scots");
+                            ModE_to_ModSc();
+                            break;
+                    }
+                    break;
             }
 
             document.getElementById("outcomes").style.display = "block";
@@ -773,9 +881,13 @@
     document.getElementById("word").ontouchstart = document.getElementById("word").onmousedown;
 
     document.getElementById("word").oninput = function () {
-        if (from == "OE") {
-            let vowels = ["a", "ā", "e", "ē", "i", "ī", "o", "ō", "u", "ū", "y", "ȳ", "æ", "ǣ",
-                "ea", "ēa", "eo", "ēo", "ie", "īe", "io", "īo", "oe", "ōe", "œ", "œ̄"];
+        if (from == "OE" || from == "PG") {
+            let vowels;
+            if (from == "OE")
+                vowels = ["a", "ā", "e", "ē", "i", "ī", "o", "ō", "u", "ū", "y", "ȳ", "æ", "ǣ",
+                    "ea", "ēa", "eo", "ēo", "ie", "īe", "io", "īo", "oe", "ōe", "œ", "œ̄"];
+            else if (from == "PG")
+                vowels = ["a", "ā", "ą", "ą̄", "ai", "au", "e", "ē", "ē₂", "ê", "ēi", "eu", "ēu", "i", "ī", "į", "į̄", "iu", "ō", "ô", "ǭ", "ǫ̂", "ōi", "ōu", "u", "ū", "ų", "ų̄"];
             let numVowels = 0;
             for (let i = 0; i < this.value.length; i++) {
                 if (vowels.includes(this.value[i] + this.value[i + 1])) {
@@ -797,62 +909,156 @@
         }
     };
 
+    document.getElementById("pos").onchange = () => {
+        if (from == "PG" && document.getElementById("to").value == "ModG" && document.getElementById("pos").value == "noun") {
+            document.getElementById("genderLabel").style.display = "";
+            document.getElementById("gender").style.display = "";
+            document.getElementById("gender").value = (gender == "f") ? "f" : "mn";
+        } else {
+            document.getElementById("genderLabel").style.display = "none";
+            document.getElementById("gender").style.display = "none";
+            document.getElementById("gender").value = "";
+        }
+    };
+
+    document.getElementById("to").onchange = () => {
+        if (from == "PG")
+            if (document.getElementById("to").value == "ModG") {
+                document.getElementById("pos").innerHTML = `
+                    <option value="noun" selected>Noun (singular)</option>
+                    <option value="nounPl">Noun (plural)</option>
+                    <option value="inf">Infinitive verb</option>
+                    <option value="conjVerb">Conjugated verb</option>
+                    <option value="other">Other</option>
+                `;
+                if (partOfSpeech == "pastPtcp")
+                    document.getElementById("pos").value = "conjVerb";
+            } else {
+                document.getElementById("pos").innerHTML = `
+                    <option value="noun" selected>Noun</option>
+                    <option value="inf">Infinitive verb</option>
+                    <option value="conjVerb">Conjugated verb</option>
+                    <option value="pastPtcp">Past participle</option>
+                    <option value="other">Other</option>
+                `;
+                if (partOfSpeech == "nounPl")
+                    document.getElementById("pos").value = "Noun";
+            }
+
+        if (Array.from(document.getElementById("pos").options).some(option => option.value == partOfSpeech))
+            document.getElementById("pos").value = partOfSpeech;
+
+        document.getElementById("pos").onchange();
+    };
+
     class Word extends Array {
         constructor() {
             super();
 
             this.atIdx = idx => this.at(idx) || new Segment("", this);
 
-            this.insert = (value, i) => this.splice(i, 0, new Segment(value, this));
+            this.insert = (value, idx) => {
+                if (isNaN(idx)) {
+                    let ctx = idx.split("_");
+                    for (let i = 1; i < this.length; i++) {
+                        let segment = this.atIdx(i);
+                        if (segment.ctxMatch(ctx[0] + "_") && segment.relIdx(-1).ctxMatch("_" + ctx[1])) {
+                            this.insert(value, segment.idx);
+                            i++;
+                        }
+                    }
 
-            function segmentMatch(segment, chkValues) {
-                chkValues = chkValues.split("/");
-                let valueIncluded = false;
-                if (chkValues.includes(segment.value))
-                    valueIncluded = true;
-                if (chkValues.includes("C") && segment.type == "consonant")
-                    valueIncluded = true;
-                if (chkValues.includes("V") && segment.type == "vowel")
-                    valueIncluded = true;
-                if (chkValues.includes("#") && !segment.value)
-                    valueIncluded = true;
-                return valueIncluded;
-            }
+                    if (this.atIdx(0).ctxMatch(ctx[0] + "_")) {
+                        this.insert("TEMP", 0);
+                        if (this.atIdx(0).ctxMatch("_" + ctx[1]))
+                            this.insert(value, 1);
+                        word.atIdx(0).remove();
+                    }
 
-            this.replace = (original, replacement, context = "_") => {
-                word.forEach(segment => {
-                    if (segment.selfMatch(original) && segment.ctxMatch(context))
-                        segment.value = replacement;
-                });
+                    if (this.atIdx(-1).ctxMatch("_" + ctx[1])) {
+                        this.insert("TEMP", word.length);
+                        if (this.atIdx(-1).ctxMatch(ctx[0] + "_"))
+                            this.insert(value, -1);
+                        word.atIdx(-1).remove();
+                    }
+                } else {
+                    this.splice(idx, 0, new Segment(value, this));
+                }
             };
 
-            this.remove = (original, context = "_") => {
+            this.replace = (original, replacement, ctx, condition, reverse) => {
+                original = original.split(" ");
+                replacement = replacement.split(" ");
+                for (let i = 0; i < this.length; i++) {
+                    let segment;
+                    if (reverse)
+                        segment = this.atIdx(-i - 1);
+                    else
+                        segment = this.atIdx(i);
+
+                    let ctxCheck = !ctx || segment.ctxMatch(ctx);
+                    let conditionCheck = !condition || condition(segment);
+                    for (let j in original)
+                        if (segment.selfMatch(original[j]) && ctxCheck && conditionCheck)
+                            segment.replace(replacement[j]);
+                }
+            };
+
+            this.replaceSeq = (str, replacement, ctx) => {
+                let sequence = str.split(",");
+                let newSegments = replacement.split(",");
+
+                if (ctx)
+                    ctx = ctx.split("_");
+
                 for (let i = 0; i < this.length; i++) {
                     let segment = this.atIdx(i);
-                    if (segment.selfMatch(original) && segment.ctxMatch(context)) {
+
+                    let searchSeq = sequence.filter(val => val);
+                    let ctxCheck = !ctx
+                        || (segment.ctxMatch(ctx[0] + "_") && segment.relIdx(searchSeq.length - 1).ctxMatch("_" + ctx[1]));
+                    if (searchSeq.every((val, j) => segment.relIdx(j).selfMatch(val)) && ctxCheck) {
+                        for (let j = 0; j < sequence.length || j < newSegments.length; j++) {
+                            if (!sequence[j])
+                                word.insert(newSegments[j], i + j);
+
+                            if (!newSegments[j]) {
+                                word.atIdx(i + j).remove();
+                                i--;
+                            } else {
+                                word.atIdx(i + j).replace(newSegments[j]);
+                            }
+                        }
+                        i += Math.max(sequence.length, newSegments.length) - 1;
+                    }
+                }
+            };
+
+            this.remove = (original, ctx, condition, reverse) => {
+                for (let i = 0; i < this.length; i++) {
+                    let segment;
+                    if (reverse)
+                        segment = this.atIdx(-i - 1);
+                    else
+                        segment = this.atIdx(i);
+
+                    let ctxCheck = !ctx || segment.ctxMatch(ctx);
+                    let conditionCheck = !condition || condition(segment);
+                    if (segment.selfMatch(original) && ctxCheck && conditionCheck) {
                         segment.remove();
                         i--;
                     }
                 }
             };
 
-            this.replaceSeq = (str, replacement) => {
-                let sequence = str.split(",");
-                for (let i = 0; i < this.length; i++) {
-                    let segment = this[i];
-                    if (sequence.every((seqSegment, j) => segment.relIdx(j).value == seqSegment)) {
-                        let newSegments = replacement.split(",").map(segment => new Segment(segment, this));
-                        newSegments.forEach((newSegment, j) => {
-                            if (newSegments.length > j) {
-                                for (let key in segment.relIdx(j))
-                                    if (!newSegment[key])
-                                        newSegment[key] = segment.relIdx(j)[key];
-                                newSegment.stressed = segment.relIdx(j).stressed;
-                            }
-                        });
-                        this.splice(segment.idx, sequence.length, ...newSegments);
-                    }
-                }
+            this.startMatch = seq => {
+                seq = seq.split(",");
+                return seq.every((item, i) => this.atIdx(i).selfMatch(item));
+            };
+
+            this.endMatch = seq => {
+                seq = seq.split(",");
+                return seq.every((item, i) => this.atIdx(this.length - seq.length + i).selfMatch(item));
             };
 
             this.duplicate = () => {
@@ -890,7 +1096,7 @@
             this.stressed = false;
             this.word = word;
 
-            this.match = (...vals) => vals.includes(this.value);
+            this.match = (self, ctx) => this.selfMatch(self) && this.ctxMatch(ctx);
             this.relIdx = diff => !this.value ? new Segment("", this.word) : (this.word[this.idx + diff] || new Segment("", this.word));
             this.nextVowel = () => this.word.slice(this.idx + 1).find(s => s.type == "vowel") || new Segment("", this.word);
             this.prevVowel = () => this.word.slice(0, this.idx).reverse().find(s => s.type == "vowel") || new Segment("", this.word);
@@ -904,8 +1110,9 @@
 
                 //Distribute the properties of a group to each value
                 let groupProperties;
+                let bracketsDepth = 0;
                 for (let i = 0; i < chk.length; i++)
-                    if (chk[i] == "{") {
+                    if (chk[i] == "{" && !bracketsDepth) {
                         let startIdx = chk.indexOf("}") + 1;
                         let endIdx = startIdx + chk.slice(startIdx).indexOf("/");
                         if (endIdx < startIdx)
@@ -913,18 +1120,22 @@
                         groupProperties = chk.slice(startIdx, endIdx);
                         chk = chk.slice(0, i) + chk.slice(i + 1);
                         i--;
-                    } else if (chk[i] == "}") {
+                    } else if (chk[i] == "}" && !bracketsDepth) {
                         groupProperties = "";
                         chk = chk.slice(0, i) + chk.slice(i + 1);
                         i--;
-                    } else if (chk[i] == "/" && groupProperties) {
+                    } else if (chk[i] == "/" && groupProperties && !bracketsDepth) {
                         chk = chk.slice(0, i) + groupProperties + chk.slice(i);
                         i += groupProperties.length;
+                    } else if (chk[i] == "[") {
+                        bracketsDepth++;
+                    } else if (chk[i] == "]") {
+                        bracketsDepth--;
                     }
 
                 //Split chk at each slash that is not inside brackets
                 let startIdx = 0;
-                let bracketsDepth = 0;
+                bracketsDepth = 0;
                 for (let i = 0; i < chk.length; i++)
                     if (chk[i] == "/" && !bracketsDepth) {
                         chkArr.push(chk.slice(startIdx, i));
@@ -988,16 +1199,48 @@
             };
 
             this.ctxMatch = ctx => {
+                if (!ctx)
+                    return true;
+
                 ctx = ctx.split("_");
                 let ctxBefore = ctx[0].split(",").reverse();
                 let ctxAfter = ctx[1].split(",");
 
-                if (!ctxBefore.every((chkValues, i) => this.relIdx(-1 - i).selfMatch(chkValues)))
+                if (!ctxBefore.every((item, i) => this.relIdx(-1 - i).selfMatch(item)))
                     return false;
-                if (!ctxAfter.every((chkValues, i) => this.relIdx(1 + i).selfMatch(chkValues)))
+                if (!ctxAfter.every((item, i) => this.relIdx(1 + i).selfMatch(item)))
                     return false;
 
                 return true;
+            };
+
+            this.replace = replacement => {
+                let newVal, newProps;
+
+                let boundary = replacement.indexOf("[");
+                if (boundary > -1) {
+                    newVal = replacement.slice(0, boundary);
+                    newProps = replacement.slice(boundary);
+                } else {
+                    newVal = replacement;
+                }
+
+                if (newVal)
+                    this.value = newVal;
+
+                if (newProps) {
+                    newProps = newProps.slice(1, -1).split("][");
+                    for (let prop of newProps)
+                        if (prop.includes("=")) {
+                            let propVal;
+                            [prop, propVal] = prop.split("=");
+                            this[prop] = propVal;
+                        } else if (prop.startsWith("!")) {
+                            this[prop.slice(1)] = false;
+                        } else {
+                            this[prop] = true;
+                        }
+                }
             };
 
             this.toString = () => {
@@ -1042,10 +1285,6 @@
 
         get idx() {
             return this.word.indexOf(this);
-        }
-
-        get negIdx() {
-            return this.idx - this.word.length;
         }
     }
 
