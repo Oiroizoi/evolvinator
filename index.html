@@ -504,16 +504,20 @@
                     wordArg = wordArg.replaceAll("io", "eo").replaceAll("īo", "ēo").replaceAll("oe", "e").replaceAll("ōe", "ē").replaceAll("œ̄", "ē").replaceAll("œ", "e"); //Dialectal vowels
                     break;
                 case "PG":
-                    wordArg = wordArg.replaceAll("y", "j")
+                    wordArg = wordArg.normalize("NFD")
+                        .replaceAll("\u0304\u0304", "\u0302") //Double macrons become circumflexes
+                        .replaceAll("\u0303", "\u0328") //Replace tildes with ogoneks
+                        .normalize("NFC")
+                        .replaceAll("y", "j")
                         .replaceAll("x", "h")
+                        .replaceAll("æ", "ē")
+                        .replaceAll("ǣ", "ē")
                         .replaceAll("ē₁", "ē")
                         .replaceAll("ē¹", "ē")
                         .replaceAll("ē²", "ē₂")
-                        .replaceAll("æ", "ē")
-                        .replaceAll("ǣ", "ē")
-                        .replaceAll("ē̄", "ê")
-                        .replaceAll("ō̄", "ô")
-                        .replaceAll("ǭ̄", "ǫ̂");
+                        .replaceAll("ƀ", "b")
+                        .replaceAll(/[đð]/g, "d")
+                        .replaceAll("ǥ", "g");
                     break;
             }
 
