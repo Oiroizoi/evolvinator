@@ -12,7 +12,7 @@ This program applies phonological changes to predict the development of historic
         <td>Modern Greek</td>
     </tr>
     <tr>
-        <td rowspan=4>Classical Latin</td>
+        <td rowspan=5>Classical Latin</td>
         <td>Modern French</td>
     </tr>
     <tr>
