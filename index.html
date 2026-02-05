@@ -416,14 +416,32 @@
     let outcomes = {};
 
     //Alter UI for vertical phone screens
-    if (window.innerWidth < window.innerHeight) {
-        document.getElementById("input").style.width = "100%";
-        document.getElementById("input").style.position = "static";
-        document.getElementById("input").style.paddingBottom = "2%";
+    window.onresize = () => {
+        if (window.innerWidth < window.innerHeight) {
+            document.body.style.zoom = "150%";
 
-        document.getElementById("outcomes").style.width = "100%";
-        document.getElementById("outcomes").style.position = "static";
-    }
+            document.getElementById("input").style.width = "100%";
+            document.getElementById("input").style.position = "static";
+            document.getElementById("input").style.paddingBottom = "2%";
+
+            document.getElementById("outcomes").style.width = "100%";
+            document.getElementById("outcomes").style.position = "static";
+        } else {
+            if (window.innerWidth < 1750)
+                document.body.style.zoom = "90%";
+            else
+                document.body.style.zoom = "";
+
+            document.getElementById("input").style.width = "50%";
+            document.getElementById("input").style.position = "fixed";
+            document.getElementById("input").style.paddingBottom = "2%";
+
+            document.getElementById("outcomes").style.width = "50%";
+            document.getElementById("outcomes").style.position = "fixed";
+        }
+    };
+
+    window.onresize();
 
     function init() {
         if (!Array.from(document.getElementById("from").options).some(option => option.value == from))
