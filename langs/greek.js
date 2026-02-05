@@ -1,57 +1,57 @@
 function getIPA_AttGr() {
-    let charToPhoneme = [
-        ["a", "a"],
-        ["ā", "aː"],
-        ["ai", "aj"],
-        ["āi", "aːj"],
-        ["au", "aw"],
-        ["āu", "aːw"],
-        ["b", "b"],
-        ["ch", "kʰ"],
-        ["d", "d"],
-        ["e", "e"],
-        ["ē", "ɛː"],
-        ["ei", "eː"],
-        ["ēi", "ɛːj"],
-        ["eu", "ew"],
-        ["ēu", "ɛːw"],
-        ["g", "g"],
-        ["h", "h"],
-        ["i", "i"],
-        ["ī", "iː"],
-        ["k", "k"],
-        ["l", "l"],
-        ["m", "m"],
-        ["n", "n"],
-        ["o", "o"],
-        ["ō", "ɔː"],
-        ["oi", "oj"],
-        ["ōi", "ɔːj"],
-        ["ou", "uː"],
-        ["p", "p"],
-        ["ph", "pʰ"],
-        ["r", "r"],
-        ["rh", "r̥"],
-        ["s", "s"],
-        ["t", "t"],
-        ["th", "tʰ"],
-        ["x", "k,s"],
-        ["y", "y"],
-        ["ȳ", "yː"],
-        ["yi", "yj"],
-        ["z", "z,d"],
-    ];
+    let charToPhoneme = {
+        "a": "a",
+        "ā": "aː",
+        "ai": "aj",
+        "āi": "aːj",
+        "au": "aw",
+        "āu": "aːw",
+        "b": "b",
+        "ch": "kʰ",
+        "d": "d",
+        "e": "e",
+        "ē": "ɛː",
+        "ei": "eː",
+        "ēi": "ɛːj",
+        "eu": "ew",
+        "ēu": "ɛːw",
+        "g": "g",
+        "h": "h",
+        "i": "i",
+        "ī": "iː",
+        "k": "k",
+        "l": "l",
+        "m": "m",
+        "n": "n",
+        "o": "o",
+        "ō": "ɔː",
+        "oi": "oj",
+        "ōi": "ɔːj",
+        "ou": "uː",
+        "p": "p",
+        "ph": "pʰ",
+        "r": "r",
+        "rh": "r̥",
+        "s": "s",
+        "t": "t",
+        "th": "tʰ",
+        "x": "k,s",
+        "y": "y",
+        "ȳ": "yː",
+        "yi": "yj",
+        "z": "z,d",
+    };
 
     let noAccents = wordArg.normalize("NFD").replaceAll("\u0301", "").replaceAll(/(?<=[iu])\u0302/g, "").replaceAll(/(?<=\u0304)\u0308/g, "").replaceAll(/\u0308(?=\u0302)/g, "").normalize("NFC");
     for (let i = 0; i < noAccents.length; i++) {
         let phonemes;
-        let digraphPair = charToPhoneme.find(pair => pair[0] == noAccents[i].normalize("NFD").replace("\u0308", "").normalize("NFC") + noAccents[i + 1]);
+        let digraphPair = charToPhoneme[noAccents[i].normalize("NFD").replace("\u0308", "").normalize("NFC") + noAccents[i + 1]];
         if (digraphPair) {
-            phonemes = digraphPair[1];
+            phonemes = digraphPair;
             i++;
         } else {
             let noAccents = wordArg.normalize("NFD").replaceAll("\u0301", "").replaceAll("\u0302", "\u0304").replaceAll("\u0308", "").normalize("NFC");
-            phonemes = charToPhoneme.find(pair => pair[0] == noAccents[i])[1];
+            phonemes = charToPhoneme[noAccents[i]];
         }
         phonemes.split(",").forEach(phoneme => word.insert(phoneme, word.length));
 
@@ -79,17 +79,8 @@ function getIPA_AttGr() {
     word.replace("s", "z", "_m/n/b/d/g");
     word.replace("r", "r̥", "_r̥");
 
-    word.forEach(segment => {
-        if (segment.match("k") && segment.ctxMatch("_b/d/g")) {
-            segment.value = "g";
-            segment.voiced = true;
-        }
-
-        if (segment.match("yj")) {
-            segment.value = "yː";
-            segment.diphthong = true;
-        }
-    });
+    word.replace("k", "g[voiced]", "_b/d/g");
+    word.replace("yj", "yː[diphthong]");
 
     for (let i = 0; i < word.length; i++) {
         let segment = word.atIdx(i);
@@ -213,9 +204,7 @@ function AttGr_to_ModGr() {
 
     word.replace("ŋ", "g", "_m");
 
-    word.replace("aːj", "aː");
-    word.replace("ɛːj", "ɛː");
-    word.replace("ɔːj", "ɔː");
+    word.replace("aːj ɛːj ɔːj", "aː ɛː ɔː");
 
     word.forEach(segment => {
         if (segment.value.endsWith("w")) {
@@ -224,14 +213,12 @@ function AttGr_to_ModGr() {
         }
     });
 
-    word.replace("ɛː", "eː");
-    word.replace("ɔː", "oː");
+    word.replace("ɛː ɔː", "eː oː");
 
     word.replace("aj", "ɛː");
     word.replace("oj", "yː");
 
-    word.replace("eː", "iː");
-    word.replace("ɛː", "eː");
+    word.replace("eː ɛː", "iː eː");
 
     word.forEach(segment => {
         if (segment.value.includes("ː"))
@@ -241,39 +228,30 @@ function AttGr_to_ModGr() {
     word.remove("h");
     word.replace("r̥", "r");
 
-    word.replace("k", "c", "_e/i/y");
-    word.replace("kʰ", "cʰ", "_e/i/y");
-    word.replace("g", "ɟ", "_e/i/y");
+    word.replace("k kʰ g", "c cʰ ɟ", "_e/i/y");
     word.replace("k", "c", "_c/cʰ");
     word.replace("g", "ɟ", "_ɟ");
     word.replace("ŋ", "ɲ", "_c/cʰ/ɟ");
 
     //Spirantization
     word.remove("d", "z_");
-    word.replace("pʰ", "ɸ");
-    word.replace("tʰ", "θ");
-    word.replace("cʰ", "ç");
-    word.replace("kʰ", "x");
+    word.replace("pʰ tʰ cʰ kʰ", "ɸ θ ç c");
     word.replace("b", "β", "[!=m]_");
     word.replace("d", "ð", "[!=n]_");
     word.replace("ɟ", "ʝ", "[!=ɲ]_");
     word.replace("g", "ɣ", "[!=ŋ]_");
 
+    //Convert pitch accent to stress
     word.forEach(segment => {
         if (segment.pitch) {
             segment.stressed = true;
-            if (segment.ctxMatch("C_"))
-                segment.relIdx(-1).stressed = true;
-            if (segment.ctxMatch("p/t/k/ɸ/θ/x/β/ð/ɣ,l/r/n_"))
-                segment.relIdx(-2).stressed = true;
             segment.ancientPitch = segment.pitch;
             delete segment.pitch;
         }
     });
-    word.forEach(segment => {
-        if (word.vowels.atIdx(0).stressed && segment.idx < word.vowels.atIdx(0).idx)
-            segment.stressed = true;
-    });
+    word.replace("C", "[stressed]", "_V[stressed]");
+    word.replace("p/t/k/ɸ/θ/x/β/ð/ɣ", "[stressed]", "_{l/r/n}[stressed]");
+    word.replace("C", "[stressed]", "", segment => word.vowels.atIdx(0).stressed && segment.idx < word.vowels.atIdx(0).idx);
 
     word.replace("β", "ɸ", "_p/t/c/k/ɸ/θ/ç/x/s/#");
 
@@ -284,12 +262,10 @@ function AttGr_to_ModGr() {
     word.replace("t", "d", "n_");
     word.replace("c", "ɟ", "ɲ_");
     word.replace("k", "g", "ŋ_");
-    word.replace("b", "p", "_t/s");
+    word.replace("b g", "p k", "_t/s");
     word.replace("d", "t", "_s");
-    word.replace("g", "k", "_t/s");
 
-    word.replace("ɸ", "f");
-    word.replace("β", "v");
+    word.replace("ɸ β", "f v");
 
     //Degemination
     for (let i = 0; i < word.length; i++) {
@@ -345,13 +321,10 @@ function AttGr_to_ModGr() {
     word.replace("p", "f", "_t/k");
     word.replace("t", "θ", "_p/k");
     word.replace("k", "x", "_p/t");
-    word.replace("f", "p", "_s");
-    word.replace("θ", "t", "_s");
-    word.replace("x", "k", "_s");
+    word.replace("f θ x", "p t k", "_s");
     word.replace("f", "p", "θ/x_");
     word.replace("θ", "t", "f/s/x_");
-    word.replace("ç", "c", "f/θ/s_");
-    word.replace("x", "k", "f/θ/s_");
+    word.replace("ç x", "c k", "f/θ/s_");
     word.replace("f", "p", "m_t/k");
     word.replace("x", "k", "ŋ_p/t");
 
@@ -367,40 +340,17 @@ function AttGr_to_ModGr() {
 
     //Syllabification
     if (word.vowels.length > 1) {
-        if (word.stressedVowel.ctxMatch("C_")) {
-            word.stressedVowel.relIdx(-1).stressed = true;
-            if (word.stressedVowel.ctxMatch("s/z,C_"))
-                word.stressedVowel.relIdx(-2).stressed = true;
-        }
-        if (word.stressedVowel.ctxMatch("C,j_")) {
-            word.stressedVowel.relIdx(-2).stressed = true;
-            if (word.stressedVowel.relIdx(-3).match("s/z"))
-                word.stressedVowel.relIdx(-3).stressed = true;
-        }
-        if (word.stressedVowel.ctxMatch("p/t/k/b/d/g/f/θ/x/v/ð/ɣ,l/r_")) {
-            word.stressedVowel.relIdx(-2).stressed = true;
-            if (word.stressedVowel.relIdx(-3).match("s"))
-                word.stressedVowel.relIdx(-3).stressed = true;
-        }
-        if (word.stressedVowel.ctxMatch("p/t/k/b/d/g/f/θ/x/v/ð/ɣ,l,j_")) {
-            word.stressedVowel.relIdx(-3).stressed = true;
-            word.stressedVowel.relIdx(-2).stressed = true;
-            if (word.stressedVowel.relIdx(-4).match("s"))
-                word.stressedVowel.relIdx(-4).stressed = true;
-        }
-
-        let nonLiquidClusters = ["ft", "xt", "vð", "ɣð", "vʝ", "vɣ", "tm", "ðm", "pn", "kn", "θn", "xn", "ɣn", "mn"];
-        if (nonLiquidClusters.includes(word.stressedVowel.relIdx(-2).value + word.stressedVowel.relIdx(-1).value))
-            word.stressedVowel.relIdx(-2).stressed = true;
-        if (nonLiquidClusters.includes(word.stressedVowel.relIdx(-3).value + word.stressedVowel.relIdx(-2).value) && word.stressedVowel.ctxMatch("j_")) {
-            word.stressedVowel.relIdx(-3).stressed = true;
-            word.stressedVowel.relIdx(-2).stressed = true;
-        }
+        word.replace("C", "[stressed]", "_V[stressed]");
+        word.replace("C", "[stressed]", "_j[stressed]");
+        word.replace("p/t/k/b/d/g/f/θ/x/v/ð/ɣ", "[stressed]", "_{l/r}[stressed]");
+        word.replace("s/z", "[stressed]", "_C[stressed]");
+        word.replace("f/x", "[stressed]", "_t[stressed]");
+        word.replace("v/ɣ", "[stressed]", "_ð[stressed]");
+        word.replace("v", "[stressed]", "_{ʝ/ɣ}[stressed]");
+        word.replace("t/ð", "[stressed]", "_m[stressed]");
+        word.replace("p/k/θ/x/ɣ/m", "[stressed]", "_n[stressed]");
+        word.replace("C", "[stressed]", "", segment => word.vowels.atIdx(0).stressed && segment.idx < word.vowels.atIdx(0).idx);
     }
-    word.forEach(segment => {
-        if (word.vowels.atIdx(0).stressed && segment.idx < word.vowels.atIdx(0).idx)
-            segment.stressed = true;
-    });
 
     addRow("ByzGr", "Byzantine Greek", "900", getSpelling_ByzGr(), word, true);
 
@@ -408,30 +358,20 @@ function AttGr_to_ModGr() {
     word.replace("y", "i");
     word.remove("j", "_i");
 
-    if (word.partOfSpeech == "verb" && word.startMatch("e[!stressed]") && word.vowels.length > 1 && !word.atIdx(0).ctxMatch("_l/r,C"))
-        word.atIdx(0).remove();
-    word.forEach(segment => {
-        if (word.vowels.atIdx(0).stressed && segment.idx < word.vowels.atIdx(0).idx)
-            segment.stressed = true;
-    });
+    if (word.partOfSpeech == "verb")
+        word.remove("e[!stressed]", "#_", segment => word.vowels.length > 1 && !segment.ctxMatch("_l/r,C"));
+    word.replace("C", "[stressed]", "", segment => word.vowels.atIdx(0).stressed && segment.idx < word.vowels.atIdx(0).idx);
 
     word.replace("l", "r", "_θ");
 
     let earlyModernWord = word.duplicate();
 
-    word.replace("b", "ᵐb", "m_");
-    word.replace("d", "ⁿd", "n_");
-    word.replace("ɟ", "ᶮɟ", "ɲ_");
-    word.replace("g", "ᵑg", "ŋ_");
-    word.remove("m", "_ᵐb");
-    word.remove("n", "_ⁿd");
-    word.remove("ɲ", "_ᶮɟ");
-    word.remove("ŋ", "_ᵑg");
+    word.replaceSeq("m,b", ",ᵐb");
+    word.replaceSeq("n,d", ",ⁿd");
+    word.replaceSeq("ɲ,ɟ", ",ᶮɟ");
+    word.replaceSeq("ŋ,g", ",ᵑg");
 
-    word.replace("ᵐb", "b", "#/C_");
-    word.replace("ⁿd", "d", "#/C_");
-    word.replace("ᶮɟ", "ɟ", "#/C_");
-    word.replace("ᵑg", "g", "#/C_");
+    word.replace("ᵐb ⁿd ᶮɟ ᵑg", "b d ɟ g", "#/C_");
 
     word.remove("j", "c/ɟ/ç/ʝ_");
     word.replace("j", "ɲ", "m_");
@@ -595,7 +535,7 @@ function getSpellingFromArg_AttGr() {
 function getSpelling_KoiGr() {
     let str = word.ancientSpelling;
 
-    //Convert to Latin script for the font
+    //Convert to Latin characters for the font
     let greekToLatin = {
         "α": "a",
         "β": "b",

@@ -1,63 +1,63 @@
 function getIPA_San() {
-    let charToPhoneme = [
-        ["a", "ɜ"],
-        ["ā", "ɑː"],
-        ["ai", "ɑj"],
-        ["au", "ɑw"],
-        ["b", "b"],
-        ["bh", "bʱ"],
-        ["c", "t͡ɕ"],
-        ["ch", "t͡ɕʰ"],
-        ["d", "d"],
-        ["ḍ", "ɖ"],
-        ["dh", "dʱ"],
-        ["ḍh", "ɖʱ"],
-        ["e", "eː"],
-        ["g", "g"],
-        ["gh", "gʱ"],
-        ["h", "ɦ"],
-        ["ḥ", "h"],
-        ["i", "i"],
-        ["ī", "iː"],
-        ["j", "d͡ʑ"],
-        ["jh", "d͡ʑʱ"],
-        ["k", "k"],
-        ["kh", "kʰ"],
-        ["l", "l"],
-        ["ḷ", "l̩"],
-        ["m", "m"],
-        ["ṃ", "N"],
-        ["n", "n"],
-        ["ṇ", "ɳ"],
-        ["ñ", "ɲ"],
-        ["ṅ", "ŋ"],
-        ["o", "oː"],
-        ["p", "p"],
-        ["ph", "pʰ"],
-        ["r", "ɾ"],
-        ["ṛ", "r̩"],
-        ["ṝ", "r̩ː"],
-        ["s", "s"],
-        ["ṣ", "ʂ"],
-        ["ś", "ɕ"],
-        ["t", "t"],
-        ["ṭ", "ʈ"],
-        ["th", "tʰ"],
-        ["ṭh", "ʈʰ"],
-        ["u", "u"],
-        ["ū", "uː"],
-        ["v", "ʋ"],
-        ["y", "j"],
-    ];
+    let charToPhoneme = {
+        "a": "ɜ",
+        "ā": "ɑː",
+        "ai": "ɑj",
+        "au": "ɑw",
+        "b": "b",
+        "bh": "bʱ",
+        "c": "t͡ɕ",
+        "ch": "t͡ɕʰ",
+        "d": "d",
+        "ḍ": "ɖ",
+        "dh": "dʱ",
+        "ḍh": "ɖʱ",
+        "e": "eː",
+        "g": "g",
+        "gh": "gʱ",
+        "h": "ɦ",
+        "ḥ": "h",
+        "i": "i",
+        "ī": "iː",
+        "j": "d͡ʑ",
+        "jh": "d͡ʑʱ",
+        "k": "k",
+        "kh": "kʰ",
+        "l": "l",
+        "ḷ": "l̩",
+        "m": "m",
+        "ṃ": "N",
+        "n": "n",
+        "ṇ": "ɳ",
+        "ñ": "ɲ",
+        "ṅ": "ŋ",
+        "o": "oː",
+        "p": "p",
+        "ph": "pʰ",
+        "r": "ɾ",
+        "ṛ": "r̩",
+        "ṝ": "r̩ː",
+        "s": "s",
+        "ṣ": "ʂ",
+        "ś": "ɕ",
+        "t": "t",
+        "ṭ": "ʈ",
+        "th": "tʰ",
+        "ṭh": "ʈʰ",
+        "u": "u",
+        "ū": "uː",
+        "v": "ʋ",
+        "y": "j",
+    };
 
     for (let i = 0; i < wordArg.length; i++) {
         let phonemes;
-        let digraphPair = charToPhoneme.find(pair => pair[0] == wordArg[i] + wordArg[i + 1]);
+        let digraphPair = charToPhoneme[wordArg[i] + wordArg[i + 1]];
         if (digraphPair) {
-            phonemes = digraphPair[1];
+            phonemes = digraphPair;
             i++;
         } else {
-            phonemes = charToPhoneme.find(pair => pair[0] == wordArg[i])[1];
+            phonemes = charToPhoneme[wordArg[i]];
         }
         phonemes.split(",").forEach(phoneme => word.insert(phoneme, word.length));
     }
@@ -115,9 +115,7 @@ function San_to_EPr() {
     //Monophthongization
     word.replace("ɑj", "eː");
     word.replace("ɑw", "oː");
-    word.replaceSeq("ɜ,j,ɜ", "eː");
-    word.replaceSeq("ɜ,j,i", "eː");
-    word.replaceSeq("ɜ,j,oː", "eː");
+    word.replaceSeq("ɜ,j,ɜ/i/oː", "eː");
     word.replaceSeq("ɜ,ʋ,i", "eː");
     word.replaceSeq("ɜ,ʋ,ɜ", "oː");
 
@@ -137,9 +135,7 @@ function San_to_EPr() {
     word.replace("m/ʋ", "p", "V,t/tʰ/ʈ/ʈʰ_");
     word.replace("m/ʋ", "b", "V,d/dʱ/ɖ/ɖʱ_");
 
-    word.replaceSeq("n,j", "ɲ,ɲ");
-    word.replaceSeq("ɳ,j", "ɲ,ɲ");
-    word.replaceSeq("j̃,j", "ɲ,ɲ");
+    word.replaceSeq("n/ɳ/j̃,j", "ɲ,ɲ");
 
     word.forEach(segment => {
         if (segment.match("l/ɾ", "V,m_"))
@@ -169,8 +165,7 @@ function San_to_EPr() {
     word.replace("N", "ɲ", "_ɲ/t͡ɕ/t͡ɕʰ/d͡ʑ/d͡ʑʱ");
     word.replace("N", "ŋ", "_ŋ/k/kʰ/g/gʱ");
 
-    word.replace("ʋ̃", "ʋ");
-    word.replace("l̃", "l");
+    word.replace("ʋ̃ l̃", "ʋ l");
 
     word.forEach(segment => {
         if (segment.value.endsWith("ː") && segment.ctxMatch("_C,C"))
@@ -276,24 +271,9 @@ function EPr_to_Apa() {
     word.replace("ɳ/ɲ/ŋ", "n", "_V/ɦ");
     word.replace("ɳ/ɲ/ŋ", "n", "_n");
 
-    word.replace("p", "b", "V_V");
-    word.replace("pʰ", "bʱ", "V_V");
-    word.replace("t", "d", "V_V");
-    word.replace("tʰ", "dʱ", "V_V");
-    word.replace("ʈ", "ɖ", "V_V");
-    word.replace("ʈʰ", "ɖʱ", "V_V");
-    word.replace("k", "g", "V_V");
-    word.replace("kʰ", "gʱ", "V_V");
-    word.replace("t͡ɕ", "d͡ʑ", "V_V");
-    word.replace("t͡ɕʰ", "d͡ʑʱ", "V_V");
+    word.replace("p pʰ t tʰ ʈ ʈʰ k kʰ t͡ɕ t͡ɕʰ", "b bʱ d dʱ ɖ ɖʱ g gʱ d͡ʑ d͡ʑʱ", "V_V");
 
-    word.replace("b", "ʋ", "V_V");
-    word.replace("d", "ð", "V_V");
-    word.replace("g", "ɣ", "V_V");
-    word.replace("bʱ/dʱ/d͡ʑʱ/gʱ", "ɦ", "V_V");
-    word.replace("d͡ʑ", "ʑ", "V_V");
-    word.replace("ɖ", "ɽ", "V_V");
-    word.replace("ɖʱ", "ɽʱ", "V_V");
+    word.replace("b d ɖ g d͡ʑ bʱ/dʱ/gʱ/d͡ʑʱ ɖʱ", "ʋ ð ɽ ɣ ʑ ɦ ɽʱ", "V_V");
 
     word.remove("ð/ʑ/ɣ");
 
@@ -306,10 +286,7 @@ function EPr_to_Apa() {
 
     word.remove("ʋ", "ɜ/ɑː_i/iː/u/uː");
 
-    word.replace("t͡ɕ", "t͡ʃ");
-    word.replace("t͡ɕʰ", "t͡ʃʰ");
-    word.replace("d͡ʑ", "d͡ʒ");
-    word.replace("d͡ʑʱ", "d͡ʒʱ");
+    word.replace("t͡ɕ t͡ɕʰ d͡ʑ d͡ʑʱ", "t͡ʃ t͡ʃʰ d͡ʒ d͡ʒʱ");
 
     word.forEach(segment => {
         if (segment.match("ɦ", "C[!=ɦ]_"))
@@ -321,11 +298,8 @@ function EPr_to_Apa() {
 
     word.replace("m", "ʋ̃", "V_V");
 
-    if (word.vowels.length > 1) {
-        word.replace("ɑː", "ɜ", "_#");
-        word.replace("iː/eː", "i", "_#");
-        word.replace("uː/oː", "u", "_#");
-    }
+    if (word.vowels.length > 1)
+        word.replace("ɑː iː/eː uː/oː", "ɜ i u", "_#");
 
     word.remove("ʋ", "i/iː/u/uː_V");
 
@@ -340,8 +314,7 @@ function EPr_to_Apa() {
     else
         word.vowels.at(-4).stressed = true;
 
-    if (word.stressedVowel.ctxMatch("C_"))
-        word.stressedVowel.relIdx(-1).stressed = true;
+    word.replace("C", "[stressed]", "_V[stressed]");
 
     addRow("Apa", "Apabhramsha", "900", getSpelling_Apa(), word, true);
 }
@@ -443,15 +416,9 @@ function Apa_to_OH(variety) {
         }
     });
 
-    word.replace("ɖ", "ɽ", "V_V");
-    word.replace("ɖʱ", "ɽʱ", "V_V");
+    word.replace("ɖ ɖʱ", "ɽ ɽʱ", "V_V");
 
-    word.forEach(segment => {
-        if (segment.match("ʋ̃")) {
-            segment.relIdx(-1).nasalized = true;
-            segment.value = "ʋ";
-        }
-    });
+    word.replaceSeq("V,ʋ̃", "V[nasalized],ʋ");
 
     word.forEach(segment => segment.stressed = false);
     if (word.vowels.length == 1)
@@ -479,22 +446,10 @@ function Apa_to_OH(variety) {
         }
     });
 
-    word.forEach(segment => {
-        if (segment.ctxMatch("_V[stressed]")) {
-            if (segment.match("i/iː")) {
-                segment.value = "j";
-                segment.type = "consonant";
-            } if (segment.match("u/uː")) {
-                segment.value = "ʋ";
-                segment.type = "consonant";
-            }
-        }
-    });
+    word.replace("i/iː u/uː", "j[type=consonant] ʋ[type=consonant]", "_V[stressed]");
 
-    if (word.stressedVowel.ctxMatch("C_"))
-        word.stressedVowel.relIdx(-1).stressed = true;
-    if (word.stressedVowel.ctxMatch("C,j/ʋ_"))
-        word.stressedVowel.relIdx(-2).stressed = true;
+    word.replace("C", "[stressed]", "_V[stressed]");
+    word.replace("C", "[stressed]", "_{j/ʋ}[stressed]");
 
     addRow("OH", "Old Hindi", "1300", (variety == "urdu") ? getSpelling_OH_persian() : getSpelling_OH_devanagari(), word);
 }
@@ -510,8 +465,7 @@ function OH_to_ModH(variety) {
             segment.value = "ɜ";
     });
 
-    word.replace("ɜɪ̯[!stressed]", "eː", "_#");
-    word.replace("ɜʊ̯[!stressed]", "oː", "_#");
+    word.replace("ɜɪ̯[!stressed] ɜʊ̯[!stressed]", "eː oː", "_#");
 
     //Schwa deletion
     word.slice().reverse().forEach(segment => {
@@ -556,27 +510,18 @@ function OH_to_ModH(variety) {
         }
     });
 
-    word.forEach(segment => {
-        if (segment.match("V", "_m/n/ɳ/ɲ/ŋ,C/#"))
-            segment.nasalized = true;
-    });
+    word.replace("V", "[nasalized]", "_m/mʱ/n/nʱ/ɳ/ɲ/ŋ,C/#");
 
-
-    word.replace("mʱ", "m", "_C/#");
-    word.replace("nʱ", "n", "_C/#");
+    word.replace("mʱ nʱ", "m n", "_C/#");
 
     word.replace("ʋ", "w", "#,C_");
 
-    word.forEach(segment => {
-        if (segment.match("i", "_V"))
-            word.insert("j", segment.idx + 1);
-    });
+    word.insert("j", "i_V");
 
     word.replace("i", "ɪ", "_[!=j]");
     word.replace("u", "ʊ");
 
-    word.replace("ɜɪ̯", "ɛː");
-    word.replace("ɜʊ̯", "ɔː");
+    word.replace("ɜɪ̯ ɜʊ̯", "ɛː ɔː");
 
     word.replace("ɜ", "ɛ", "_ɦ,ɜ/C/#");
     word.replace("ɜ", "ɛ", "ɛ,ɦ_");
@@ -587,17 +532,7 @@ function OH_to_ModH(variety) {
     word.replace("ɑː", "aː");
 
     if (variety == "urdu")
-        word.forEach(segment => {
-            if (segment.match("j", "V_C/#")) {
-                segment.value = "eː";
-                segment.type = "vowel";
-            }
-
-            if (segment.match("ʋ", "V_C/#")) {
-                segment.value = "oː";
-                segment.type = "vowel";
-            }
-        });
+        word.replace("j ʋ", "eː[type=vowel] oː[type=vowel]", "V_C/#");
 
     if (variety == "urdu")
         addRow("ModUr", "Modern Urdu", "", getSpelling_ModUr(), word);

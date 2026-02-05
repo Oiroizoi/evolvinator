@@ -19,10 +19,10 @@ This program applies phonological changes to predict the development of historic
         <td>Modern Italian</td>
     </tr>
     <tr>
-        <td>Modern Romanian</td>
+        <td>Modern Portuguese</td>
     </tr>
     <tr>
-        <td>Modern Portuguese</td>
+        <td>Modern Romanian</td>
     </tr>
     <tr>
         <td>Modern Spanish</td>
@@ -132,6 +132,7 @@ These examples demonstrate the form of valid inputs as well as some of the major
 - fēcī ("I did", Conjugated verb)
 - fēminās ("women", Noun)
 - flammam ("flame", Noun)
+- hordeum ("barley", Noun)
 - īnsulam ("island", Noun)
 - locum ("place", Noun)
 - mōnstrāre ("to show", Infinitive verb)
@@ -244,12 +245,13 @@ All words are stressed on the first syllable unless otherwise noted.
 - [Historical Phonology of Modern Standard Hindi: Proto-Indo-European to the Present](https://openlibrary.org/works/OL38602141W/Historical_phonology_of_modern_standard_Hindi)
 
 ### Historical fonts used (some slightly modified)
+- [0800 Theophanes](https://web.archive.org/web/20240529071259/http://www.sch%C3%A4ffel.ch/de_gruppe1.html)
+- [BeowulfOT](https://github.com/psb1558/BeowulfOT-font)
+- [Cinzel](https://fonts.google.com/specimen/Cinzel)
+- [EB Garamond](https://fonts.google.com/specimen/EB+Garamond)
+- [P39](http://individual.utoronto.ca/atloder/uncialfonts.html)
 - [Pfeffer Mediæval](https://robert-pfeffer.net/schriftarten/englisch/pfeffer_mediaeval.html)
 - [Pfeffer Simpelgotisch](https://robert-pfeffer.net/schriftarten/englisch/pfeffer_simpelgotisch.html)
-- [EB Garamond](https://fonts.google.com/specimen/EB+Garamond)
-- [UnifrakturMaguntia](https://unifraktur.sourceforge.net/maguntia.html)
-- [Cinzel](https://fonts.google.com/specimen/Cinzel)
 - [Rustic Capitals](https://www.fontspace.com/rustic-capitals-font-f7460)
 - [Stoix](https://www.dafont.com/stoix.font)
-- [P39](http://individual.utoronto.ca/atloder/uncialfonts.html)
-- [0800 Theophanes](https://web.archive.org/web/20240529071259/http://www.sch%C3%A4ffel.ch/de_gruppe1.html)
+- [UnifrakturMaguntia](https://unifraktur.sourceforge.net/maguntia.html)

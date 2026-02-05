@@ -1,63 +1,63 @@
 function getIPA_PG() {
-    let charToPhoneme = [
-        ["a", "ɑ"],
-        ["ā", "ɑː"],
-        ["ą", "ɑ̃"],
-        ["ą̄", "ɑ̃ː"],
-        ["ai", "ɑ,j"],
-        ["au", "ɑ,w"],
-        ["b", "β"],
-        ["d", "ð"],
-        ["e", "e"],
-        ["ē", "ɛː"],
-        ["ē₂", "eː"],
-        ["ê", "ɛːː"],
-        ["ēi", "ɛː,j"],
-        ["eu", "e,w"],
-        ["ēu", "ɛː,w"],
-        ["f", "ɸ"],
-        ["g", "ɣ"],
-        ["gw", "ɣʷ"],
-        ["h", "x"],
-        ["hw", "xʷ"],
-        ["i", "i"],
-        ["ī", "iː"],
-        ["į", "ĩ"],
-        ["į̄", "ĩː"],
-        ["iu", "i,w"],
-        ["j", "j"],
-        ["k", "k"],
-        ["kw", "kʷ"],
-        ["l", "l"],
-        ["m", "m"],
-        ["n", "n"],
-        ["ō", "ɔː"],
-        ["ô", "ɔːː"],
-        ["ǭ", "ɔ̃ː"],
-        ["ǫ̂", "ɔ̃ːː"],
-        ["ōi", "ɔː,j"],
-        ["ōu", "ɔː,w"],
-        ["p", "p"],
-        ["r", "r"],
-        ["s", "s"],
-        ["t", "t"],
-        ["u", "u"],
-        ["ū", "uː"],
-        ["ų", "ũ"],
-        ["ų̄", "ũː"],
-        ["w", "w"],
-        ["z", "z"],
-        ["þ", "θ"],
-    ];
+    let charToPhoneme = {
+        "a": "ɑ",
+        "ā": "ɑː",
+        "ą": "ɑ̃",
+        "ą̄": "ɑ̃ː",
+        "ai": "ɑ,j",
+        "au": "ɑ,w",
+        "b": "β",
+        "d": "ð",
+        "e": "e",
+        "ē": "ɛː",
+        "ē₂": "eː",
+        "ê": "ɛːː",
+        "ēi": "ɛː,j",
+        "eu": "e,w",
+        "ēu": "ɛː,w",
+        "f": "ɸ",
+        "g": "ɣ",
+        "gw": "ɣʷ",
+        "h": "x",
+        "hw": "xʷ",
+        "i": "i",
+        "ī": "iː",
+        "į": "ĩ",
+        "į̄": "ĩː",
+        "iu": "i,w",
+        "j": "j",
+        "k": "k",
+        "kw": "kʷ",
+        "l": "l",
+        "m": "m",
+        "n": "n",
+        "ō": "ɔː",
+        "ô": "ɔːː",
+        "ǭ": "ɔ̃ː",
+        "ǫ̂": "ɔ̃ːː",
+        "ōi": "ɔː,j",
+        "ōu": "ɔː,w",
+        "p": "p",
+        "r": "r",
+        "s": "s",
+        "t": "t",
+        "u": "u",
+        "ū": "uː",
+        "ų": "ũ",
+        "ų̄": "ũː",
+        "w": "w",
+        "z": "z",
+        "þ": "θ",
+    };
 
     for (let i = 0; i < wordArg.length; i++) {
         let phonemes;
-        let digraphPair = charToPhoneme.find(pair => pair[0] == wordArg[i] + wordArg[i + 1]);
+        let digraphPair = charToPhoneme[wordArg[i] + wordArg[i + 1]];
         if (digraphPair) {
-            phonemes = digraphPair[1];
+            phonemes = digraphPair;
             i++;
         } else {
-            phonemes = charToPhoneme.find(pair => pair[0] == wordArg[i])[1];
+            phonemes = charToPhoneme[wordArg[i]];
         }
         phonemes.split(",").forEach(phoneme => word.insert(phoneme, word.length));
     }
@@ -85,8 +85,7 @@ function getIPA_PG() {
     word.replace("β", "b", "#/m_");
     word.replace("ð", "d", "#/n/l/z_");
     word.replace("β[stressed] ð[stressed]", "b d");
-    word.replace("ɣ", "g", "ŋ_");
-    word.replace("ɣʷ", "gʷ", "ŋ_");
+    word.replace("ɣ ɣʷ", "g gʷ", "ŋ_");
     word.replaceSeq("β,β", "b,b");
     word.replaceSeq("ð,ð", "d,d");
     word.replaceSeq("ɣ,ɣ", "g,g");
@@ -115,36 +114,15 @@ function PG_to_PWG() {
         && (word.endMatch("V[!stressed]") || word.endMatch("V[!stressed],z"))
     )
         word.vowels.atIdx(-1).remove();
-    word.forEach(segment => {
-        if (segment.match("j") && segment.ctxMatch("C_#")) {
-            segment.value = "i";
-            segment.type = "vowel";
-        }
-
-        if (segment.match("j") && segment.ctxMatch("C,i_#")) {
-            segment.relIdx(-1).value = "iː";
-            segment.remove();
-        }
-
-        if (segment.match("w") && segment.ctxMatch("C_#")) {
-            segment.value = "u";
-            segment.type = "vowel";
-        }
-
-        if (segment.match("w") && segment.ctxMatch("C,u_#")) {
-            segment.relIdx(-1).value = "uː";
-            segment.remove();
-        }
-    });
+    word.replace("j w", "i[type=vowel] u[type=vowel]", "C_#");
+    word.replace("i,j", "iː", "_#");
+    word.replace("u,w", "uː", "_#");
 
     //A-mutation
-    word.forEach(segment => {
-        if (
-            segment.match("u[stressed]") && segment != word.vowels.atIdx(-1) && !segment.nextVowel().match("i/iː/ĩ/ĩː/u/uː/ũ/ũː")
-            && !segment.nextVowel().ctxMatch("j_") && !segment.ctxMatch("_m/n/ŋ,C") && !segment.ctxMatch("f/w_l")
-        )
-            segment.value = "o";
-    });
+    word.replace("u[stressed]", "o", "", segment =>
+        segment != word.vowels.atIdx(-1) && !segment.nextVowel().match("i/iː/ĩ/ĩː/u/uː/ũ/ũː")
+        && !segment.nextVowel().ctxMatch("j_") && !segment.ctxMatch("_m/n/ŋ,C") && !segment.ctxMatch("f/w_l")
+    );
 
     word.remove("j", "ɔː_#");
 
@@ -160,12 +138,7 @@ function PG_to_PWG() {
     word.replace("o", "u", "_#");
     word.replace("kʷ gʷ xʷ", "k g x", "_u");
     word.remove("w", "C_u");
-    word.forEach(segment => {
-        if (segment.match("u[!stressed]", "V_")) {
-            segment.value = "w";
-            segment.type = "consonant";
-        }
-    });
+    word.replace("u[!stressed]", "w[type=consonant]", "V_");
 
     word.replace("ɔː[!stressed]", "ɑː", "_z,#");
     word.replace("ɔ̃ː[!stressed]", "ɑː", "_#");
@@ -176,17 +149,8 @@ function PG_to_PWG() {
 
     word.remove("w", "oː[!stressed]_C/#");
 
-    word.forEach(segment => {
-        if (segment.match("ɑ[!stressed]", "_j[!stressed],C/#")) {
-            segment.value = "eː";
-            segment.relIdx(1).remove();
-        }
-
-        if (segment.match("ɑ[!stressed]", "_w[!stressed],C/#")) {
-            segment.value = "oː";
-            segment.relIdx(1).remove();
-        }
-    });
+    word.replaceSeq("ɑ[!stressed],j[!stressed]", "eː", "_C/#");
+    word.replaceSeq("ɑ[!stressed],w[!stressed]", "oː", "_C/#");
 
     if (!word.vowels.atIdx(-1).stressed || word.partOfSpeech == "noun" || word.partOfSpeech == "nounPl")
         word.remove("z", "_#");
@@ -227,10 +191,7 @@ function PWG_to_EOE() {
 
     word.remove("ɹ", "_#");
 
-    word.forEach(segment => {
-        if (segment.match("m", "_r"))
-            word.insert("b", segment.idx + 1);
-    });
+    word.insert("b", "m_r/ɹ");
 
     word.replace("ɸ β", "f v");
 
@@ -321,27 +282,10 @@ function PWG_to_EOE() {
 
     word.remove("{æ/ɑ}[!stressed]", "_#");
 
-    word.forEach(segment => {
-        if (segment.match("j") && segment.ctxMatch("C_#")) {
-            segment.value = "i";
-            segment.type = "vowel";
-        }
-
-        if (segment.match("j") && segment.ctxMatch("C,i_#")) {
-            segment.relIdx(-1).value = "iː";
-            segment.remove();
-        }
-
-        if (segment.match("w") && segment.ctxMatch("C[!=w]_#")) {
-            segment.value = "u";
-            segment.type = "vowel";
-        }
-
-        if (segment.match("w") && segment.ctxMatch("C,u_#")) {
-            segment.relIdx(-1).value = "uː";
-            segment.remove();
-        }
-    });
+    word.replace("j", "i[type=vowel]", "C_#");
+    word.replace("w", "u[type=vowel]", "C[!=w]_#");
+    word.replace("i,j", "iː", "_#");
+    word.replace("u,w", "uː", "_#");
 
     //Height harmonization
     word.replace("æ/ɑ e/eː i/iː", "æːɑ̯ eːo̯ iːu̯", "_w,C/#");
@@ -415,10 +359,7 @@ function PWG_to_EOE() {
 
     word.replace("x", "ç", "æ/æː/e/eː/ø/øː/i/iː/y/yː/ç_");
 
-    word.replace("l", "l̥", "h_");
-    word.replace("n", "n̥", "h_");
-    word.replace("r", "r̥", "h_");
-    word.replace("w", "ʍ", "h_");
+    word.replace("l n r w", "l̥ n̥ r̥ ʍ", "h_");
 
     addRow("EOE", "Early Anglian Old English", "700", getSpelling_OE_runic(), word, true);
 }
@@ -487,16 +428,12 @@ function EOE_to_OE() {
     word.remove("w[!stressed]", "æ/æː/e/eː/i/iː/y/yː_V");
 
     word.replace("ʝ", "j");
-    word.replace("c", "t͡ʃ");
-    word.replace("ɟ", "d͡ʒ");
+    word.replace("c ɟ", "t͡ʃ d͡ʒ");
     word.replace("t͡ʃ", "t", "_t͡ʃ");
     word.replace("d͡ʒ", "d", "_d͡ʒ");
     word.replace("ɲ", "n", "_t͡ʃ/d͡ʒ");
     word.replaceSeq("s,t͡ʃ", "ʃ,ʃ");
-    word.forEach(segment => {
-        if (segment.match("ʃ", "_ʃ") && !segment.ctxMatch("V_ʃ,V[!stressed]"))
-            segment.remove();
-    });
+    word.remove("ʃ", "_ʃ", segment => !segment.ctxMatch("V_ʃ,V[!stressed]"));
 
     //Back mutation
     word.replace("e i", "eo̯ iu̯", "_C[!=k/g],ɑ/ɑː/o/oː/u/uː");
@@ -607,10 +544,7 @@ function PWG_to_OHG() {
 
     word.replace("ɹ", "r");
 
-    word.forEach(segment => {
-        if (segment.match("m", "_r"))
-            word.insert("b", segment.idx + 1);
-    });
+    word.insert("b", "m_r");
 
     word.replace("kʷ gʷ xʷ", "k g x", "", segment => segment.idx > word.stressedVowel.idx);
 
@@ -620,7 +554,10 @@ function PWG_to_OHG() {
     word.replace("x", "h", "#_");
     word.replace("x", "h", "_V[stressed]");
 
-    word.vowels.forEach(segment => segment.origOpenSyll = segment.ctxMatch("_C,V/j") || segment.ctxMatch("_j/w,C,V/j") || segment.ctxMatch("_V/#") || (word.partOfSpeech == "noun" && segment.ctxMatch("_C,#")));
+    word.vowels.forEach(segment =>
+        segment.origOpenSyll = segment.ctxMatch("_C,V/j") || segment.ctxMatch("_j/w,C,V/j") || segment.ctxMatch("_V/#")
+        || (word.partOfSpeech == "noun" && segment.ctxMatch("_C,#"))
+    );
 
     //Denasalization
     word.forEach(segment => {
@@ -632,27 +569,10 @@ function PWG_to_OHG() {
 
     word.remove("ɑ[!stressed]", "_#");
 
-    word.forEach(segment => {
-        if (segment.match("j") && segment.ctxMatch("C[!=j]_#")) {
-            segment.value = "i";
-            segment.type = "vowel";
-        }
-
-        if (segment.match("j") && segment.ctxMatch("C[!=j],i_#")) {
-            segment.relIdx(-1).value = "iː";
-            segment.remove();
-        }
-
-        if (segment.match("w") && segment.ctxMatch("C[!=j/w]_#")) {
-            segment.value = "u";
-            segment.type = "vowel";
-        }
-
-        if (segment.match("w") && segment.ctxMatch("C[!=j/w],u_#")) {
-            segment.relIdx(-1).value = "uː";
-            segment.remove();
-        }
-    });
+    word.replace("j", "i[type=vowel]", "C[!=j]_#");
+    word.replace("w", "u[type=vowel]", "C[!=j/w]_#");
+    word.replace("i,j", "iː", "C[!=j]_#");
+    word.replace("u,w", "uː", "C[!=j/w]_#");
 
     if ((word.endMatch("C[!=j/w],l/r") || word.endMatch("C[!=j/w/l/r/m],m/n")) && word.atIdx(-1).value != word.atIdx(-2).value)
         word.insert("ɑ", -1);
@@ -679,27 +599,10 @@ function PWG_to_OHG() {
         && (word.endMatch("C,C,i/u") || (word.endMatch("C,i/u") && word.vowels.atIdx(-2).value.length > 1))
     )
         word.atIdx(-1).remove();
-    word.forEach(segment => {
-        if (segment.match("j") && segment.ctxMatch("C[!=j]_#")) {
-            segment.value = "i";
-            segment.type = "vowel";
-        }
-
-        if (segment.match("j") && segment.ctxMatch("C[!=j],i_#")) {
-            segment.relIdx(-1).value = "iː";
-            segment.remove();
-        }
-
-        if (segment.match("w") && segment.ctxMatch("C[!=j/w]_#")) {
-            segment.value = "u";
-            segment.type = "vowel";
-        }
-
-        if (segment.match("w") && segment.ctxMatch("C[!=j/w],u_#")) {
-            segment.relIdx(-1).value = "uː";
-            segment.remove();
-        }
-    });
+    word.replace("j", "i[type=vowel]", "C[!=j]_#");
+    word.replace("w", "u[type=vowel]", "C[!=j/w]_#");
+    word.replace("i,j", "iː", "C[!=j]_#");
+    word.replace("u,w", "uː", "C[!=j/w]_#");
 
     word.remove("n", "m_#");
 

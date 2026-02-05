@@ -6,6 +6,7 @@
     <title>Evolvinator</title>
 
     <link rel="preload" href="fonts/0800Theophanes.otf" as="font" type="font/otf" crossorigin>
+    <link rel="preload" href="fonts/BeowulfOT.otf" as="font" type="font/otf" crossorigin>
     <link rel="preload" href="fonts/Menaion.otf" as="font" type="font/otf" crossorigin>
     <link rel="preload" href="fonts/P39.ttf" as="font" type="font/ttf" crossorigin>
     <link rel="preload" href="fonts/PfefferMediaeval.otf" as="font" type="font/otf" crossorigin>
@@ -25,6 +26,11 @@
         @font-face {
             font-family: "0800 Theophanes";
             src: url("fonts/0800Theophanes.otf") format("opentype");
+        }
+
+        @font-face {
+            font-family: "BeowulfOT";
+            src: url("fonts/BeowulfOT.otf") format("opentype");
         }
 
         @font-face {
@@ -71,63 +77,147 @@
         }
 
         body {
-            font: 16px "Segoe UI", sans-serif;
-            line-height: 150%;
+            font: 20px "Segoe UI", sans-serif;
+            line-height: 200%;
+            text-align: center;
+            margin: 0;
         }
 
-        form {
-            line-height: 200%;
+        #input,
+        #outcomes {
+            position: fixed;
+            top: 0;
+            width: 50%;
+            height: 100%;
+            box-sizing: border-box;
+            padding: 2% 8px 8px;
+            overflow: auto;
+            display: none;
+        }
+
+        #input {
+            left: 0;
+            background-color: #def;
+        }
+
+        #outcomes {
+            right: 0;
+        }
+
+        form>* {
+            margin-top: 32px;
+        }
+
+        select,
+        input {
+            font-size: 90%;
+            padding: 2px;
+            outline: none;
+        }
+
+        #title {
+            font-size: 40px;
+            font-weight: bold;
+        }
+
+        a {
+            color: #006080;
+        }
+
+        a:active {
+            color: black;
+        }
+
+        #to,
+        #from {
+            margin: 0 8px;
         }
 
         #asterisk {
             display: none;
+            font-size: 30px;
+            padding-right: 4px;
         }
 
         #word {
-            width: 175px;
+            width: 75%;
+            max-width: 500px;
+            line-height: 110%;
+            font-size: 24px;
+            padding: 4px;
+        }
+
+        #word:focus {
+            background-color: white;
+            color: black;
+        }
+
+        #buttons {
+            margin-top: 10px;
+            font-size: 22px;
+        }
+
+        input[type=button] {
+            margin: 0 3px;
+            padding: 2px 8px;
         }
 
         label {
             display: inline-block;
         }
 
-        input[type=button] {
-            margin-left: 4px;
-        }
-
-        #stress,
-        #pos,
-        #gender {
-            margin-right: 8px;
-        }
-
         #inputNote {
-            font-size: 14px;
-            line-height: 200%;
-            margin-top: -5px;
+            margin-top: 0;
         }
 
-        #table {
-            margin-top: 20px;
-            text-align: center;
-            border-spacing: 0;
+        #stressContainer,
+        #posContainer,
+        #genderContainer {
+            display: inline-block;
+            margin: 0 8px;
         }
 
-        th {
-            position: relative;
-            padding: 5px 0;
-            background-color: lightgray;
-            border-color: black;
+        input[type=submit] {
+            font-size: 22px;
+            background-color: white;
+            color: #006080;
+            padding: 8px 40px;
+            border: 1px solid black;
+            border-radius: 8px;
             cursor: pointer;
         }
 
-        #headerArrow {
-            position: absolute;
-            top: 0;
-            right: 0;
-            height: 100%;
-            aspect-ratio: 1;
-            padding: 5px 0;
+        input[type=submit]:hover {
+            background-color: #eee;
+        }
+
+        input[type=submit]:active {
+            background-color: #006080;
+            color: white;
+        }
+
+        #header {
+            font-size: 32px;
+            font-weight: bold;
+        }
+
+        #checkboxes {
+            font-size: 16px;
+        }
+
+        input[type="checkbox"] {
+            vertical-align: text-top;
+        }
+
+        #checkboxes label {
+            margin-right: 10px;
+        }
+
+        #table {
+            display: inline;
+            margin-top: 20px;
+            border-spacing: 0;
+            max-width: 100%;
         }
 
         td {
@@ -150,15 +240,15 @@
 
             #LL .spelling {
                 font-family: "Rustic Capitals";
-                font-size: 14px;
+                font-size: 17px;
                 transform: translateY(2px);
                 font-style: normal;
             }
 
             #OE .spelling {
-                font-family: "Pfeffer Mediæval";
-                font-feature-settings: "ss02";
-                font-size: 18px;
+                font-family: "BeowulfOT";
+                font-feature-settings: "hist";
+                font-size: 32px;
                 font-style: normal;
             }
 
@@ -170,7 +260,7 @@
             #MHG .spelling {
                 font-family: "Pfeffer Mediæval";
                 font-feature-settings: "hist";
-                font-size: 18px;
+                font-size: 23px;
                 font-style: normal;
             }
 
@@ -178,7 +268,7 @@
             #OGP .spelling {
                 font-family: "Pfeffer Simpelgotisch";
                 font-feature-settings: "hist";
-                font-size: 18px;
+                font-size: 22px;
                 font-style: normal;
             }
 
@@ -186,38 +276,38 @@
             #EModSp .spelling,
             #MF .spelling {
                 font-family: "EB Garamond";
-                font-size: 18px;
+                font-size: 22px;
                 font-style: normal;
             }
 
             #ORom .spelling {
                 font-family: "Menaion";
-                font-size: 18px;
+                font-size: 22px;
                 font-style: normal;
             }
 
             #ENHG .spelling {
                 font-family: "Unifraktur Maguntia 16";
-                font-size: 19px;
+                font-size: 24px;
                 font-style: normal;
             }
 
             #AttGr .spelling {
                 font-family: "Stoix";
-                font-size: 18px;
+                font-size: 22px;
                 text-transform: uppercase;
                 font-style: normal;
             }
 
             #KoiGr .spelling {
                 font-family: "P39";
-                font-size: 14px;
+                font-size: 18px;
                 font-style: normal;
             }
 
             #ByzGr .spelling {
                 font-family: "0800 Theophanes";
-                font-size: 20px;
+                font-size: 25px;
                 font-style: normal;
             }
         }
@@ -242,88 +332,69 @@
         .nonHist {
             font-feature-settings: initial !important;
         }
-
-        #checkboxes {
-            margin-top: 30px;
-            font-size: 13px;
-        }
-
-        input[type="checkbox"] {
-            vertical-align: text-top;
-        }
-
-        #checkboxes label {
-            margin-right: 10px;
-        }
-
-        #githubLink {
-            position: absolute;
-            top: 15px;
-            right: 20px;
-            width: 40px;
-            height: 40px;
-            border-radius: 40px;
-            font-size: 30px;
-            text-align: center;
-            line-height: 40px;
-            font-weight: 500;
-            font-style: italic;
-            background-color: #999;
-            color: white;
-        }
-
-        #githubLink:hover {
-            background-color: #b4f;
-        }
     </style>
 </head>
 
 <body>
-    <form autocomplete="off">
-        <select name="from" id="from">
-            <option value="AttGr">Ancient Greek</option>
-            <option value="Lat">Classical Latin</option>
-            <option value="San">Classical Sanskrit</option>
-            <option value="OE" selected>Old English</option>
-            <option value="PG">Proto-Germanic</option>
-        </select>
-        →
-        <select name="to" id="to"></select>
-        <br>
+    <div id="input">
+        <form autocomplete="off">
+            <div style="margin-top:0;">
+                John Birkeland's
+                <div id="title">Evolvinator</div>
+                Finds the expected modern reflexes of historical words
+            </div>
+            <div> For more information and example inputs, see the
+                <a href="https://github.com/Oiroizoi/evolvinator?tab=readme-ov-file#evolvinator" target="_blank">
+                    GitHub page</a>.
+            </div>
 
-        <label for="word" id="wordLabel">Word:</label>
-        <span id="asterisk">*</span><input type="text" name="word" id="word">
-        <span id="buttons"></span>
-        <br>
+            <div>
+                <select name="from" id="from">
+                    <option value="AttGr">Ancient Greek</option>
+                    <option value="Lat">Classical Latin</option>
+                    <option value="San">Classical Sanskrit</option>
+                    <option value="OE" selected>Old English</option>
+                    <option value="PG">Proto-Germanic</option>
+                </select>
+                🡺
+                <select name="to" id="to"></select>
+            </div>
 
-        <div id="inputNote"></div>
+            <label for="word" id="wordLabel"></label>
+            <span id="asterisk">*</span><input type="text" name="word" id="word">
+            <div id="buttons"></div>
 
-        <label for="stress" id="stressLabel">Stressed syllable:</label>
-        <select name="stress" id="stress">
-            <option>1</option>
-        </select>
-        <label for="pos" id="posLabel">Part of speech:</label>
-        <select name="pos" id="pos"></select>
-        <label for="pos" id="genderLabel">Gender:</label>
-        <select name="gender" id="gender">
-            <option value="mn">Masculine/neuter</option>
-            <option value="f">Feminine</option>
-        </select>
-        <br>
+            <div id="inputNote"></div>
 
-        <input type="submit">
-    </form>
+            <div>
+                <div id="stressContainer">
+                    <label for="stress" id="stressLabel">Stressed syllable:</label>
+                    <select name="stress" id="stress">
+                        <option>1</option>
+                    </select>
+                </div>
+                <div id="posContainer">
+                    <label for="pos" id="posLabel">Part of speech:</label>
+                    <select name="pos" id="pos"></select>
+                </div>
+                <div id="genderContainer">
+                    <label for="pos" id="genderLabel">Gender:</label>
+                    <select name="gender" id="gender">
+                        <option value="mn">Masculine/neuter</option>
+                        <option value="f">Feminine</option>
+                    </select>
+                </div>
+            </div>
 
-    <div id="outcomes">
-        <table id="table">
-            <tr id="header"></tr>
-        </table>
-        <div id="checkboxes"></div>
+            <input type="submit" value="Evolve!">
+        </form>
     </div>
 
-    <a href="https://github.com/Oiroizoi/evolvinator" target="_blank">
-        <div id="githubLink">i</div>
-    </a>
+    <div id="outcomes">
+        <div id="header">Expected outcomes</div>
+        <div id="checkboxes"></div>
+        <table id="table"></table>
+    </div>
 </body>
 
 <script src="langs/greek.js"></script>
@@ -334,8 +405,8 @@
 <script>
     let params = new URLSearchParams(window.location.search);
     let wordArg = params.get("word");
-    let from = params.get("from") || "OE";
-    let to = params.get("to") || "ModE";
+    let from = params.get("from") || localStorage.getItem("ev-from") || "OE";
+    let to = params.get("to") || localStorage.getItem("ev-to") || "ModE";
     let stressArg = +params.get("stress") || 1;
     let partOfSpeech = params.get("pos");
     let gender = params.get("gender");
@@ -344,7 +415,20 @@
 
     let outcomes = {};
 
+    //Alter UI for vertical phone screens
+    if (window.innerWidth < window.innerHeight) {
+        document.getElementById("input").style.width = "100%";
+        document.getElementById("input").style.position = "static";
+        document.getElementById("input").style.paddingBottom = "2%";
+
+        document.getElementById("outcomes").style.width = "100%";
+        document.getElementById("outcomes").style.position = "static";
+    }
+
     function init() {
+        if (!Array.from(document.getElementById("from").options).some(option => option.value == from))
+            from = "OE";
+
         if (wordArg) {
             wordArg = wordArg.trim().toLowerCase().normalize("NFC");
 
@@ -628,18 +712,22 @@
         if (from == "AttGr") {
             document.getElementById("inputNote").innerHTML = "Note: Latin- and Greek-script inputs are both accepted.";
             document.getElementById("inputNote").style.display = "";
+        } else if (from == "San") {
+            document.getElementById("inputNote").innerHTML = "Note: Latin-script and Devanagari inputs are both accepted.";
+            document.getElementById("inputNote").style.display = "";
         } else {
             document.getElementById("inputNote").innerHTML = "";
             document.getElementById("inputNote").style.display = "none";
         }
 
+        if (!Array.from(document.getElementById("stress").options).some(option => option.value == stressArg))
+            stressArg = "1";
+
         if (from == "OE" || from == "PG") {
-            document.getElementById("stressLabel").style.display = "";
-            document.getElementById("stress").style.display = "";
+            document.getElementById("stressContainer").style.display = "";
             document.getElementById("stress").value = stressArg;
         } else {
-            document.getElementById("stressLabel").style.display = "none";
-            document.getElementById("stress").style.display = "none";
+            document.getElementById("stressContainer").style.display = "none";
             document.getElementById("stress").value = "";
         }
 
@@ -679,21 +767,15 @@
 
         if (Array.from(document.getElementById("pos").options).some(option => option.value == partOfSpeech))
             document.getElementById("pos").value = partOfSpeech;
+        else if (partOfSpeech)
+            partOfSpeech = "other";
 
         document.getElementById("to").onchange();
-
-        document.getElementById("outcomes").style.display = "none";
 
         document.getElementById("table").classList.add("from_" + from);
         document.getElementById("table").classList.add("to_" + to);
 
-        document.getElementById("header").onclick = () => {
-            document.getElementById("outcomes").classList.toggle("expanded");
-            if (document.getElementById("headerArrow").innerHTML == "▲")
-                document.getElementById("headerArrow").innerHTML = "▼";
-            else
-                document.getElementById("headerArrow").innerHTML = "▲";
-        };
+        document.getElementById("input").style.display = "block";
 
         if (!document.getElementById("word").value)
             document.getElementById("word").focus();
@@ -709,29 +791,34 @@
     };
 
     function tableSetup() {
-        document.getElementById("header").innerHTML = `<th colspan="4"> Expected outcomes: <div id="headerArrow">▼</div> </th>`;
-
         document.getElementById("checkboxes").innerHTML = `
-            <label><input type="checkbox" id="expandChk">Automatically expand table</label>
+            <label><input type="checkbox" id="expandChk">Show expanded table</label>
             <label><input type="checkbox" id="modernChk">Use modern typography</label>
         `;
 
         document.getElementById("expandChk").onclick = function () {
-            localStorage.setItem("ev-autoExpand", this.checked);
-            if (this.checked && document.getElementById("headerArrow").innerHTML == "▼")
-                document.getElementById("header").click();
+            localStorage.setItem("ev-expand", this.checked);
+            document.getElementById("outcomes").classList.toggle("expanded");
         };
 
         document.getElementById("modernChk").onclick = function () {
             localStorage.setItem("ev-modernTypography", this.checked);
             document.getElementById("outcomes").classList.toggle("modernTypography");
             modernTypography = this.checked;
+
+            from = localStorage.getItem("ev-from");
+            to = localStorage.getItem("ev-to");
+            partOfSpeech = word.partOfSpeech;
+            gender = word.gender;
             getOutcomes();
         };
 
-        if (localStorage.getItem("ev-autoExpand") == "true") {
+        if (!localStorage.getItem("ev-expand"))
+            localStorage.setItem("ev-expand", "true");
+
+        if (localStorage.getItem("ev-expand") == "true") {
             document.getElementById("expandChk").checked = true;
-            document.getElementById("header").click();
+            document.getElementById("outcomes").classList.add("expanded");
         }
 
         if (localStorage.getItem("ev-modernTypography") == "true") {
@@ -744,12 +831,12 @@
     function addRow(id, name, date, spelling, word, hidden) {
         document.getElementById(id)?.remove();
 
-        let row = document.createElement("tr");
+        let row = document.getElementById("table").insertRow(-1);
         row.id = id;
-        row.innerHTML = `<td>${name}</td> <td>${date ? "c. " + date : "—"}</td> <td class="spelling">${spelling || "—"}</td> <td>[${word}]</td>`;
+        row.innerHTML =
+            `<td>${name}</td> <td>${date ? "c. " + date : "—"}</td> <td class="spelling">${spelling || "—"}</td> <td>[${word}]</td>`;
         if (hidden)
             row.classList.add("hidden");
-        document.getElementById("table").append(row);
 
         word.forEach(segment => segment[id + "Value"] = segment.value);
         outcomes[id] = word.duplicate();
@@ -759,6 +846,9 @@
         word = new Word();
         word.partOfSpeech = partOfSpeech;
         word.gender = gender;
+
+        localStorage.setItem("ev-from", from);
+        localStorage.setItem("ev-to", to);
 
         try {
             switch (from) {
@@ -915,12 +1005,10 @@
 
     document.getElementById("pos").onchange = () => {
         if (from == "PG" && document.getElementById("to").value == "ModG" && document.getElementById("pos").value == "noun") {
-            document.getElementById("genderLabel").style.display = "";
-            document.getElementById("gender").style.display = "";
+            document.getElementById("genderContainer").style.display = "";
             document.getElementById("gender").value = (gender == "f") ? "f" : "mn";
         } else {
-            document.getElementById("genderLabel").style.display = "none";
-            document.getElementById("gender").style.display = "none";
+            document.getElementById("genderContainer").style.display = "none";
             document.getElementById("gender").value = "";
         }
     };
@@ -1004,7 +1092,7 @@
                     let conditionCheck = !condition || condition(segment);
                     for (let j in original)
                         if (segment.selfMatch(original[j]) && ctxCheck && conditionCheck)
-                            segment.replace(replacement[j]);
+                            segment.set(replacement[j]);
                 }
             };
 
@@ -1030,7 +1118,7 @@
                                 word.atIdx(i + j).remove();
                                 i--;
                             } else {
-                                word.atIdx(i + j).replace(newSegments[j]);
+                                word.atIdx(i + j).set(newSegments[j]);
                             }
                         }
                         i += Math.max(sequence.length, newSegments.length) - 1;
@@ -1171,7 +1259,7 @@
 
                     if (value == this.value)
                         return true;
-                    if (value == "")
+                    if (value == "" || value == "*")
                         return true;
                     if (value == "C" && this.type == "consonant")
                         return true;
@@ -1218,18 +1306,18 @@
                 return true;
             };
 
-            this.replace = replacement => {
+            this.set = str => {
                 let newVal, newProps;
 
-                let boundary = replacement.indexOf("[");
+                let boundary = str.indexOf("[");
                 if (boundary > -1) {
-                    newVal = replacement.slice(0, boundary);
-                    newProps = replacement.slice(boundary);
+                    newVal = str.slice(0, boundary);
+                    newProps = str.slice(boundary);
                 } else {
-                    newVal = replacement;
+                    newVal = str;
                 }
 
-                if (newVal)
+                if (newVal && newVal != "*" && newVal != "C" && newVal != "V")
                     this.value = newVal;
 
                 if (newProps) {
