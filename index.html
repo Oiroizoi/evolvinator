@@ -104,6 +104,26 @@
             right: 0;
         }
 
+        body.smallScreen {
+            zoom: 90%;
+        }
+
+        body.vertical {
+            zoom: 150%;
+        }
+
+        .vertical #input {
+            position: static;
+            width: 100%;
+            padding-bottom: 2%;
+        }
+
+        .vertical #outcomes {
+            position: static;
+            width: 100%;
+            padding-bottom: 2%;
+        }
+
         form>* {
             margin-top: 32px;
         }
@@ -356,7 +376,7 @@
                     <option value="OE" selected>Old English</option>
                     <option value="PG">Proto-Germanic</option>
                 </select>
-                🡺
+                ➔
                 <select name="to" id="to"></select>
             </div>
 
@@ -415,29 +435,16 @@
 
     let outcomes = {};
 
-    //Alter UI for vertical phone screens
     window.onresize = () => {
         if (window.innerWidth < window.innerHeight) {
-            document.body.style.zoom = "150%";
-
-            document.getElementById("input").style.width = "100%";
-            document.getElementById("input").style.position = "static";
-            document.getElementById("input").style.paddingBottom = "2%";
-
-            document.getElementById("outcomes").style.width = "100%";
-            document.getElementById("outcomes").style.position = "static";
+            document.body.classList.add("vertical");
+            document.body.classList.remove("smallScreen");
+        } else if (window.innerWidth < 1750) {
+            document.body.classList.add("smallScreen");
+            document.body.classList.remove("vertical");
         } else {
-            if (window.innerWidth < 1750)
-                document.body.style.zoom = "90%";
-            else
-                document.body.style.zoom = "";
-
-            document.getElementById("input").style.width = "50%";
-            document.getElementById("input").style.position = "fixed";
-            document.getElementById("input").style.paddingBottom = "2%";
-
-            document.getElementById("outcomes").style.width = "50%";
-            document.getElementById("outcomes").style.position = "fixed";
+            document.body.classList.remove("vertical");
+            document.body.classList.remove("smallScreen");
         }
     };
 
