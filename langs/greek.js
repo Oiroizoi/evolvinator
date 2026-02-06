@@ -235,7 +235,7 @@ function AttGr_to_ModGr() {
 
     //Spirantization
     word.remove("d", "z_");
-    word.replace("pʰ tʰ cʰ kʰ", "ɸ θ ç c");
+    word.replace("pʰ tʰ cʰ kʰ", "ɸ θ ç x");
     word.replace("b", "β", "[!=m]_");
     word.replace("d", "ð", "[!=n]_");
     word.replace("ɟ", "ʝ", "[!=ɲ]_");
