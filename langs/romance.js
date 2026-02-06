@@ -1340,7 +1340,7 @@ function OGP_to_ModPort() {
     word.remove("j", "u_C");
     word.remove("j", "o_ʃ");
 
-    word.replace("s̺ z̺", "s");
+    word.replace("s̺ z̺", "s z");
 
     word.EModPortWord = word.duplicate();
 

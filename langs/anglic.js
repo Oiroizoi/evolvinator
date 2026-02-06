@@ -286,6 +286,7 @@ function EME_to_LME(variety) {
             segment.remove();
         }
     });
+    word.replace("ç", "x", "_C");
 
     word.forEach(segment => {
         if (segment.match("V") && segment.idx > word.stressedVowel.idx) {
@@ -681,8 +682,10 @@ function LME_to_EModE(variety) {
         word.atIdx(-1).value = "z";
 
     //Loss of vowel in -es and -ed suffixes
-    if (word.sSuffix && word.endMatch("V/C[!=s/z/ʃ/t͡ʃ/d͡ʒ],{ə/ɪ}[!stressed],z"))
+    if (word.endMatch("V/C[!=s/z/ʃ/t͡ʃ/d͡ʒ],{ə/ɪ}[!stressed],z")) {
+        word.sSuffix = true;
         word.atIdx(-2).remove();
+    }
     if ((word.partOfSpeech == "conjVerb" || word.partOfSpeech == "pastPtcp") && word.endMatch("V[!stressed],d/t")) {
         word.pastTense = true;
         if (word.endMatch("V/C[!=t/d],ə,d"))
@@ -789,7 +792,7 @@ function LME_to_EModE(variety) {
         word.replace("ɔ", "ɒ");
 
     if (variety == "scots")
-        word.remove("t", "p/k_");
+        word.remove("t[!stressed]", "p/k_");
 
     if (variety == "scots")
         addRow("EModE", "Middle Scots", "1600", getSpelling_MSc(word), word, true);

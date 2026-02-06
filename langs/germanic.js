@@ -418,12 +418,7 @@ function EOE_to_OE() {
     word.replace("n", "ɲ", "_c/ɟ");
     word.replace("n/ɲ", "ŋ", "_k/g");
 
-    word.forEach(segment => {
-        if (segment.match("i", "C_j,V") && !segment.stressed) {
-            segment.relIdx(1).remove();
-            segment.remove();
-        }
-    });
+    word.replaceSeq("i[!stressed],j", "", "C_V");
 
     word.remove("w[!stressed]", "æ/æː/e/eː/i/iː/y/yː_V");
 
