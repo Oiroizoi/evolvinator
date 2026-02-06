@@ -339,18 +339,16 @@ function AttGr_to_ModGr() {
     word.remove("v", "_m");
 
     //Syllabification
-    if (word.vowels.length > 1) {
-        word.replace("C", "[stressed]", "_V[stressed]");
-        word.replace("C", "[stressed]", "_j[stressed]");
-        word.replace("p/t/k/b/d/g/f/θ/x/v/ð/ɣ", "[stressed]", "_{l/r}[stressed]");
-        word.replace("s/z", "[stressed]", "_C[stressed]");
-        word.replace("f/x", "[stressed]", "_t[stressed]");
-        word.replace("v/ɣ", "[stressed]", "_ð[stressed]");
-        word.replace("v", "[stressed]", "_{ʝ/ɣ}[stressed]");
-        word.replace("t/ð", "[stressed]", "_m[stressed]");
-        word.replace("p/k/θ/x/ɣ/m", "[stressed]", "_n[stressed]");
-        word.replace("C", "[stressed]", "", segment => word.vowels.atIdx(0).stressed && segment.idx < word.vowels.atIdx(0).idx);
-    }
+    word.replace("C", "[stressed]", "_V[stressed]");
+    word.replace("C", "[stressed]", "_j[stressed]");
+    word.replace("p/t/k/b/d/g/f/θ/x/v/ð/ɣ", "[stressed]", "_{l/r}[stressed]");
+    word.replace("s/z", "[stressed]", "_C[stressed]");
+    word.replace("f/x", "[stressed]", "_t[stressed]");
+    word.replace("v/ɣ", "[stressed]", "_ð[stressed]");
+    word.replace("v", "[stressed]", "_{ʝ/ɣ}[stressed]");
+    word.replace("t/ð", "[stressed]", "_m[stressed]");
+    word.replace("p/k/θ/x/ɣ/m", "[stressed]", "_n[stressed]");
+    word.replace("C", "[stressed]", "", segment => word.vowels.atIdx(0).stressed && segment.idx < word.vowels.atIdx(0).idx);
 
     addRow("ByzGr", "Byzantine Greek", "900", getSpelling_ByzGr(), word, true);
 
