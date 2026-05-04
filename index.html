@@ -237,6 +237,7 @@
             margin-top: 20px;
             border-spacing: 0;
             max-width: 100%;
+            white-space: nowrap;
         }
 
         td {
@@ -414,1001 +415,1010 @@
         <div id="checkboxes"></div>
         <table id="table"></table>
     </div>
-</body>
 
-<script src="langs/greek.js"></script>
-<script src="langs/romance.js"></script>
-<script src="langs/indo-aryan.js"></script>
-<script src="langs/anglic.js"></script>
-<script src="langs/germanic.js"></script>
-<script>
-    let params = new URLSearchParams(window.location.search);
-    let wordArg = params.get("word");
-    let from = params.get("from") || localStorage.getItem("ev-from") || "OE";
-    let to = params.get("to") || localStorage.getItem("ev-to") || "ModE";
-    let stressArg = +params.get("stress") || 1;
-    let partOfSpeech = params.get("pos");
-    let gender = params.get("gender");
-    let word;
-    let modernTypography = false;
 
-    let outcomes = {};
+    <script src="langs/greek.js"></script>
+    <script src="langs/romance.js"></script>
+    <script src="langs/indo-aryan.js"></script>
+    <script src="langs/anglic.js"></script>
+    <script src="langs/germanic.js"></script>
+    <script>
+        let params = new URLSearchParams(window.location.search);
+        let wordArg = params.get("word");
+        let from = params.get("from") || localStorage.getItem("ev-from") || "OE";
+        let to = params.get("to") || localStorage.getItem("ev-to") || "ModE";
+        let stressArg = +params.get("stress") || 1;
+        let partOfSpeech = params.get("pos");
+        let gender = params.get("gender");
+        let word;
+        let modernTypography = false;
 
-    window.onresize = () => {
-        if (window.innerWidth < window.innerHeight) {
-            document.body.classList.add("vertical");
-            document.body.classList.remove("smallScreen");
-        } else if (window.innerWidth < 1750) {
-            document.body.classList.add("smallScreen");
-            document.body.classList.remove("vertical");
-        } else {
-            document.body.classList.remove("vertical");
-            document.body.classList.remove("smallScreen");
-        }
-    };
+        let outcomes = {};
 
-    window.onresize();
+        window.onresize = () => {
+            if (window.innerWidth < window.innerHeight) {
+                document.body.classList.add("vertical");
+                document.body.classList.remove("smallScreen");
+            } else if (window.innerWidth < 1750) {
+                document.body.classList.add("smallScreen");
+                document.body.classList.remove("vertical");
+            } else {
+                document.body.classList.remove("vertical");
+                document.body.classList.remove("smallScreen");
+            }
+        };
 
-    function init() {
-        if (!Array.from(document.getElementById("from").options).some(option => option.value == from))
-            from = "OE";
+        window.onresize();
 
-        if (wordArg) {
-            wordArg = wordArg.trim().toLowerCase().normalize("NFC");
+        function init() {
+            if (!Array.from(document.getElementById("from").options).some(option => option.value == from))
+                from = "OE";
 
-            //Normalize spelling
+            if (wordArg) {
+                wordArg = wordArg.trim().toLowerCase().normalize("NFC");
+
+                //Normalize spelling
+                switch (from) {
+                    case "AttGr":
+                        wordArg = wordArg.normalize("NFD");
+                        wordArg = wordArg.replaceAll("\u0306", "") //Breve
+                            .replaceAll("\u0313", "") //Smooth breathing
+                            .replaceAll("\u0342", "\u0302") //Replace Greek circumflex with Latin form
+                            .replaceAll("\u0300", "\u0301") //Replace grave accent with accute
+                            .replaceAll(/([\u0301\u0302])\u0345/g, "\u0345$1") //Switch order of accents and iota subscript
+                            .replaceAll(/\u0345/g, "\u0304\u0345") //Lengthen vowels with iota subscript
+                            .replaceAll("\u0345", "i"); //Iota subscript
+                        //Rough breathing
+                        wordArg = wordArg.replaceAll("ῥ", "rh")
+                            .replaceAll("ἁ", "ha")
+                            .replaceAll("ᾱ̔", "hā")
+                            .replaceAll("ἑ", "he")
+                            .replaceAll("ἡ", "hē")
+                            .replaceAll("ὁ", "ho")
+                            .replaceAll("ὡ", "hō");
+                        if (wordArg.includes("\u0314"))
+                            wordArg = "h" + wordArg;
+                        wordArg = wordArg.replaceAll("\u0314", "");
+                        //Convert Greek input to Latin script
+                        wordArg = wordArg.replaceAll("α", "a")
+                            .replaceAll("β", "b")
+                            .replaceAll("γ", "g")
+                            .replaceAll("δ", "d")
+                            .replaceAll("ε", "e")
+                            .replaceAll("ζ", "z")
+                            .replaceAll("η", "ē")
+                            .replaceAll("θ", "th")
+                            .replaceAll("ι", "i")
+                            .replaceAll("κ", "k")
+                            .replaceAll("λ", "l")
+                            .replaceAll("μ", "m")
+                            .replaceAll("ν", "n")
+                            .replaceAll("ξ", "x")
+                            .replaceAll("ο", "o")
+                            .replaceAll("π", "p")
+                            .replaceAll("ρ", "r")
+                            .replaceAll("σ", "s")
+                            .replaceAll("ς", "s")
+                            .replaceAll("τ", "t")
+                            .replaceAll("υ", "y")
+                            .replaceAll("φ", "ph")
+                            .replaceAll("χ", "ch")
+                            .replaceAll("ψ", "ps")
+                            .replaceAll("ω", "ō");
+                        wordArg = wordArg.replaceAll("c", "k")
+                            //Dieresis comes before accents
+                            .replaceAll(/\u0301\u0308/g, "\u0308\u0301")
+                            .replaceAll(/\u0302\u0308/g, "\u0308\u0302")
+                            //Other spelling changes
+                            .replaceAll("kh", "ch")
+                            .replaceAll("u", "y")
+                            .replaceAll("\u0304\u0304", "\u0304")
+                            .replaceAll(/(?<=(a|ā|e|ē|o))y(?![\u0308\u0304])/g, "u")
+                            .replaceAll(/g(?=[gkcx])/g, "n")
+                            .replaceAll(/rr(?!h)/g, "rrh")
+                            .replaceAll(/chch/g, "kch")
+                            .replaceAll(/phph/g, "pph")
+                            .replaceAll(/thth/g, "tth")
+                            .replaceAll(/rhrh/g, "rrh")
+                            //Remove redundant macron before circumflex
+                            .replaceAll(/\u0304(?=\u0308?\u0302)/g, "")
+                            //Add dieresis over "i" and "y" in certain cases
+                            .replaceAll(/(?<=[\u0301\u0302])i(?![\u0308\u0304])/g, "ï")
+                            .replaceAll(/(?<=[aeoy][\u0304\u0301\u0302\u0308]*)ī(?!\u0308)/g, "ī̈")
+                            .replaceAll(/(?<=[aeo][\u0304\u0301\u0302\u0308]*)y(?![\u0308\u0304])/g, "ÿ")
+                            .replaceAll(/(?<=[aeo][\u0304\u0301\u0302\u0308]*)ȳ(?!\u0308)/g, "ȳ̈")
+                            //Remove dieresis over other vowels
+                            .replaceAll(/(?<=(a|ā|e|ē|o|ō))\u0308/g, "");
+                        wordArg = wordArg.replaceAll(/.\u0304/g, match => match.normalize("NFC"));
+                        break;
+                    case "Lat":
+                        wordArg = wordArg.normalize("NFD").replaceAll("\u0306", "").normalize("NFC") //Remove breves
+                            .replaceAll("k", "c").replaceAll("j", "i").replace(/^w/, "gu")
+                            .replaceAll(/(?<=[eouyāēīōūȳ])u(?=[aeiouyāēīōūȳ])/g, "v");
+                        break;
+                    case "San":
+                        wordArg = wordArg.replaceAll("ē", "e")
+                            .replaceAll("ō", "o")
+                            .replaceAll("r̥", "ṛ")
+                            .replaceAll("l̥", "ḷ")
+                            .replaceAll("ṁ", "ṃ")
+                            .replaceAll(/(?<=j)n/g, "ñ");
+                        wordArg = wordArg.normalize("NFD");
+                        //Remove all accents
+                        wordArg = wordArg.replaceAll(/(?<!s)\u0301/g, "")
+                            .replaceAll("\u0300", "")
+                            .replaceAll("\u0951", "")
+                            .replaceAll("\u0952", "");
+                        //Convert Devanagari input to Latin script
+                        wordArg = wordArg.replaceAll("अ", "a")
+                            .replaceAll(/आ|\u093E/g, "ā")
+                            .replaceAll(/इ|\u093F/g, "i")
+                            .replaceAll(/ई|\u0940/g, "ī")
+                            .replaceAll(/उ|\u0941/g, "u")
+                            .replaceAll(/ऊ|\u0942/g, "ū")
+                            .replaceAll(/ऋ|\u0943/g, "ṛ")
+                            .replaceAll(/ॠ|\u0944/g, "ṝ")
+                            .replaceAll(/ए|\u0947/g, "e")
+                            .replaceAll(/ऐ|\u0948/g, "ai")
+                            .replaceAll(/ओ|\u094B/g, "o")
+                            .replaceAll(/औ|\u094C/g, "au")
+                            .replaceAll(/ऌ|\u0962/g, "ḷ")
+                            .replaceAll(/\u0902/g, "ṃ")
+                            .replaceAll(/\u0903/g, "ḥ");
+                        let consMap = {
+                            "क": "k",
+                            "ख": "kh",
+                            "ग": "g",
+                            "घ": "gh",
+                            "ङ": "ṅ",
+                            "च": "c",
+                            "छ": "ch",
+                            "ज": "j",
+                            "झ": "jh",
+                            "ञ": "ñ",
+                            "ट": "ṭ",
+                            "ठ": "ṭh",
+                            "ड": "ḍ",
+                            "ढ": "ḍh",
+                            "ण": "ṇ",
+                            "त": "t",
+                            "थ": "th",
+                            "द": "d",
+                            "ध": "dh",
+                            "न": "n",
+                            "प": "p",
+                            "फ": "ph",
+                            "ब": "b",
+                            "भ": "bh",
+                            "म": "m",
+                            "य": "y",
+                            "र": "r",
+                            "ल": "l",
+                            "व": "v",
+                            "श": "ś",
+                            "ष": "ṣ",
+                            "स": "s",
+                            "ह": "h",
+                        };
+                        for (let cons in consMap) {
+                            let lat = consMap[cons];
+                            let noInherent = new RegExp(cons + "(?!(a|e|i|o|u|ṛ|ḷ|\u094D))", "g");
+                            wordArg = wordArg.replaceAll(noInherent, lat + "a").replaceAll(cons, lat);
+                        }
+                        wordArg = wordArg.replaceAll("\u094D", "");
+                        wordArg = wordArg.normalize("NFC");
+                        break;
+                    case "OE":
+                        wordArg = wordArg.replaceAll("ð", "þ").replaceAll("ƿ", "w").replaceAll("k", "c"); //Alternative spellings
+                        wordArg = wordArg.replaceAll("io", "eo").replaceAll("īo", "ēo").replaceAll("oe", "e").replaceAll("ōe", "ē").replaceAll("œ̄", "ē").replaceAll("œ", "e"); //Dialectal vowels
+                        break;
+                    case "PG":
+                        wordArg = wordArg.normalize("NFD")
+                            .replaceAll("\u0304\u0304", "\u0302") //Double macrons become circumflexes
+                            .replaceAll("\u0303", "\u0328") //Replace tildes with ogoneks
+                            .normalize("NFC")
+                            .replaceAll("y", "j")
+                            .replaceAll("x", "h")
+                            .replaceAll("æ", "ē")
+                            .replaceAll("ǣ", "ē")
+                            .replaceAll("ē₁", "ē")
+                            .replaceAll("ē¹", "ē")
+                            .replaceAll("ē²", "ē₂")
+                            .replaceAll("ƀ", "b")
+                            .replaceAll(/[đð]/g, "d")
+                            .replaceAll("ǥ", "g");
+                        break;
+                }
+
+                params.set("word", wordArg);
+                window.history.replaceState({}, "", "?" + params);
+
+                if (!document.getElementById("word").value)
+                    document.getElementById("word").value = wordArg;
+            }
+
+            document.getElementById("word").oninput();
+
+            let name;
+            let descendants;
+            let defaultId;
             switch (from) {
                 case "AttGr":
-                    wordArg = wordArg.normalize("NFD");
-                    wordArg = wordArg.replaceAll("\u0306", "") //Breve
-                        .replaceAll("\u0313", "") //Smooth breathing
-                        .replaceAll("\u0342", "\u0302") //Replace Greek circumflex with Latin form
-                        .replaceAll("\u0300", "\u0301") //Replace grave accent with accute
-                        .replaceAll(/([\u0301\u0302])\u0345/g, "\u0345$1") //Switch order of accents and iota subscript
-                        .replaceAll(/\u0345/g, "\u0304\u0345") //Lengthen vowels with iota subscript
-                        .replaceAll("\u0345", "i"); //Iota subscript
-                    //Rough breathing
-                    wordArg = wordArg.replaceAll("ῥ", "rh")
-                        .replaceAll("ἁ", "ha")
-                        .replaceAll("ᾱ̔", "hā")
-                        .replaceAll("ἑ", "he")
-                        .replaceAll("ἡ", "hē")
-                        .replaceAll("ὁ", "ho")
-                        .replaceAll("ὡ", "hō");
-                    if (wordArg.includes("\u0314"))
-                        wordArg = "h" + wordArg;
-                    wordArg = wordArg.replaceAll("\u0314", "");
-                    //Convert Greek input to Latin script
-                    wordArg = wordArg.replaceAll("α", "a")
-                        .replaceAll("β", "b")
-                        .replaceAll("γ", "g")
-                        .replaceAll("δ", "d")
-                        .replaceAll("ε", "e")
-                        .replaceAll("ζ", "z")
-                        .replaceAll("η", "ē")
-                        .replaceAll("θ", "th")
-                        .replaceAll("ι", "i")
-                        .replaceAll("κ", "k")
-                        .replaceAll("λ", "l")
-                        .replaceAll("μ", "m")
-                        .replaceAll("ν", "n")
-                        .replaceAll("ξ", "x")
-                        .replaceAll("ο", "o")
-                        .replaceAll("π", "p")
-                        .replaceAll("ρ", "r")
-                        .replaceAll("σ", "s")
-                        .replaceAll("ς", "s")
-                        .replaceAll("τ", "t")
-                        .replaceAll("υ", "y")
-                        .replaceAll("φ", "ph")
-                        .replaceAll("χ", "ch")
-                        .replaceAll("ψ", "ps")
-                        .replaceAll("ω", "ō");
-                    wordArg = wordArg.replaceAll("c", "k")
-                        //Dieresis comes before accents
-                        .replaceAll(/\u0301\u0308/g, "\u0308\u0301")
-                        .replaceAll(/\u0302\u0308/g, "\u0308\u0302")
-                        //Other spelling changes
-                        .replaceAll("kh", "ch")
-                        .replaceAll("u", "y")
-                        .replaceAll("\u0304\u0304", "\u0304")
-                        .replaceAll(/(?<=(a|ā|e|ē|o))y(?![\u0308\u0304])/g, "u")
-                        .replaceAll(/g(?=[gkcx])/g, "n")
-                        .replaceAll(/rr(?!h)/g, "rrh")
-                        .replaceAll(/chch/g, "kch")
-                        .replaceAll(/phph/g, "pph")
-                        .replaceAll(/thth/g, "tth")
-                        .replaceAll(/rhrh/g, "rrh")
-                        //Remove redundant macron before circumflex
-                        .replaceAll(/\u0304(?=\u0308?\u0302)/g, "")
-                        //Add dieresis over "i" and "y" in certain cases
-                        .replaceAll(/(?<=[\u0301\u0302])i(?![\u0308\u0304])/g, "ï")
-                        .replaceAll(/(?<=[aeoy][\u0304\u0301\u0302\u0308]*)ī(?!\u0308)/g, "ī̈")
-                        .replaceAll(/(?<=[aeo][\u0304\u0301\u0302\u0308]*)y(?![\u0308\u0304])/g, "ÿ")
-                        .replaceAll(/(?<=[aeo][\u0304\u0301\u0302\u0308]*)ȳ(?!\u0308)/g, "ȳ̈")
-                        //Remove dieresis over other vowels
-                        .replaceAll(/(?<=(a|ā|e|ē|o|ō))\u0308/g, "");
-                    wordArg = wordArg.replaceAll(/.\u0304/g, match => match.normalize("NFC"));
+                    name = "Ancient Greek";
+                    descendants = {ModGr: "Modern Greek"};
+                    defaultId = "ModGr";
                     break;
                 case "Lat":
-                    wordArg = wordArg.normalize("NFD").replaceAll("\u0306", "").normalize("NFC") //Remove breves
-                        .replaceAll("k", "c").replaceAll("j", "i").replace(/^w/, "gu")
-                        .replaceAll(/(?<=[eouyāēīōūȳ])u(?=[aeiouyāēīōūȳ])/g, "v");
+                    name = "Classical Latin";
+                    descendants = {ModF: "Modern French", ModIt: "Modern Italian", ModPort: "Modern Portuguese", ModRom: "Modern Romanian", ModSp: "Modern Spanish"};
+                    defaultId = "ModSp";
                     break;
                 case "San":
-                    wordArg = wordArg.replaceAll("ē", "e")
-                        .replaceAll("ō", "o")
-                        .replaceAll("r̥", "ṛ")
-                        .replaceAll("l̥", "ḷ")
-                        .replaceAll("ṁ", "ṃ")
-                        .replaceAll(/(?<=j)n/g, "ñ");
-                    wordArg = wordArg.normalize("NFD");
-                    //Remove all accents
-                    wordArg = wordArg.replaceAll(/(?<!s)\u0301/g, "")
-                        .replaceAll("\u0300", "")
-                        .replaceAll("\u0951", "")
-                        .replaceAll("\u0952", "");
-                    //Convert Devanagari input to Latin script
-                    wordArg = wordArg.replaceAll("अ", "a")
-                        .replaceAll(/आ|\u093E/g, "ā")
-                        .replaceAll(/इ|\u093F/g, "i")
-                        .replaceAll(/ई|\u0940/g, "ī")
-                        .replaceAll(/उ|\u0941/g, "u")
-                        .replaceAll(/ऊ|\u0942/g, "ū")
-                        .replaceAll(/ऋ|\u0943/g, "ṛ")
-                        .replaceAll(/ॠ|\u0944/g, "ṝ")
-                        .replaceAll(/ए|\u0947/g, "e")
-                        .replaceAll(/ऐ|\u0948/g, "ai")
-                        .replaceAll(/ओ|\u094B/g, "o")
-                        .replaceAll(/औ|\u094C/g, "au")
-                        .replaceAll(/ऌ|\u0962/g, "ḷ")
-                        .replaceAll(/\u0902/g, "ṃ")
-                        .replaceAll(/\u0903/g, "ḥ");
-                    let consMap = {
-                        "क": "k",
-                        "ख": "kh",
-                        "ग": "g",
-                        "घ": "gh",
-                        "ङ": "ṅ",
-                        "च": "c",
-                        "छ": "ch",
-                        "ज": "j",
-                        "झ": "jh",
-                        "ञ": "ñ",
-                        "ट": "ṭ",
-                        "ठ": "ṭh",
-                        "ड": "ḍ",
-                        "ढ": "ḍh",
-                        "ण": "ṇ",
-                        "त": "t",
-                        "थ": "th",
-                        "द": "d",
-                        "ध": "dh",
-                        "न": "n",
-                        "प": "p",
-                        "फ": "ph",
-                        "ब": "b",
-                        "भ": "bh",
-                        "म": "m",
-                        "य": "y",
-                        "र": "r",
-                        "ल": "l",
-                        "व": "v",
-                        "श": "ś",
-                        "ष": "ṣ",
-                        "स": "s",
-                        "ह": "h",
-                    };
-                    for (let cons in consMap) {
-                        let lat = consMap[cons];
-                        let noInherent = new RegExp(cons + "(?!(a|e|i|o|u|ṛ|ḷ|\u094D))", "g");
-                        wordArg = wordArg.replaceAll(noInherent, lat + "a").replaceAll(cons, lat);
-                    }
-                    wordArg = wordArg.replaceAll("\u094D", "");
-                    wordArg = wordArg.normalize("NFC");
+                    name = "Classical Sanskrit";
+                    descendants = {ModH: "Modern Hindi", ModUr: "Modern Urdu"};
+                    defaultId = "ModH";
                     break;
                 case "OE":
-                    wordArg = wordArg.replaceAll("ð", "þ").replaceAll("ƿ", "w").replaceAll("k", "c"); //Alternative spellings
-                    wordArg = wordArg.replaceAll("io", "eo").replaceAll("īo", "ēo").replaceAll("oe", "e").replaceAll("ōe", "ē").replaceAll("œ̄", "ē").replaceAll("œ", "e"); //Dialectal vowels
+                    name = "Old English";
+                    descendants = {ModE: "Modern English", ModSc: "Modern Scots"};
+                    defaultId = "ModE";
                     break;
                 case "PG":
-                    wordArg = wordArg.normalize("NFD")
-                        .replaceAll("\u0304\u0304", "\u0302") //Double macrons become circumflexes
-                        .replaceAll("\u0303", "\u0328") //Replace tildes with ogoneks
-                        .normalize("NFC")
-                        .replaceAll("y", "j")
-                        .replaceAll("x", "h")
-                        .replaceAll("æ", "ē")
-                        .replaceAll("ǣ", "ē")
-                        .replaceAll("ē₁", "ē")
-                        .replaceAll("ē¹", "ē")
-                        .replaceAll("ē²", "ē₂")
-                        .replaceAll("ƀ", "b")
-                        .replaceAll(/[đð]/g, "d")
-                        .replaceAll("ǥ", "g");
+                    name = "Proto-Germanic";
+                    descendants = {ModE: "Modern English", ModG: "Modern German", ModSc: "Modern Scots"};
+                    defaultId = "ModE";
                     break;
             }
 
-            params.set("word", wordArg);
-            window.history.replaceState({}, "", "?" + params);
+            document.getElementById("to").innerHTML = "";
+            for (let id in descendants) {
+                let option = document.createElement("option");
+                option.value = id;
+                option.innerHTML = descendants[id];
+                document.getElementById("to").append(option);
+            }
+            if (!descendants[to])
+                to = defaultId;
 
-            if (!document.getElementById("word").value)
-                document.getElementById("word").value = wordArg;
-        }
+            document.getElementById("from").value = from;
+            document.getElementById("to").value = to;
 
-        document.getElementById("word").oninput();
+            document.getElementById("asterisk").style.display = (from == "PG") ? "inline" : "none";
 
-        let name;
-        let descendants;
-        let defaultId;
-        switch (from) {
-            case "AttGr":
-                name = "Ancient Greek";
-                descendants = {ModGr: "Modern Greek"};
-                defaultId = "ModGr";
-                break;
-            case "Lat":
-                name = "Classical Latin";
-                descendants = {ModF: "Modern French", ModIt: "Modern Italian", ModPort: "Modern Portuguese", ModRom: "Modern Romanian", ModSp: "Modern Spanish"};
-                defaultId = "ModSp";
-                break;
-            case "San":
-                name = "Classical Sanskrit";
-                descendants = {ModH: "Modern Hindi", ModUr: "Modern Urdu"};
-                defaultId = "ModH";
-                break;
-            case "OE":
-                name = "Old English";
-                descendants = {ModE: "Modern English", ModSc: "Modern Scots"};
-                defaultId = "ModE";
-                break;
-            case "PG":
-                name = "Proto-Germanic";
-                descendants = {ModE: "Modern English", ModG: "Modern German", ModSc: "Modern Scots"};
-                defaultId = "ModE";
-                break;
-        }
+            document.getElementById("word").placeholder = `Enter ${name} word`;
 
-        document.getElementById("to").innerHTML = "";
-        for (let id in descendants) {
-            let option = document.createElement("option");
-            option.value = id;
-            option.innerHTML = descendants[id];
-            document.getElementById("to").append(option);
-        }
-        if (!descendants[to])
-            to = defaultId;
-
-        document.getElementById("from").value = from;
-        document.getElementById("to").value = to;
-
-        document.getElementById("asterisk").style.display = (from == "PG") ? "inline" : "none";
-
-        document.getElementById("word").placeholder = `Enter ${name} word`;
-
-        let specialChars;
-        switch (from) {
-            case "AttGr":
-                specialChars = ["ā", "ē", "ī", "ō", "ȳ", "´", "^", "¨"];
-                break;
-            case "Lat":
-                specialChars = ["ā", "ē", "ī", "ō", "ū", "ȳ"];
-                break;
-            case "San":
-                specialChars = ["ḍ", "ḥ", "ṃ", "ṇ", "ñ", "ṅ", "ṣ", "ś", "ṭ", "ḷ", "ṛ", "ā", "ī", "ū", "ṝ"];
-                break;
-            case "OE":
-                specialChars = ["ċ", "ġ", "þ", "æ", "ā", "ē", "ī", "ō", "ū", "ȳ", "ǣ"];
-                break;
-            case "PG":
-                specialChars = ["þ", "ā", "ą", "ą̄", "ē", "ē₂", "ê", "ī", "į", "į̄", "ō", "ô", "ǭ", "ǫ̂", "ū", "ų", "ų̄"];
-                break;
-        }
-        document.getElementById("buttons").innerHTML = "";
-        specialChars.forEach(char => {
-            let inputChar;
-            switch (char) {
-                case "´":
-                    inputChar = "\u0301";
+            let specialChars;
+            switch (from) {
+                case "AttGr":
+                    specialChars = ["ā", "ē", "ī", "ō", "ȳ", "´", "^", "¨"];
                     break;
-                case "^":
-                    inputChar = "\u0302";
+                case "Lat":
+                    specialChars = ["ā", "ē", "ī", "ō", "ū", "ȳ"];
                     break;
-                case "¨":
-                    inputChar = "\u0308";
+                case "San":
+                    specialChars = ["ḍ", "ḥ", "ṃ", "ṇ", "ñ", "ṅ", "ṣ", "ś", "ṭ", "ḷ", "ṛ", "ā", "ī", "ū", "ṝ"];
                     break;
-                default:
-                    inputChar = char;
+                case "OE":
+                    specialChars = ["ċ", "ġ", "þ", "æ", "ā", "ē", "ī", "ō", "ū", "ȳ", "ǣ"];
+                    break;
+                case "PG":
+                    specialChars = ["þ", "ā", "ą", "ą̄", "ē", "ē₂", "ê", "ī", "į", "į̄", "ō", "ô", "ǭ", "ǫ̂", "ū", "ų", "ų̄"];
+                    break;
+            }
+            document.getElementById("buttons").innerHTML = "";
+            specialChars.forEach(char => {
+                let inputChar;
+                switch (char) {
+                    case "´":
+                        inputChar = "\u0301";
+                        break;
+                    case "^":
+                        inputChar = "\u0302";
+                        break;
+                    case "¨":
+                        inputChar = "\u0308";
+                        break;
+                    default:
+                        inputChar = char;
+                }
+
+                let button = document.createElement("input");
+                button.value = char;
+                button.type = "button";
+                button.onclick = () => {
+                    let wordInput = document.getElementById("word");
+                    wordInput.setRangeText(inputChar, wordInput.selectionStart, wordInput.selectionEnd, "end");
+                    wordInput.oninput();
+                    wordInput.focus();
+                };
+                document.getElementById("buttons").append(button);
+            });
+
+            if (from == "AttGr") {
+                document.getElementById("inputNote").innerHTML = "Note: Latin- and Greek-script inputs are both accepted.";
+                document.getElementById("inputNote").style.display = "";
+            } else if (from == "San") {
+                document.getElementById("inputNote").innerHTML = "Note: Latin-script and Devanagari inputs are both accepted.";
+                document.getElementById("inputNote").style.display = "";
+            } else {
+                document.getElementById("inputNote").innerHTML = "";
+                document.getElementById("inputNote").style.display = "none";
             }
 
-            let button = document.createElement("input");
-            button.value = char;
-            button.type = "button";
-            button.onclick = () => {
-                let wordInput = document.getElementById("word");
-                wordInput.setRangeText(inputChar, wordInput.selectionStart, wordInput.selectionEnd, "end");
-                wordInput.oninput();
-                wordInput.focus();
-            };
-            document.getElementById("buttons").append(button);
-        });
+            if (!Array.from(document.getElementById("stress").options).some(option => option.value == stressArg))
+                stressArg = "1";
 
-        if (from == "AttGr") {
-            document.getElementById("inputNote").innerHTML = "Note: Latin- and Greek-script inputs are both accepted.";
-            document.getElementById("inputNote").style.display = "";
-        } else if (from == "San") {
-            document.getElementById("inputNote").innerHTML = "Note: Latin-script and Devanagari inputs are both accepted.";
-            document.getElementById("inputNote").style.display = "";
-        } else {
-            document.getElementById("inputNote").innerHTML = "";
-            document.getElementById("inputNote").style.display = "none";
-        }
+            if (from == "OE" || from == "PG") {
+                document.getElementById("stressContainer").style.display = "";
+                document.getElementById("stress").value = stressArg;
+            } else {
+                document.getElementById("stressContainer").style.display = "none";
+                document.getElementById("stress").value = "";
+            }
 
-        if (!Array.from(document.getElementById("stress").options).some(option => option.value == stressArg))
-            stressArg = "1";
-
-        if (from == "OE" || from == "PG") {
-            document.getElementById("stressContainer").style.display = "";
-            document.getElementById("stress").value = stressArg;
-        } else {
-            document.getElementById("stressContainer").style.display = "none";
-            document.getElementById("stress").value = "";
-        }
-
-        switch (from) {
-            case "AttGr":
-                document.getElementById("pos").innerHTML = `
+            switch (from) {
+                case "AttGr":
+                    document.getElementById("pos").innerHTML = `
                     <option value="noun" selected>Noun</option>
                     <option value="verb">Verb</option>
                     <option value="other">Other</option>
             `;
-                break;
-            case "Lat":
-                document.getElementById("pos").innerHTML = `
+                    break;
+                case "Lat":
+                    document.getElementById("pos").innerHTML = `
                     <option value="noun" selected>Noun</option>
                     <option value="inf">Infinitive verb</option>
                     <option value="conjVerb">Conjugated verb</option>
                     <option value="other">Other</option>
             `;
-                break;
-            case "San":
-                document.getElementById("pos").innerHTML = `
+                    break;
+                case "San":
+                    document.getElementById("pos").innerHTML = `
                     <option value="noun" selected>Noun/adjective</option>
                     <option value="other">Other</option>
             `;
-                break;
-            case "OE":
-            case "PG":
-                document.getElementById("pos").innerHTML = `
+                    break;
+                case "OE":
+                case "PG":
+                    document.getElementById("pos").innerHTML = `
                     <option value="noun" selected>Noun</option>
                     <option value="inf">Infinitive verb</option>
                     <option value="conjVerb">Conjugated verb</option>
                     <option value="pastPtcp">Past participle</option>
                     <option value="other">Other</option>
             `;
-                break;
+                    break;
+            }
+
+            if (Array.from(document.getElementById("pos").options).some(option => option.value == partOfSpeech))
+                document.getElementById("pos").value = partOfSpeech;
+            else if (partOfSpeech)
+                partOfSpeech = "other";
+
+            document.getElementById("to").onchange();
+
+            document.getElementById("table").classList.add("from_" + from);
+            document.getElementById("table").classList.add("to_" + to);
+
+            document.getElementById("input").style.display = "block";
+
+            if (!document.getElementById("word").value)
+                document.getElementById("word").focus();
         }
 
-        if (Array.from(document.getElementById("pos").options).some(option => option.value == partOfSpeech))
-            document.getElementById("pos").value = partOfSpeech;
-        else if (partOfSpeech)
-            partOfSpeech = "other";
+        document.getElementById("from").onchange = () => {
+            from = document.getElementById("from").value;
+            if (from == (params.get("from") || "OE"))
+                partOfSpeech = params.get("pos");
+            else
+                partOfSpeech = "";
+            init();
+        };
 
-        document.getElementById("to").onchange();
-
-        document.getElementById("table").classList.add("from_" + from);
-        document.getElementById("table").classList.add("to_" + to);
-
-        document.getElementById("input").style.display = "block";
-
-        if (!document.getElementById("word").value)
-            document.getElementById("word").focus();
-    }
-
-    document.getElementById("from").onchange = () => {
-        from = document.getElementById("from").value;
-        if (from == (params.get("from") || "OE"))
-            partOfSpeech = params.get("pos");
-        else
-            partOfSpeech = "";
-        init();
-    };
-
-    function tableSetup() {
-        document.getElementById("checkboxes").innerHTML = `
+        function tableSetup() {
+            document.getElementById("checkboxes").innerHTML = `
             <label><input type="checkbox" id="expandChk">Show expanded table</label>
             <label><input type="checkbox" id="modernChk">Use modern typography</label>
         `;
 
-        document.getElementById("expandChk").onclick = function () {
-            localStorage.setItem("ev-expand", this.checked);
-            document.getElementById("outcomes").classList.toggle("expanded");
-        };
-
-        document.getElementById("modernChk").onclick = function () {
-            localStorage.setItem("ev-modernTypography", this.checked);
-            document.getElementById("outcomes").classList.toggle("modernTypography");
-            modernTypography = this.checked;
-
-            from = localStorage.getItem("ev-from");
-            to = localStorage.getItem("ev-to");
-            partOfSpeech = word.partOfSpeech;
-            gender = word.gender;
-            getOutcomes();
-        };
-
-        if (!localStorage.getItem("ev-expand"))
-            localStorage.setItem("ev-expand", "true");
-
-        if (localStorage.getItem("ev-expand") == "true") {
-            document.getElementById("expandChk").checked = true;
-            document.getElementById("outcomes").classList.add("expanded");
-        }
-
-        if (localStorage.getItem("ev-modernTypography") == "true") {
-            document.getElementById("modernChk").checked = true;
-            document.getElementById("outcomes").classList.toggle("modernTypography");
-            modernTypography = true;
-        }
-    }
-
-    function addRow(id, name, date, spelling, word, hidden) {
-        document.getElementById(id)?.remove();
-
-        let row = document.getElementById("table").insertRow(-1);
-        row.id = id;
-        row.innerHTML =
-            `<td>${name}</td> <td>${date ? "c. " + date : "—"}</td> <td class="spelling">${spelling || "—"}</td> <td>[${word}]</td>`;
-        if (hidden)
-            row.classList.add("hidden");
-
-        word.forEach(segment => segment[id + "Value"] = segment.value);
-        outcomes[id] = word.duplicate();
-    }
-
-    function getOutcomes() {
-        word = new Word();
-        word.partOfSpeech = partOfSpeech;
-        word.gender = gender;
-
-        localStorage.setItem("ev-from", from);
-        localStorage.setItem("ev-to", to);
-
-        try {
-            switch (from) {
-                case "AttGr":
-                    getIPA_AttGr();
-                    AttGr_to_ModGr();
-                    break;
-                case "Lat":
-                    getIPA_Lat();
-                    Lat_to_LL();
-                    switch (to) {
-                        case "ModF":
-                            LL_to_WR("french");
-                            WR_to_EOF();
-                            EOF_to_LOF();
-                            LOF_to_MF();
-                            MF_to_ModF();
-                            break;
-                        case "ModIt":
-                            LL_to_ModIt("spanish");
-                            break;
-                        case "ModPort":
-                            LL_to_WR("portuguese");
-                            WR_to_IR();
-                            IR_to_OGP();
-                            OGP_to_ModPort();
-                            ModPort_to_Port();
-                            ModPort_to_Br();
-                            break;
-                        case "ModRom":
-                            LL_to_CRom();
-                            CRom_to_ModRom();
-                            break;
-                        case "ModSp":
-                            LL_to_WR("spanish");
-                            WR_to_IR();
-                            IR_to_OSp();
-                            OSp_to_ModSp();
-                            break;
-                    }
-                    break;
-                case "San":
-                    getIPA_San();
-                    San_to_EPr();
-                    EPr_to_Apa();
-                    Apa_to_OH((to == "ModUr") ? "urdu" : "hindi");
-                    OH_to_ModH((to == "ModUr") ? "urdu" : "hindi");
-                    break;
-                case "OE":
-                    getIPA_OE();
-                    switch (to) {
-                        case "ModE":
-                            OE_to_EME();
-                            EME_to_LME();
-                            LME_to_EModE();
-                            EModE_to_ModE();
-                            ModE_to_UK();
-                            ModE_to_US();
-                            UK_to_AU();
-                            break;
-                        case "ModSc":
-                            OE_to_EME("northumbrian");
-                            EME_to_LME("scots");
-                            LME_to_EModE("scots");
-                            EModE_to_ModE("scots");
-                            ModE_to_ModSc();
-                            break;
-                    }
-                    break;
-                case "PG":
-                    getIPA_PG();
-                    switch (to) {
-                        case "ModE":
-                            PG_to_PWG();
-                            PWG_to_EOE();
-                            EOE_to_OE();
-                            OE_to_EME();
-                            EME_to_LME();
-                            LME_to_EModE();
-                            EModE_to_ModE();
-                            ModE_to_UK();
-                            ModE_to_US();
-                            UK_to_AU();
-                            break;
-                        case "ModG":
-                            PG_to_PWG();
-                            PWG_to_OHG();
-                            OHG_to_MHG();
-                            MHG_to_ModG();
-                            break;
-                        case "ModSc":
-                            PG_to_PWG();
-                            PWG_to_EOE();
-                            EOE_to_OE();
-                            OE_to_EME("northumbrian");
-                            EME_to_LME("scots");
-                            LME_to_EModE("scots");
-                            EModE_to_ModE("scots");
-                            ModE_to_ModSc();
-                            break;
-                    }
-                    break;
-            }
-
-            document.getElementById("outcomes").style.display = "block";
-        } catch (err) {
-            console.error(err);
-            alert((typeof err == "string") ? err : "Error: invalid word");
-        }
-    }
-
-    document.getElementById("wordLabel").onclick = () => document.getElementById("word").select();
-
-    document.getElementById("word").onmousedown = function () {
-        if (this == document.activeElement)
-            this.onclick = null;
-        else {
-            this.onclick = () => {
-                if (!window.getSelection().toString())
-                    this.select();
+            document.getElementById("expandChk").onclick = function () {
+                localStorage.setItem("ev-expand", this.checked);
+                document.getElementById("outcomes").classList.toggle("expanded");
             };
-        }
-    };
-    document.getElementById("word").ontouchstart = document.getElementById("word").onmousedown;
 
-    document.getElementById("word").oninput = function () {
-        if (from == "OE" || from == "PG") {
-            let vowels;
-            if (from == "OE")
-                vowels = ["a", "ā", "e", "ē", "i", "ī", "o", "ō", "u", "ū", "y", "ȳ", "æ", "ǣ",
-                    "ea", "ēa", "eo", "ēo", "ie", "īe", "io", "īo", "oe", "ōe", "œ", "œ̄"];
-            else if (from == "PG")
-                vowels = ["a", "ā", "ą", "ą̄", "ai", "au", "e", "ē", "ē₂", "ê", "ēi", "eu", "ēu", "i", "ī", "į", "į̄", "iu", "ō", "ô", "ǭ", "ǫ̂", "ōi", "ōu", "u", "ū", "ų", "ų̄"];
-            let numVowels = 0;
-            for (let i = 0; i < this.value.length; i++) {
-                if (vowels.includes(this.value[i] + this.value[i + 1])) {
-                    numVowels++;
-                    i++;
+            document.getElementById("modernChk").onclick = function () {
+                localStorage.setItem("ev-modernTypography", this.checked);
+                document.getElementById("outcomes").classList.toggle("modernTypography");
+                modernTypography = this.checked;
+
+                from = localStorage.getItem("ev-from");
+                to = localStorage.getItem("ev-to");
+                partOfSpeech = word.partOfSpeech;
+                gender = word.gender;
+                getOutcomes();
+            };
+
+            if (!localStorage.getItem("ev-expand"))
+                localStorage.setItem("ev-expand", "true");
+
+            if (localStorage.getItem("ev-expand") == "true") {
+                document.getElementById("expandChk").checked = true;
+                document.getElementById("outcomes").classList.add("expanded");
+            }
+
+            if (localStorage.getItem("ev-modernTypography") == "true") {
+                document.getElementById("modernChk").checked = true;
+                document.getElementById("outcomes").classList.toggle("modernTypography");
+                modernTypography = true;
+            }
+        }
+
+        function addRow(id, name, date, spelling, word, hidden) {
+            document.getElementById(id)?.remove();
+
+            let row = document.getElementById("table").insertRow(-1);
+            row.id = id;
+            row.innerHTML =
+                `<td>${name}</td> <td>${date ? "c. " + date : "—"}</td> <td class="spelling">${spelling || "—"}</td> <td>[${word}]</td>`;
+            if (hidden)
+                row.classList.add("hidden");
+
+            word.forEach(segment => segment[id + "Value"] = segment.value);
+            outcomes[id] = word.duplicate();
+        }
+
+        function getOutcomes() {
+            word = new Word();
+            word.partOfSpeech = partOfSpeech;
+            word.gender = gender;
+
+            localStorage.setItem("ev-from", from);
+            localStorage.setItem("ev-to", to);
+
+            try {
+                switch (from) {
+                    case "AttGr":
+                        getIPA_AttGr();
+                        AttGr_to_ModGr();
+                        break;
+                    case "Lat":
+                        getIPA_Lat();
+                        Lat_to_LL();
+                        switch (to) {
+                            case "ModF":
+                                LL_to_WR("french");
+                                WR_to_EOF();
+                                EOF_to_LOF();
+                                LOF_to_MF();
+                                MF_to_ModF();
+                                break;
+                            case "ModIt":
+                                LL_to_ModIt("spanish");
+                                break;
+                            case "ModPort":
+                                LL_to_WR("portuguese");
+                                WR_to_IR();
+                                IR_to_OGP();
+                                OGP_to_ModPort();
+                                ModPort_to_Port();
+                                ModPort_to_Br();
+                                break;
+                            case "ModRom":
+                                LL_to_CRom();
+                                CRom_to_ModRom();
+                                break;
+                            case "ModSp":
+                                LL_to_WR("spanish");
+                                WR_to_IR();
+                                IR_to_OSp();
+                                OSp_to_ModSp();
+                                break;
+                        }
+                        break;
+                    case "San":
+                        getIPA_San();
+                        San_to_EPr();
+                        EPr_to_Apa();
+                        Apa_to_OH((to == "ModUr") ? "urdu" : "hindi");
+                        OH_to_ModH((to == "ModUr") ? "urdu" : "hindi");
+                        break;
+                    case "OE":
+                        getIPA_OE();
+                        switch (to) {
+                            case "ModE":
+                                OE_to_EME();
+                                EME_to_LME();
+                                LME_to_EModE();
+                                EModE_to_ModE();
+                                ModE_to_UK();
+                                ModE_to_US();
+                                UK_to_AU();
+                                break;
+                            case "ModSc":
+                                OE_to_EME("northumbrian");
+                                EME_to_LME("scots");
+                                LME_to_EModE("scots");
+                                EModE_to_ModE("scots");
+                                ModE_to_ModSc();
+                                break;
+                        }
+                        break;
+                    case "PG":
+                        getIPA_PG();
+                        switch (to) {
+                            case "ModE":
+                                PG_to_PWG();
+                                PWG_to_EOE();
+                                EOE_to_OE();
+                                OE_to_EME();
+                                EME_to_LME();
+                                LME_to_EModE();
+                                EModE_to_ModE();
+                                ModE_to_UK();
+                                ModE_to_US();
+                                UK_to_AU();
+                                break;
+                            case "ModG":
+                                PG_to_PWG();
+                                PWG_to_OHG();
+                                OHG_to_MHG();
+                                MHG_to_ModG();
+                                break;
+                            case "ModSc":
+                                PG_to_PWG();
+                                PWG_to_EOE();
+                                EOE_to_OE();
+                                OE_to_EME("northumbrian");
+                                EME_to_LME("scots");
+                                LME_to_EModE("scots");
+                                EModE_to_ModE("scots");
+                                ModE_to_ModSc();
+                                break;
+                        }
+                        break;
                 }
-                else if (vowels.includes(this.value[i]))
-                    numVowels++;
-            }
-            let stressValue = document.getElementById("stress").value;
-            document.getElementById("stress").innerHTML = "";
-            for (let i = 0; i < Math.max(numVowels, 1); i++) {
-                let option = document.createElement("option");
-                option.innerHTML = i + 1;
-                if (i == stressValue - 1)
-                    option.selected = true;
-                document.getElementById("stress").append(option);
+
+                document.getElementById("outcomes").style.display = "block";
+            } catch (err) {
+                console.error(err);
+                alert((typeof err == "string") ? err : "Error: invalid word");
             }
         }
-    };
 
-    document.getElementById("pos").onchange = () => {
-        if (from == "PG" && document.getElementById("to").value == "ModG" && document.getElementById("pos").value == "noun") {
-            document.getElementById("genderContainer").style.display = "";
-            document.getElementById("gender").value = (gender == "f") ? "f" : "mn";
-        } else {
-            document.getElementById("genderContainer").style.display = "none";
-            document.getElementById("gender").value = "";
-        }
-    };
+        document.getElementById("wordLabel").onclick = () => document.getElementById("word").select();
 
-    document.getElementById("to").onchange = () => {
-        if (from == "PG")
-            if (document.getElementById("to").value == "ModG") {
-                document.getElementById("pos").innerHTML = `
+        document.getElementById("word").onmousedown = function () {
+            if (this == document.activeElement)
+                this.onclick = null;
+            else {
+                this.onclick = () => {
+                    if (!window.getSelection().toString())
+                        this.select();
+                };
+            }
+        };
+        document.getElementById("word").ontouchstart = document.getElementById("word").onmousedown;
+
+        document.getElementById("word").oninput = function () {
+            if (from == "OE" || from == "PG") {
+                let vowels;
+                if (from == "OE")
+                    vowels = ["a", "ā", "e", "ē", "i", "ī", "o", "ō", "u", "ū", "y", "ȳ", "æ", "ǣ",
+                        "ea", "ēa", "eo", "ēo", "ie", "īe", "io", "īo", "oe", "ōe", "œ", "œ̄"];
+                else if (from == "PG")
+                    vowels = ["a", "ā", "ą", "ą̄", "ai", "au", "e", "ē", "ē₂", "ê", "ēi", "eu", "ēu", "i", "ī", "į", "į̄", "iu", "ō", "ô", "ǭ", "ǫ̂", "ōi", "ōu", "u", "ū", "ų", "ų̄"];
+                let numVowels = 0;
+                for (let i = 0; i < this.value.length; i++) {
+                    if (vowels.includes(this.value[i] + this.value[i + 1])) {
+                        numVowels++;
+                        i++;
+                    }
+                    else if (vowels.includes(this.value[i]))
+                        numVowels++;
+                }
+                let stressValue = document.getElementById("stress").value;
+                document.getElementById("stress").innerHTML = "";
+                for (let i = 0; i < Math.max(numVowels, 1); i++) {
+                    let option = document.createElement("option");
+                    option.innerHTML = i + 1;
+                    if (i == stressValue - 1)
+                        option.selected = true;
+                    document.getElementById("stress").append(option);
+                }
+            }
+        };
+
+        document.getElementById("pos").onchange = () => {
+            if (from == "PG" && document.getElementById("to").value == "ModG" && document.getElementById("pos").value == "noun") {
+                document.getElementById("genderContainer").style.display = "";
+                document.getElementById("gender").value = (gender == "f") ? "f" : "mn";
+            } else {
+                document.getElementById("genderContainer").style.display = "none";
+                document.getElementById("gender").value = "";
+            }
+        };
+
+        document.getElementById("to").onchange = () => {
+            if (from == "PG")
+                if (document.getElementById("to").value == "ModG") {
+                    document.getElementById("pos").innerHTML = `
                     <option value="noun" selected>Noun (singular)</option>
                     <option value="nounPl">Noun (plural)</option>
                     <option value="inf">Infinitive verb</option>
                     <option value="conjVerb">Conjugated verb</option>
                     <option value="other">Other</option>
                 `;
-                if (partOfSpeech == "pastPtcp")
-                    document.getElementById("pos").value = "conjVerb";
-            } else {
-                document.getElementById("pos").innerHTML = `
+                    if (partOfSpeech == "pastPtcp")
+                        document.getElementById("pos").value = "conjVerb";
+                } else {
+                    document.getElementById("pos").innerHTML = `
                     <option value="noun" selected>Noun</option>
                     <option value="inf">Infinitive verb</option>
                     <option value="conjVerb">Conjugated verb</option>
                     <option value="pastPtcp">Past participle</option>
                     <option value="other">Other</option>
                 `;
-                if (partOfSpeech == "nounPl")
-                    document.getElementById("pos").value = "Noun";
-            }
-
-        if (Array.from(document.getElementById("pos").options).some(option => option.value == partOfSpeech))
-            document.getElementById("pos").value = partOfSpeech;
-
-        document.getElementById("pos").onchange();
-    };
-
-    class Word extends Array {
-        constructor() {
-            super();
-
-            this.atIdx = idx => this.at(idx) || new Segment("", this);
-
-            this.insert = (value, idx) => {
-                if (isNaN(idx)) {
-                    let ctx = idx.split("_");
-                    for (let i = 1; i < this.length; i++) {
-                        let segment = this.atIdx(i);
-                        if (segment.ctxMatch(ctx[0] + "_") && segment.relIdx(-1).ctxMatch("_" + ctx[1])) {
-                            this.insert(value, segment.idx);
-                            i++;
-                        }
-                    }
-
-                    if (this.atIdx(0).ctxMatch(ctx[0] + "_")) {
-                        this.insert("TEMP", 0);
-                        if (this.atIdx(0).ctxMatch("_" + ctx[1]))
-                            this.insert(value, 1);
-                        word.atIdx(0).remove();
-                    }
-
-                    if (this.atIdx(-1).ctxMatch("_" + ctx[1])) {
-                        this.insert("TEMP", word.length);
-                        if (this.atIdx(-1).ctxMatch(ctx[0] + "_"))
-                            this.insert(value, -1);
-                        word.atIdx(-1).remove();
-                    }
-                } else {
-                    this.splice(idx, 0, new Segment(value, this));
+                    if (partOfSpeech == "nounPl")
+                        document.getElementById("pos").value = "Noun";
                 }
-            };
 
-            this.replace = (original, replacement, ctx, condition, reverse) => {
-                original = original.split(" ");
-                replacement = replacement.split(" ");
-                for (let i = 0; i < this.length; i++) {
-                    let segment;
-                    if (reverse)
-                        segment = this.atIdx(-i - 1);
-                    else
-                        segment = this.atIdx(i);
+            if (Array.from(document.getElementById("pos").options).some(option => option.value == partOfSpeech))
+                document.getElementById("pos").value = partOfSpeech;
 
-                    let ctxCheck = !ctx || segment.ctxMatch(ctx);
-                    let conditionCheck = !condition || condition(segment);
-                    for (let j in original)
-                        if (segment.selfMatch(original[j]) && ctxCheck && conditionCheck)
-                            segment.set(replacement[j]);
-                }
-            };
-
-            this.replaceSeq = (str, replacement, ctx) => {
-                let sequence = str.split(",");
-                let newSegments = replacement.split(",");
-
-                if (ctx)
-                    ctx = ctx.split("_");
-
-                for (let i = 0; i < this.length; i++) {
-                    let segment = this.atIdx(i);
-
-                    let searchSeq = sequence.filter(val => val);
-                    let ctxCheck = !ctx
-                        || (segment.ctxMatch(ctx[0] + "_") && segment.relIdx(searchSeq.length - 1).ctxMatch("_" + ctx[1]));
-                    if (searchSeq.every((val, j) => segment.relIdx(j).selfMatch(val)) && ctxCheck) {
-                        for (let j = 0; j < sequence.length || j < newSegments.length; j++) {
-                            if (!sequence[j])
-                                word.insert(newSegments[j], i + j);
-
-                            if (!newSegments[j]) {
-                                word.atIdx(i + j).remove();
-                                i--;
-                            } else {
-                                word.atIdx(i + j).set(newSegments[j]);
-                            }
-                        }
-                        i += Math.max(sequence.length, newSegments.length) - 1;
-                    }
-                }
-            };
-
-            this.remove = (original, ctx, condition, reverse) => {
-                for (let i = 0; i < this.length; i++) {
-                    let segment;
-                    if (reverse)
-                        segment = this.atIdx(-i - 1);
-                    else
-                        segment = this.atIdx(i);
-
-                    let ctxCheck = !ctx || segment.ctxMatch(ctx);
-                    let conditionCheck = !condition || condition(segment);
-                    if (segment.selfMatch(original) && ctxCheck && conditionCheck) {
-                        segment.remove();
-                        i--;
-                    }
-                }
-            };
-
-            this.startMatch = seq => {
-                seq = seq.split(",");
-                return seq.every((item, i) => this.atIdx(i).selfMatch(item));
-            };
-
-            this.endMatch = seq => {
-                seq = seq.split(",");
-                return seq.every((item, i) => this.atIdx(this.length - seq.length + i).selfMatch(item));
-            };
-
-            this.duplicate = () => {
-                let newWord = new Word();
-                this.forEach((segment, i) => {
-                    let newSegment = new Segment(segment.value, newWord);
-                    for (let key in segment)
-                        if (!newSegment[key])
-                            newSegment[key] = segment[key];
-                    newSegment.stressed = segment.stressed;
-                    newSegment.type = segment.type;
-                    newWord.push(newSegment);
-                });
-                for (let key in this)
-                    if (!newWord[key])
-                        newWord[key] = this[key];
-                return newWord;
-            };
-
-            this.toString = () => this.join("");
+            document.getElementById("pos").onchange();
         };
 
-        get vowels() {
-            return this.filter(segment => segment.type == "vowel");
+        class Word extends Array {
+            constructor() {
+                super();
+
+                this.atIdx = idx => this.at(idx) || new Segment("", this);
+
+                this.insert = (value, idx) => {
+                    if (isNaN(idx)) {
+                        let ctx = idx.split("_");
+                        for (let i = 1; i < this.length; i++) {
+                            let segment = this.atIdx(i);
+                            if (segment.ctxMatch(ctx[0] + "_") && segment.relIdx(-1).ctxMatch("_" + ctx[1])) {
+                                this.insert(value, segment.idx);
+                                i++;
+                            }
+                        }
+
+                        if (this.atIdx(0).ctxMatch(ctx[0] + "_")) {
+                            this.insert("TEMP", 0);
+                            if (this.atIdx(0).ctxMatch("_" + ctx[1]))
+                                this.insert(value, 1);
+                            word.atIdx(0).remove();
+                        }
+
+                        if (this.atIdx(-1).ctxMatch("_" + ctx[1])) {
+                            this.insert("TEMP", word.length);
+                            if (this.atIdx(-1).ctxMatch(ctx[0] + "_"))
+                                this.insert(value, -1);
+                            word.atIdx(-1).remove();
+                        }
+                    } else {
+                        this.splice(idx, 0, new Segment(value, this));
+                    }
+                };
+
+                this.replace = (original, replacement, ctx, condition, reverse) => {
+                    original = original.split(" ");
+                    if (typeof replacement != "function")
+                        replacement = replacement.split(" ");
+
+                    for (let i = 0; i < this.length; i++) {
+                        let segment;
+                        if (reverse)
+                            segment = this.atIdx(-i - 1);
+                        else
+                            segment = this.atIdx(i);
+
+                        let ctxCheck = !ctx || segment.ctxMatch(ctx);
+                        let conditionCheck = !condition || condition(segment);
+                        for (let j in original)
+                            if (segment.selfMatch(original[j]) && ctxCheck && conditionCheck) {
+                                if (typeof replacement == "function")
+                                    segment.set(replacement(segment));
+                                else
+                                    segment.set(replacement[j]);
+
+                                break;
+                            }
+                    }
+                };
+
+                this.replaceSeq = (str, replacement, ctx) => {
+                    let sequence = str.split(",");
+                    let newSegments = replacement.split(",");
+
+                    if (ctx)
+                        ctx = ctx.split("_");
+
+                    for (let i = 0; i < this.length; i++) {
+                        let segment = this.atIdx(i);
+
+                        let searchSeq = sequence.filter(val => val);
+                        let ctxCheck = !ctx
+                            || (segment.ctxMatch(ctx[0] + "_") && segment.relIdx(searchSeq.length - 1).ctxMatch("_" + ctx[1]));
+                        if (searchSeq.every((val, j) => segment.relIdx(j).selfMatch(val)) && ctxCheck) {
+                            for (let j = 0; j < sequence.length || j < newSegments.length; j++) {
+                                if (!sequence[j])
+                                    word.insert(newSegments[j], i + j);
+
+                                if (!newSegments[j]) {
+                                    word.atIdx(i + j).remove();
+                                    i--;
+                                } else {
+                                    word.atIdx(i + j).set(newSegments[j]);
+                                }
+                            }
+                            i += Math.max(sequence.length, newSegments.length) - 1;
+                        }
+                    }
+                };
+
+                this.remove = (original, ctx, condition, reverse) => {
+                    for (let i = 0; i < this.length; i++) {
+                        let segment;
+                        if (reverse)
+                            segment = this.atIdx(-i - 1);
+                        else
+                            segment = this.atIdx(i);
+
+                        let ctxCheck = !ctx || segment.ctxMatch(ctx);
+                        let conditionCheck = !condition || condition(segment);
+                        if (segment.selfMatch(original) && ctxCheck && conditionCheck) {
+                            segment.remove();
+                            i--;
+                        }
+                    }
+                };
+
+                this.startMatch = seq => {
+                    seq = seq.split(",");
+                    return seq.every((item, i) => this.atIdx(i).selfMatch(item));
+                };
+
+                this.endMatch = seq => {
+                    seq = seq.split(",");
+                    return seq.every((item, i) => this.atIdx(this.length - seq.length + i).selfMatch(item));
+                };
+
+                this.duplicate = () => {
+                    let newWord = new Word();
+                    this.forEach((segment, i) => {
+                        let newSegment = new Segment(segment.value, newWord);
+                        for (let key in segment)
+                            if (!newSegment[key])
+                                newSegment[key] = segment[key];
+                        newSegment.stressed = segment.stressed;
+                        newSegment.type = segment.type;
+                        newWord.push(newSegment);
+                    });
+                    for (let key in this)
+                        if (!newWord[key])
+                            newWord[key] = this[key];
+                    return newWord;
+                };
+
+                this.toString = () => this.join("");
+            };
+
+            get vowels() {
+                return this.filter(segment => segment.type == "vowel");
+            }
+
+            get stressedVowel() {
+                return this.vowels.find(vowel => vowel.stressed);
+            }
         }
 
-        get stressedVowel() {
-            return this.vowels.find(vowel => vowel.stressed);
-        }
-    }
+        class Segment {
+            constructor(value, word) {
+                this.value = value;
+                this.stressed = false;
+                this.word = word;
 
-    class Segment {
-        constructor(value, word) {
-            this.value = value;
-            this.stressed = false;
-            this.word = word;
+                this.match = (self, ctx) => this.selfMatch(self) && this.ctxMatch(ctx);
+                this.relIdx = diff => !this.value ? new Segment("", this.word) : (this.word[this.idx + diff] || new Segment("", this.word));
+                this.nextVowel = () => this.word.slice(this.idx + 1).find(s => s.type == "vowel") || new Segment("", this.word);
+                this.prevVowel = () => this.word.slice(0, this.idx).reverse().find(s => s.type == "vowel") || new Segment("", this.word);
+                this.remove = () => this.word.splice(this.idx, 1);
 
-            this.match = (self, ctx) => this.selfMatch(self) && this.ctxMatch(ctx);
-            this.relIdx = diff => !this.value ? new Segment("", this.word) : (this.word[this.idx + diff] || new Segment("", this.word));
-            this.nextVowel = () => this.word.slice(this.idx + 1).find(s => s.type == "vowel") || new Segment("", this.word);
-            this.prevVowel = () => this.word.slice(0, this.idx).reverse().find(s => s.type == "vowel") || new Segment("", this.word);
-            this.remove = () => this.word.splice(this.idx, 1);
+                this.selfMatch = chk => {
+                    if (!chk)
+                        return true;
 
-            this.selfMatch = chk => {
-                if (!chk)
+                    let chkArr = [];
+
+                    //Distribute the properties of a group to each value
+                    let groupProperties;
+                    let bracketsDepth = 0;
+                    for (let i = 0; i < chk.length; i++)
+                        if (chk[i] == "{" && !bracketsDepth) {
+                            let startIdx = chk.indexOf("}") + 1;
+                            let endIdx = startIdx + chk.slice(startIdx).indexOf("/");
+                            if (endIdx < startIdx)
+                                endIdx = Infinity;
+                            groupProperties = chk.slice(startIdx, endIdx);
+                            chk = chk.slice(0, i) + chk.slice(i + 1);
+                            i--;
+                        } else if (chk[i] == "}" && !bracketsDepth) {
+                            groupProperties = "";
+                            chk = chk.slice(0, i) + chk.slice(i + 1);
+                            i--;
+                        } else if (chk[i] == "/" && groupProperties && !bracketsDepth) {
+                            chk = chk.slice(0, i) + groupProperties + chk.slice(i);
+                            i += groupProperties.length;
+                        } else if (chk[i] == "[") {
+                            bracketsDepth++;
+                        } else if (chk[i] == "]") {
+                            bracketsDepth--;
+                        }
+
+                    //Split chk at each slash that is not inside brackets
+                    let startIdx = 0;
+                    bracketsDepth = 0;
+                    for (let i = 0; i < chk.length; i++)
+                        if (chk[i] == "/" && !bracketsDepth) {
+                            chkArr.push(chk.slice(startIdx, i));
+                            startIdx = i + 1;
+                        } else if (chk[i] == "[") {
+                            bracketsDepth++;
+                        } else if (chk[i] == "]") {
+                            bracketsDepth--;
+                        }
+                    chkArr.push(chk.slice(startIdx));
+
+                    for (let str of chkArr) {
+                        let value;
+                        let properties;
+
+                        let boundary = str.indexOf("[");
+                        if (boundary > -1) {
+                            value = str.slice(0, boundary);
+                            properties = str.slice(boundary);
+                        } else {
+                            value = str;
+                        }
+
+                        if (properties) {
+                            properties = properties.slice(1, -1).split("][");
+                            if (!properties.every(property => this.propMatch(property)))
+                                continue;
+                        }
+
+                        if (value == this.value)
+                            return true;
+                        if (value == "" || value == "*")
+                            return true;
+                        if (value == "C" && this.type == "consonant")
+                            return true;
+                        if (value == "V" && this.type == "vowel")
+                            return true;
+                        if (value == "#" && !this.value)
+                            return true;
+                    }
+
+                    return false;
+                };
+
+                this.propMatch = property => {
+                    let negate = property.includes("!");
+                    property = property.replace("!", "");
+
+                    let result;
+
+                    if (property.startsWith("=")) {
+                        result = this.selfMatch(property.slice(1));
+                    } else if (property.includes("=")) {
+                        let splitIdx = property.indexOf("=");
+                        result = this[property.slice(0, splitIdx)] == property.slice(splitIdx + 1);
+                    } else {
+                        result = this[property];
+                    }
+
+                    return negate ? !result : result;
+                };
+
+                this.ctxMatch = ctx => {
+                    if (!ctx)
+                        return true;
+
+                    ctx = ctx.split("_");
+                    let ctxBefore = ctx[0].split(",").reverse();
+                    let ctxAfter = ctx[1].split(",");
+
+                    if (!ctxBefore.every((item, i) => this.relIdx(-1 - i).selfMatch(item)))
+                        return false;
+                    if (!ctxAfter.every((item, i) => this.relIdx(1 + i).selfMatch(item)))
+                        return false;
+
                     return true;
+                };
 
-                let chkArr = [];
-
-                //Distribute the properties of a group to each value
-                let groupProperties;
-                let bracketsDepth = 0;
-                for (let i = 0; i < chk.length; i++)
-                    if (chk[i] == "{" && !bracketsDepth) {
-                        let startIdx = chk.indexOf("}") + 1;
-                        let endIdx = startIdx + chk.slice(startIdx).indexOf("/");
-                        if (endIdx < startIdx)
-                            endIdx = Infinity;
-                        groupProperties = chk.slice(startIdx, endIdx);
-                        chk = chk.slice(0, i) + chk.slice(i + 1);
-                        i--;
-                    } else if (chk[i] == "}" && !bracketsDepth) {
-                        groupProperties = "";
-                        chk = chk.slice(0, i) + chk.slice(i + 1);
-                        i--;
-                    } else if (chk[i] == "/" && groupProperties && !bracketsDepth) {
-                        chk = chk.slice(0, i) + groupProperties + chk.slice(i);
-                        i += groupProperties.length;
-                    } else if (chk[i] == "[") {
-                        bracketsDepth++;
-                    } else if (chk[i] == "]") {
-                        bracketsDepth--;
-                    }
-
-                //Split chk at each slash that is not inside brackets
-                let startIdx = 0;
-                bracketsDepth = 0;
-                for (let i = 0; i < chk.length; i++)
-                    if (chk[i] == "/" && !bracketsDepth) {
-                        chkArr.push(chk.slice(startIdx, i));
-                        startIdx = i + 1;
-                    } else if (chk[i] == "[") {
-                        bracketsDepth++;
-                    } else if (chk[i] == "]") {
-                        bracketsDepth--;
-                    }
-                chkArr.push(chk.slice(startIdx));
-
-                for (let str of chkArr) {
-                    let value;
-                    let properties;
+                this.set = str => {
+                    let newVal, newProps;
 
                     let boundary = str.indexOf("[");
                     if (boundary > -1) {
-                        value = str.slice(0, boundary);
-                        properties = str.slice(boundary);
+                        newVal = str.slice(0, boundary);
+                        newProps = str.slice(boundary);
                     } else {
-                        value = str;
+                        newVal = str;
                     }
 
-                    if (properties) {
-                        properties = properties.slice(1, -1).split("][");
-                        if (!properties.every(property => this.propMatch(property)))
-                            continue;
+                    if (newVal && newVal != "*" && newVal != "C" && newVal != "V")
+                        this.value = newVal;
+
+                    if (newProps) {
+                        newProps = newProps.slice(1, -1).split("][");
+                        for (let prop of newProps)
+                            if (prop.includes("=")) {
+                                let propVal;
+                                [prop, propVal] = prop.split("=");
+                                this[prop] = propVal;
+                            } else if (prop.startsWith("!")) {
+                                this[prop.slice(1)] = false;
+                            } else {
+                                this[prop] = true;
+                            }
                     }
+                };
 
-                    if (value == this.value)
-                        return true;
-                    if (value == "" || value == "*")
-                        return true;
-                    if (value == "C" && this.type == "consonant")
-                        return true;
-                    if (value == "V" && this.type == "vowel")
-                        return true;
-                    if (value == "#" && !this.value)
-                        return true;
-                }
+                this.toString = () => {
+                    let str = "";
+                    for (let i in this.value) {
+                        let char = this.value[i];
+                        str += char;
+                        if (this.nasalized && !char.match(/[\u0300-\u036fː̃]/))
+                            str += "\u0303";
+                        if (i == 0 && this.pitch)
+                            switch (this.pitch) {
+                                case "low":
+                                    str += "\u0300";
+                                    break;
+                                case "high":
+                                    str += "\u0301";
+                                    break;
+                                case "rising":
+                                    str += "\u030C";
+                                    break;
+                                case "falling":
+                                    str += "\u0302";
+                                    break;
+                            }
+                    }
+                    if (this.stressed && !this.relIdx(-1).stressed)
+                        str = "ˈ" + str;
+                    return str;
+                };
 
-                return false;
-            };
+                if (
+                    this.value && [
+                        "a", "æ", "ɛ", "e", "ɪ", "i", "ɶ", "œ", "ø", "ʏ", "y",
+                        "ɐ", "ɜ", "ə", "ɘ", "ɨ", "ɞ", "ɵ", "ʉ",
+                        "ɑ", "ʌ", "ɤ", "ɯ", "ɒ", "ɔ", "o", "ʊ", "u"
+                    ].includes(this.value[0])
+                )
+                    this.type = "vowel";
+                else if (this.value)
+                    this.type = "consonant";
+            }
 
-            this.propMatch = property => {
-                let negate = property.includes("!");
-                property = property.replace("!", "");
-
-                let result;
-
-                if (property.startsWith("=")) {
-                    result = this.selfMatch(property.slice(1));
-                } else if (property.includes("=")) {
-                    let splitIdx = property.indexOf("=");
-                    result = this[property.slice(0, splitIdx)] == property.slice(splitIdx + 1);
-                } else {
-                    result = this[property];
-                }
-
-                return negate ? !result : result;
-            };
-
-            this.ctxMatch = ctx => {
-                if (!ctx)
-                    return true;
-
-                ctx = ctx.split("_");
-                let ctxBefore = ctx[0].split(",").reverse();
-                let ctxAfter = ctx[1].split(",");
-
-                if (!ctxBefore.every((item, i) => this.relIdx(-1 - i).selfMatch(item)))
-                    return false;
-                if (!ctxAfter.every((item, i) => this.relIdx(1 + i).selfMatch(item)))
-                    return false;
-
-                return true;
-            };
-
-            this.set = str => {
-                let newVal, newProps;
-
-                let boundary = str.indexOf("[");
-                if (boundary > -1) {
-                    newVal = str.slice(0, boundary);
-                    newProps = str.slice(boundary);
-                } else {
-                    newVal = str;
-                }
-
-                if (newVal && newVal != "*" && newVal != "C" && newVal != "V")
-                    this.value = newVal;
-
-                if (newProps) {
-                    newProps = newProps.slice(1, -1).split("][");
-                    for (let prop of newProps)
-                        if (prop.includes("=")) {
-                            let propVal;
-                            [prop, propVal] = prop.split("=");
-                            this[prop] = propVal;
-                        } else if (prop.startsWith("!")) {
-                            this[prop.slice(1)] = false;
-                        } else {
-                            this[prop] = true;
-                        }
-                }
-            };
-
-            this.toString = () => {
-                let str = "";
-                for (let i in this.value) {
-                    let char = this.value[i];
-                    str += char;
-                    if (this.nasalized && !char.match(/[\u0300-\u036fː̃]/))
-                        str += "\u0303";
-                    if (i == 0 && this.pitch)
-                        switch (this.pitch) {
-                            case "low":
-                                str += "\u0300";
-                                break;
-                            case "high":
-                                str += "\u0301";
-                                break;
-                            case "rising":
-                                str += "\u030C";
-                                break;
-                            case "falling":
-                                str += "\u0302";
-                                break;
-                        }
-                }
-                if (this.stressed && !this.relIdx(-1).stressed)
-                    str = "ˈ" + str;
-                return str;
-            };
-
-            if (
-                this.value && [
-                    "a", "æ", "ɛ", "e", "ɪ", "i", "ɶ", "œ", "ø", "ʏ", "y",
-                    "ɐ", "ɜ", "ə", "ɘ", "ɨ", "ɞ", "ɵ", "ʉ",
-                    "ɑ", "ʌ", "ɤ", "ɯ", "ɒ", "ɔ", "o", "ʊ", "u"
-                ].includes(this.value[0])
-            )
-                this.type = "vowel";
-            else if (this.value)
-                this.type = "consonant";
+            get idx() {
+                return this.word.indexOf(this);
+            }
         }
 
-        get idx() {
-            return this.word.indexOf(this);
+        init();
+        if (wordArg) {
+            tableSetup();
+            getOutcomes();
         }
-    }
-
-    init();
-    if (wordArg) {
-        tableSetup();
-        getOutcomes();
-    }
-</script>
+    </script>
+</body>
 
 </html>

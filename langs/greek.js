@@ -304,9 +304,7 @@ function AttGr_to_ModGr() {
             if (segment.stressed)
                 segment.relIdx(1).stressed = true;
             segment.remove();
-        }
-
-        if (segment.match("e/i/y", "_V") && !segment.ctxMatch("C,r_")) {
+        } else if (segment.match("e/i/y", "_V") && !segment.ctxMatch("C,r_")) {
             segment.value = "j";
             segment.type = "consonant";
             if (segment.stressed)
@@ -343,6 +341,7 @@ function AttGr_to_ModGr() {
     word.replace("C", "[stressed]", "_j[stressed]");
     word.replace("p/t/k/b/d/g/f/θ/x/v/ð/ɣ", "[stressed]", "_{l/r}[stressed]");
     word.replace("s/z", "[stressed]", "_C[stressed]");
+    word.replace("p/t/k", "[stressed]", "_s[stressed]");
     word.replace("f/x", "[stressed]", "_t[stressed]");
     word.replace("v/ɣ", "[stressed]", "_ð[stressed]");
     word.replace("v", "[stressed]", "_{ʝ/ɣ}[stressed]");

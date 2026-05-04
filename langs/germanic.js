@@ -115,8 +115,8 @@ function PG_to_PWG() {
     )
         word.vowels.atIdx(-1).remove();
     word.replace("j w", "i[type=vowel] u[type=vowel]", "C_#");
-    word.replace("i,j", "iː", "_#");
-    word.replace("u,w", "uː", "_#");
+    word.replaceSeq("i,j", "iː", "_#");
+    word.replaceSeq("u,w", "uː", "_#");
 
     //A-mutation
     word.replace("u[stressed]", "o", "", segment =>
@@ -131,11 +131,7 @@ function PG_to_PWG() {
     word.replace("ɛː", "ɑː");
 
     //Final vowel shortening
-    word.forEach(segment => {
-        if (segment.match("V[!stressed]", "_#") && segment.value.endsWith("ː") && segment.value.length == 2)
-            segment.value = segment.value[0];
-    });
-    word.replace("o", "u", "_#");
+    word.replace("ɑː eː iː oː/uː", "ɑ e i u", "_#", segment => !segment.stressed);
     word.replace("kʷ gʷ xʷ", "k g x", "_u");
     word.remove("w", "C_u");
     word.replace("u[!stressed]", "w[type=consonant]", "V_");
@@ -149,8 +145,8 @@ function PG_to_PWG() {
 
     word.remove("w", "oː[!stressed]_C/#");
 
-    word.replaceSeq("ɑ[!stressed],j[!stressed]", "eː", "_C/#");
-    word.replaceSeq("ɑ[!stressed],w[!stressed]", "oː", "_C/#");
+    word.replaceSeq("ɑ[!stressed],j", "eː", "_C/#");
+    word.replaceSeq("ɑ[!stressed],w", "oː", "_C/#");
 
     if (!word.vowels.atIdx(-1).stressed || word.partOfSpeech == "noun" || word.partOfSpeech == "nounPl")
         word.remove("z", "_#");
@@ -284,8 +280,8 @@ function PWG_to_EOE() {
 
     word.replace("j", "i[type=vowel]", "C_#");
     word.replace("w", "u[type=vowel]", "C[!=w]_#");
-    word.replace("i,j", "iː", "_#");
-    word.replace("u,w", "uː", "_#");
+    word.replaceSeq("i,j", "iː", "_#");
+    word.replaceSeq("u,w", "uː", "_#");
 
     //Height harmonization
     word.replace("æ/ɑ e/eː i/iː", "æːɑ̯ eːo̯ iːu̯", "_w,C/#");
@@ -390,8 +386,8 @@ function EOE_to_OE() {
     });
     word.forEach(segment => {
         if (
-            segment.match("{i/u}[!stressed]") && (segment.ctxMatch("C_C,V") || segment.ctxMatch("C_s/θ,#") || segment.ctxMatch("C_s,t,#"))
-            && !segment.match("i", "_j/w") && (segment.ctxMatch("C,C_") || segment.prevVowel().value.includes("ː"))
+            segment.match("{i/u}[!stressed]") && (segment.ctxMatch("C_C,V") || segment.ctxMatch("C_s/θ,#")) && !segment.match("i", "_j/w")
+            && (segment.ctxMatch("C,C_") || segment.prevVowel().value.includes("ː"))
         )
             segment.remove();
     });
@@ -412,8 +408,9 @@ function EOE_to_OE() {
             segment.remove();
         }
     });
-    word.remove("ɫ/rˠ/x/ç", "C[!=w]_C");
-    word.remove("m/n", "C[!=rˠ]_C");
+    word.remove("ɫ/rˠ", "C[!=w]_C");
+    word.remove("m/n", "C[!=rˠ/w]_C");
+    word.remove("x/ç", "C[!=ɫ/rˠ/w]_C");
     word.remove("t/d", "t/d_l");
     word.replace("n", "ɲ", "_c/ɟ");
     word.replace("n/ɲ", "ŋ", "_k/g");
@@ -566,8 +563,8 @@ function PWG_to_OHG() {
 
     word.replace("j", "i[type=vowel]", "C[!=j]_#");
     word.replace("w", "u[type=vowel]", "C[!=j/w]_#");
-    word.replace("i,j", "iː", "C[!=j]_#");
-    word.replace("u,w", "uː", "C[!=j/w]_#");
+    word.replaceSeq("i,j", "iː", "C[!=j]_#");
+    word.replaceSeq("u,w", "uː", "C[!=j/w]_#");
 
     if ((word.endMatch("C[!=j/w],l/r") || word.endMatch("C[!=j/w/l/r/m],m/n")) && word.atIdx(-1).value != word.atIdx(-2).value)
         word.insert("ɑ", -1);
@@ -596,8 +593,8 @@ function PWG_to_OHG() {
         word.atIdx(-1).remove();
     word.replace("j", "i[type=vowel]", "C[!=j]_#");
     word.replace("w", "u[type=vowel]", "C[!=j/w]_#");
-    word.replace("i,j", "iː", "C[!=j]_#");
-    word.replace("u,w", "uː", "C[!=j/w]_#");
+    word.replaceSeq("i,j", "iː", "C[!=j]_#");
+    word.replaceSeq("u,w", "uː", "C[!=j/w]_#");
 
     word.remove("n", "m_#");
 
@@ -821,7 +818,7 @@ function OHG_to_MHG() {
             segment.relIdx(-1).remove();
         }
     });
-    if (word.endMatch("C[!=l/r/m],m/n,ə")) {
+    if (word.endMatch("C[!=l/r/m],m/n,ə") && !word.endMatch("n,n,ə")) {
         word.insert(word.atIdx(-2).value, word.length);
         word.atIdx(-3).remove();
     }

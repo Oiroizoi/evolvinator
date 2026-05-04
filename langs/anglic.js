@@ -112,8 +112,7 @@ function OE_to_EME(variety) {
     word.replace("θ", "s", "_s");
     word.remove("s", "_s", segment => !segment.ctxMatch("V_s,V/l"));
 
-    word.replace("x", "k", "_s");
-    word.replace("ç", "k", "_s");
+    word.replace("x/ç", "k", "_s");
 
     word.replace("ɣ", "x", "_p/t/k/t͡ʃ/f/θ/s/ʃ/#");
 
@@ -128,6 +127,12 @@ function OE_to_EME(variety) {
     word.replace("d", "t", "_θ/s");
 
     word.remove("h[!stressed]", "C_");
+
+    //Metathesis of r before ht
+    word.replaceSeq(",V,rˠ", "r,V", "p/t/k/b/d/g/f/θ/h/ʃ_x,t");
+    word.replaceSeq(",V,rˠ", "r,V", "#/V,w_x,t");
+    word.replace("C", "[stressed]", "_V[stressed]");
+    word.replace("h", "ç", "æ/æː/e/eː/i/iː/y/yː/iy̯/iːy̯_");
 
     word.forEach(segment => {
         if (segment.match("V") && segment.idx > word.stressedVowel.idx) {
@@ -166,7 +171,9 @@ function OE_to_EME(variety) {
             word.insert("ə", segment.idx);
         }
     }
-    word.replace("j", "iː[type=vowel]", "#/C_C/#");
+    word.replace("j", "iː[type=vowel][!stressed]", "#/C_C/#");
+    word.replace("C", "[!stressed]", "", segment => !segment.nextVowel().stressed);
+    word.replace("ɫ rˠ", "l r", "_iː");
 
     if (variety != "northumbrian")
         word.replace("e/eo̯/ø/y/o", "u", "w_r/rˠ");
@@ -286,7 +293,7 @@ function EME_to_LME(variety) {
             segment.remove();
         }
     });
-    word.replace("ç", "x", "_C");
+    word.replace("ç", "x", "C_");
 
     word.forEach(segment => {
         if (segment.match("V") && segment.idx > word.stressedVowel.idx) {
@@ -359,7 +366,7 @@ function EME_to_LME(variety) {
         if (
             segment.match("ə", "C_C") && (segment.relIdx(-2).match("V") || segment.relIdx(-2).value == segment.relIdx(-1).value)
             && (segment.relIdx(2).match("V/j") || segment.relIdx(2).value == segment.relIdx(1).value) && !segment.ctxMatch("_C[!=s],ə,#")
-            && !segment.relIdx(2).match("{ə/i}[inSuffix]") && !segment.ctxMatch("ʍ_") && !segment.ctxMatch("t͡ʃ_s")
+            && !segment.ctxMatch("_C,C,ə,#") && !segment.relIdx(2).match("{ə/i}[inSuffix]") && !segment.ctxMatch("ʍ_") && !segment.ctxMatch("t͡ʃ_s")
         ) {
             if (segment.relIdx(-1).value == segment.relIdx(-2).value)
                 segment.relIdx(-1).remove();
@@ -492,7 +499,7 @@ function EME_to_LME(variety) {
 
     word.remove("w", "_l");
 
-    word.insert("ə", "iː[!stressed]_r/rˠ");
+    word.insert("ə", "iː[!stressed]_{r/rˠ}[!stressed]");
 
     word.replace("iː[!stressed][!inSuffix]", "i", "_C/V");
 
@@ -779,8 +786,7 @@ function LME_to_EModE(variety) {
     word.replace("æi̯", "ɛi̯");
     word.replace("ɑu̯", "ɔː");
     word.replace("ɔu̯", "ou̯");
-    word.replace("iu̯", "ɪu̯");
-    word.replace("ɛu̯", "ɪu̯");
+    word.replace("iu̯/ɛu̯", "ɪu̯");
     word.replace("ɔi̯", "oi̯");
     if (variety != "scots")
         word.replace("ui̯", "oi̯");
@@ -925,7 +931,9 @@ function EModE_to_ModE(variety) {
 
     word.replace("tʰ t d", "t̠ʰ t̠ d̠", "_ɹ̠");
 
-    word.insert("ʔ", "V/n/ɫ/ɹ̠_{t/t͡ʃ}[!stressed],n̩/C/#");
+    word.insert("ʔ", "V/ɹ̠/ɫ/n_t/t͡ʃ,C/#");
+    word.remove("t", "ʔ_C");
+    word.replace("t", "ʔ", "V/ɹ̠/ɫ/n_n̩");
 
     word.insert("ʔ", "#_V");
     word.replace("C", "[stressed]", "_V[stressed]");
@@ -962,6 +970,8 @@ function ModE_to_UK() {
 
     word.remove("j", "#/C,s_");
     word.remove("j[stressed]", "l_");
+
+    word.replace("oː", "ɔ", "_ɫ,ʔ/s");
 
     addRow("UK", "Modern English (UK)", "", word.modernSpelling, word);
 }
@@ -1198,7 +1208,11 @@ function ModE_to_ModSc() {
 
     word.replace("ø", "ʏ");
 
-    word.insert("ʔ", "V/n/ɫ/ɾ_{t/t͡ʃ}[!stressed],n̩/C[!=ɾ]/#");
+    word.insert("ʔ", "#_V");
+    word.replace("C", "[stressed]", "_V[stressed]");
+
+    word.insert("ʔ", "V/n/ɫ/ɹ̠_t/t͡ʃ,C[!=ɾ]/#");
+    word.remove("t", "ʔ_C");
 
     word.replace("ʌu̯[!stressed]", "e", "_C/#");
 
@@ -2696,7 +2710,7 @@ function getSpelling_ModE(word) {
 
 function getSpelling_ModSc(scotsWord) {
     let word = scotsWord.duplicate();
-    word.remove("ʔ");
+    word.remove("ʔ", "_V/t");
     let str = "";
 
     let shortVowels = "a/aː/ɛ/ɛː/ɪ/ɔ/ɔː/ʌ/ə";
@@ -2962,6 +2976,7 @@ function getSpelling_ModSc(scotsWord) {
                     str += "sh";
                 break;
             case "t":
+            case "ʔ":
                 if (segment.ctxMatch("_θ"))
                     break;
                 else if (doubleCons)
